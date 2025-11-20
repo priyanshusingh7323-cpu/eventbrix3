@@ -1,6 +1,6 @@
 // File 31: scripts/category-banquet.js
 
-import { db } from "../firebase.js";
+import { db } from "./firebase.js";
 import {
   collection,
   getDocs,
