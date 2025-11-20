@@ -13,6 +13,9 @@
   <h3>Pending Vendors</h3>
   <div id="pendingVendors" class="admin-vendor-list"></div>
 
+  <!-- FIX: Firebase must load BEFORE admin-dashboard.js -->
+  <script type="module" src="../scripts/firebase.js"></script>
   <script type="module" src="../scripts/admin-dashboard.js"></script>
+
 </body>
 </html>

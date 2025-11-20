@@ -1,8 +1,8 @@
 // File 29: scripts/admin-dashboard.js
-// Loads pending vendors + Approve/Reject system
 
-import { db } from "../firebase.js";
-import { collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db } from "./firebase.js";
+import { collection, getDocs, updateDoc, doc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const pendingBox = document.getElementById("pendingVendors");
 
@@ -25,14 +25,12 @@ async function loadPendingVendors() {
         <button class="reject-btn">Reject</button>
       `;
 
-      // APPROVE HANDLER
       vendorCard.querySelector(".approve-btn").addEventListener("click", async () => {
         await updateDoc(doc(db, "vendors", v.id), { status: "approved" });
         alert("Vendor Approved");
         loadPendingVendors();
       });
 
-      // REJECT HANDLER
       vendorCard.querySelector(".reject-btn").addEventListener("click", async () => {
         await updateDoc(doc(db, "vendors", v.id), { status: "rejected" });
         alert("Vendor Rejected");
