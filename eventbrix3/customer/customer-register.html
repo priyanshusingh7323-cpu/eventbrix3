@@ -19,8 +19,32 @@
     </form>
 
     <p>Already have an account? <a href="customer-login.html">Login</a></p>
+
+    <!-- 🔥 GOOGLE SIGN-IN BUTTON -->
+    <button id="googleLoginBtn" class="google-btn" style="
+      width:100%;
+      padding:12px;
+      margin-top:15px;
+      background:white;
+      border:none;
+      border-radius:10px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      font-weight:600;
+    ">
+      <img src="../images/google.png" style="width:22px;">
+      Continue with Google
+    </button>
   </div>
 
+  <!-- 🔥 ADD THESE TWO SCRIPTS (MANDATORY) -->
+  <script type="module" src="../scripts/firebase.js"></script>
+  <script type="module" src="../scripts/auth-google.js"></script>
+
+  <!-- existing register code -->
   <script type="module" src="../scripts/customer-register.js"></script>
 </body>
 </html>
