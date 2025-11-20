@@ -1,35 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendor Register</title>
-  <link rel="stylesheet" href="../styles.css">
-</head>
-<body>
+import { auth, db } from "/scripts/firebase.js";
+import {
+  doc,
+  updateDoc,
+  getDocs,
+  collection,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<div class="form-box">
-  <h2>Complete Vendor Profile</h2>
+let vendorDocId = null;
 
-  <form id="vendorRegisterForm">
+// ============ FIND THE VENDOR DOCUMENT USING UID ============
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    location.href = "vendor-login.html";
+    return;
+  }
 
-    <input type="text" name="businessName" placeholder="Business Name *" required />
+  try {
+    const q = query(collection(db, "vendors"), where("uid", "==", user.uid));
+    const snap = await getDocs(q);
 
-    <input type="text" name="city" placeholder="City *" required />
+    if (snap.empty) {
+      alert("Vendor record missing in Firestore!");
+      return;
+    }
 
-    <input type="text" name="category" placeholder="Category *" required />
+    vendorDocId = snap.docs[0].id;
+    console.log("Vendor Doc ID:", vendorDocId);
 
-    <input type="text" name="subcategory" placeholder="Sub Category *" required />
+  } catch (err) {
+    alert(err.message);
+  }
+});
 
-    <input type="number" name="price" placeholder="Starting Price *" required />
 
-    <textarea name="about" placeholder="About your service *" required></textarea>
+// ============ FORM SUBMIT ============
+document.getElementById("vendorRegisterForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    <button type="submit">Submit</button>
-  </form>
+  if (!vendorDocId) {
+    alert("Vendor not found. Reload page!");
+    return;
+  }
 
-</div>
+  const data = {
+    businessName: e.target.businessName.value,
+    city: e.target.city.value,
+    category: e.target.category.value,
+    subcategory: e.target.subcategory.value,
+    price: e.target.price.value,
+    about: e.target.about.value,
+    status: "pending"
+  };
 
-<script type="module" src="../scripts/vendor-register.js"></script>
-</body>
-</html>
+  try {
+    await updateDoc(doc(db, "vendors", vendorDocId), data);
+
+    alert("Vendor Profile Submitted!");
+    location.href = "vendor-dashboard.html";
+
+  } catch (err) {
+    alert("ERROR: " + err.message);
+  }
+});
