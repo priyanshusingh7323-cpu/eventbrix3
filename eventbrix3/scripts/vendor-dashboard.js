@@ -3,9 +3,7 @@ import {
   collection,
   query,
   where,
-  getDocs,
-  doc,
-  getDoc
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 auth.onAuthStateChanged(async (user) => {
@@ -14,7 +12,7 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // find vendorId using UID
+  // Find vendor profile by UID
   const q = query(
     collection(db, "vendors"),
     where("uid", "==", user.uid)
@@ -28,11 +26,12 @@ auth.onAuthStateChanged(async (user) => {
   }
 
   const vendorDoc = snap.docs[0];
-  const vendorId = vendorDoc.id;
-
   const vendorData = vendorDoc.data();
 
-  // show data on dashboard
+  // Correct vendorId
+  const vendorId = vendorData.vendorId;
+
+  // Dashboard UI updates
   document.getElementById("vendorName").innerText =
     vendorData.businessName || vendorData.name;
 
@@ -44,7 +43,7 @@ auth.onAuthStateChanged(async (user) => {
   document.getElementById("vendorStatus").innerText =
     vendorData.status || "pending";
 
-  // Listings fetch (optional)
+  // Load listings
   loadListings(vendorId);
 });
 

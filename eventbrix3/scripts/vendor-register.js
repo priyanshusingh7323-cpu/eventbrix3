@@ -1,29 +1,35 @@
 import { auth, db } from "/scripts/firebase.js";
 import {
   doc,
-  updateDoc
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let vendorId = null;
+let vendorUID = null;  // This is the document ID
 
-// Vendor UID → VendorID find
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
     location.href = "vendor-login.html";
     return;
   }
 
-  // vendorId find through "uid"
-  const q = await db.collection("vendors")
-    .where("uid", "==", user.uid)
-    .get();
+  // find vendor document using UID
+  const q = query(
+    collection(db, "vendors"),
+    where("uid", "==", user.uid)
+  );
 
-  if (q.empty) {
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
     alert("Vendor profile missing!");
     return;
   }
 
-  vendorId = q.docs[0].id; // example: VEN-1001
+  vendorUID = snap.docs[0].id;  // This IS the UID (document ID)
 });
 
 
@@ -38,14 +44,14 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
   const about = e.target.about.value;
 
   try {
-    await updateDoc(doc(db, "vendors", vendorId), {
+    await updateDoc(doc(db, "vendors", vendorUID), {
       businessName,
       city,
       category,
       subcategory,
       price,
       about,
-      status: "pending"   // admin approval system
+      status: "pending"  // waiting for admin approval
     });
 
     alert("Vendor Profile Submitted!");

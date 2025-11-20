@@ -26,8 +26,8 @@ document.getElementById("vendorSignupForm").addEventListener("submit", async (e)
     // 2) Generate short VendorID: VEN-1001
     const vendorId = await getNextVendorId();
 
-    // 3) Create vendor profile in Firestore
-    await setDoc(doc(db, "vendors", vendorId), {
+    // 3) Create vendor profile using UID as the document ID
+    await setDoc(doc(db, "vendors", uid), {
       vendorId,
       uid,
       name,
