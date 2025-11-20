@@ -1,12 +1,12 @@
 import { auth, db } from "/scripts/firebase.js";
 import {
-  doc,
-  getDoc,
   collection,
-  getDocs
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-let vendorId = null;
 
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
@@ -14,50 +14,53 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // Find vendorId
-  const q = await db.collection("vendors")
-    .where("uid", "==", user.uid)
-    .get();
+  // find vendorId using UID
+  const q = query(
+    collection(db, "vendors"),
+    where("uid", "==", user.uid)
+  );
 
-  if (q.empty) {
-    alert("Vendor not found!");
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    alert("Vendor profile missing!");
     return;
   }
 
-  vendorId = q.docs[0].id;
+  const vendorDoc = snap.docs[0];
+  const vendorId = vendorDoc.id;
 
-  loadVendorDashboard();
+  const vendorData = vendorDoc.data();
+
+  // show data on dashboard
+  document.getElementById("vendorName").innerText =
+    vendorData.businessName || vendorData.name;
+
+  document.getElementById("vendorCity").innerText =
+    vendorData.city || "Not set";
+
+  document.getElementById("vendorID").innerText = vendorId;
+
+  document.getElementById("vendorStatus").innerText =
+    vendorData.status || "pending";
+
+  // Listings fetch (optional)
+  loadListings(vendorId);
 });
 
-async function loadVendorDashboard() {
-  const snap = await getDoc(doc(db, "vendors", vendorId));
-
-  if (!snap.exists()) {
-    alert("Vendor data missing!");
-    return;
-  }
-
-  const v = snap.data();
-
-  // Show vendor data
-  document.getElementById("vendorName").innerText = v.businessName || v.name;
-  document.getElementById("vendorCity").innerText = v.city || "";
-  document.getElementById("vendorID").innerText = vendorId;
-  document.getElementById("vendorStatus").innerText = v.status;
-
-  // Load listings (if enabled)
-  const listRef = collection(db, "vendors", vendorId, "listings");
-  const listSnap = await getDocs(listRef);
+async function loadListings(vendorId) {
+  const listingsRef = collection(db, "vendors", vendorId, "listings");
+  const listingsSnap = await getDocs(listingsRef);
 
   const box = document.getElementById("vendorListings");
   box.innerHTML = "";
 
-  listSnap.forEach((d) => {
-    const L = d.data();
+  listingsSnap.forEach((item) => {
+    const L = item.data();
     box.innerHTML += `
       <div class="listing-card">
-        <h4>${L.title}</h4>
-        <p>₹${L.price}</p>
+        <h4>${L.title || "Untitled"}</h4>
+        <p>₹${L.price || 0}</p>
       </div>
     `;
   });
