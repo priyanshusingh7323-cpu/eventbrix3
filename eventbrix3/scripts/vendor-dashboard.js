@@ -12,7 +12,6 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
-  // Find vendor profile by UID
   const q = query(
     collection(db, "vendors"),
     where("uid", "==", user.uid)
@@ -26,40 +25,29 @@ auth.onAuthStateChanged(async (user) => {
   }
 
   const vendorDoc = snap.docs[0];
-  const vendorData = vendorDoc.data();
+  const data = vendorDoc.data();
 
-  // Correct vendorId
-  const vendorId = vendorData.vendorId;
+  document.getElementById("vendorName").innerText = data.businessName || data.name;
+  document.getElementById("vendorCity").innerText = data.city || "Not Set";
+  document.getElementById("vendorID").innerText = data.vendorId;
+  document.getElementById("vendorStatus").innerText = data.status;
 
-  // Dashboard UI updates
-  document.getElementById("vendorName").innerText =
-    vendorData.businessName || vendorData.name;
-
-  document.getElementById("vendorCity").innerText =
-    vendorData.city || "Not set";
-
-  document.getElementById("vendorID").innerText = vendorId;
-
-  document.getElementById("vendorStatus").innerText =
-    vendorData.status || "pending";
-
-  // Load listings
-  loadListings(vendorId);
+  loadListings(data.vendorId);
 });
 
 async function loadListings(vendorId) {
-  const listingsRef = collection(db, "vendors", vendorId, "listings");
-  const listingsSnap = await getDocs(listingsRef);
+  const listRef = collection(db, "vendors", vendorId, "listings");
+  const snap = await getDocs(listRef);
 
   const box = document.getElementById("vendorListings");
   box.innerHTML = "";
 
-  listingsSnap.forEach((item) => {
-    const L = item.data();
+  snap.forEach(doc => {
+    const L = doc.data();
     box.innerHTML += `
       <div class="listing-card">
-        <h4>${L.title || "Untitled"}</h4>
-        <p>₹${L.price || 0}</p>
+        <h4>${L.title}</h4>
+        <p>₹${L.price}</p>
       </div>
     `;
   });

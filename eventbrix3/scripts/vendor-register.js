@@ -1,63 +1,35 @@
-import { auth, db } from "/scripts/firebase.js";
-import {
-  doc,
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Register</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
 
-let vendorUID = null;  // This is the document ID
+<div class="form-box">
+  <h2>Complete Vendor Profile</h2>
 
-auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    location.href = "vendor-login.html";
-    return;
-  }
+  <form id="vendorRegisterForm">
 
-  // find vendor document using UID
-  const q = query(
-    collection(db, "vendors"),
-    where("uid", "==", user.uid)
-  );
+    <input type="text" name="businessName" placeholder="Business Name *" required />
 
-  const snap = await getDocs(q);
+    <input type="text" name="city" placeholder="City *" required />
 
-  if (snap.empty) {
-    alert("Vendor profile missing!");
-    return;
-  }
+    <input type="text" name="category" placeholder="Category *" required />
 
-  vendorUID = snap.docs[0].id;  // This IS the UID (document ID)
-});
+    <input type="text" name="subcategory" placeholder="Sub Category *" required />
 
+    <input type="number" name="price" placeholder="Starting Price *" required />
 
-document.getElementById("vendorRegisterForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    <textarea name="about" placeholder="About your service *" required></textarea>
 
-  const businessName = e.target.businessName.value;
-  const city = e.target.city.value;
-  const category = e.target.category.value;
-  const subcategory = e.target.subcategory.value;
-  const price = e.target.price.value;
-  const about = e.target.about.value;
+    <button type="submit">Submit</button>
+  </form>
 
-  try {
-    await updateDoc(doc(db, "vendors", vendorUID), {
-      businessName,
-      city,
-      category,
-      subcategory,
-      price,
-      about,
-      status: "pending"  // waiting for admin approval
-    });
+</div>
 
-    alert("Vendor Profile Submitted!");
-    location.href = "vendor-dashboard.html";
-
-  } catch (err) {
-    alert(err.message);
-  }
-});
+<script type="module" src="../scripts/vendor-register.js"></script>
+</body>
+</html>

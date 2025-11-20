@@ -1,6 +1,8 @@
 import { auth, db } from "/scripts/firebase.js";
 import { 
-  createUserWithEmailAndPassword 
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import { 
@@ -10,6 +12,7 @@ import {
 
 import { getNextVendorId } from "/scripts/vendor-id.js";
 
+// FORM SUBMIT
 document.getElementById("vendorSignupForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -19,22 +22,51 @@ document.getElementById("vendorSignupForm").addEventListener("submit", async (e)
   const password = e.target.password.value;
 
   try {
-    // 1) Create Firebase Auth user
+    // Create Account
     const userCred = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCred.user.uid;
 
-    // 2) Generate short VendorID: VEN-1001
+    // Generate VendorID
     const vendorId = await getNextVendorId();
 
-    // 3) Create vendor profile using UID as the document ID
+    // Create vendor document in Firestore
     await setDoc(doc(db, "vendors", uid), {
       vendorId,
       uid,
       name,
       email,
       phone,
-      createdAt: Date.now(),
       status: "incomplete",
+      createdAt: Date.now()
+    });
+
+    alert("Signup Successful!");
+    location.href = "vendor-register.html";
+
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+// GOOGLE SIGNUP
+document.getElementById("googleSignupBtn").addEventListener("click", async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+
+    const user = result.user;
+    const uid = user.uid;
+
+    const vendorId = await getNextVendorId();
+
+    await setDoc(doc(db, "vendors", uid), {
+      vendorId,
+      uid,
+      name: user.displayName || "",
+      email: user.email,
+      phone: "",
+      status: "incomplete",
+      createdAt: Date.now()
     });
 
     alert("Signup Successful!");
