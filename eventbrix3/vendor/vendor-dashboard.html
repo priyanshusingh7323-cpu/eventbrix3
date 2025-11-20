@@ -1,55 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendor Dashboard | EventBrix</title>
-  <link rel="stylesheet" href="../styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Dashboard | EventBrix</title>
+<link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
 
-  <h2 class="title">Vendor Dashboard</h2>
+<h1 class="title">Vendor Dashboard</h1>
 
-  <!-- EXISTING VENDOR DATA -->
-  <div id="vendorData" style="display:none; margin-top:20px; padding:20px; background:#222; border-radius:10px; color:white;">
+<!-- MAIN DATA -->
+<div class="section" id="vendorData">
 
-      <h3 id="vendorName" style="font-size:24px; margin-bottom:10px;"></h3>
+  <h2 id="vendorName"></h2>
 
-      <p style="margin:5px 0;">
-        <strong>City:</strong>
-        <span id="vendorCity"></span>
-      </p>
+  <p><strong>City:</strong> <span id="vendorCity"></span></p>
+  <p><strong>Vendor ID:</strong> <span id="vendorID"></span></p>
+  <p><strong>Status:</strong> <span id="vendorStatus"></span></p>
 
-      <p style="margin:5px 0;">
-        <strong>Vendor ID:</strong>
-        <span id="vendorID"></span>
-      </p>
+  <hr style="margin:15px 0; border-color:#333;">
+  <h2>Listings</h2>
+  <div id="vendorListings"></div>
+</div>
 
-      <p style="margin:5px 0;">
-        <strong>Status:</strong>
-        <span id="vendorStatus"></span>
-      </p>
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a href="vendor-dashboard.html">🏠</a>
+  <a href="vendor-register.html">📝</a>
+  <a href="chat.html">💬</a>
+  <a id="logoutBtn">🚪</a>
+</div>
 
-      <hr style="margin:20px 0; border-color:#444;" />
-
-      <h3>Listings</h3>
-      <div id="vendorListings" style="margin-top:10px;"></div>
-  </div>
-
-
-  <!-- CHAT BUTTON -->
-  <a id="vendorChatBtn"
-     class="chat-btn"
-     style="margin-top:20px; display:none; text-align:center; color:#ffd42a; font-size:20px;">
-      Chat Panel
-  </a>
-
-
-  <!-- LOGOUT -->
-  <button id="logoutBtn" class="logout-btn" style="margin-top:40px;">
-    Logout
-  </button>
-
-  <script type="module" src="../scripts/vendor-dashboard.js"></script>
+<script type="module" src="../scripts/vendor-dashboard.js"></script>
 </body>
 </html>

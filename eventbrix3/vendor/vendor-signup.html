@@ -1,35 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendor Signup | EventBrix</title>
-  <link rel="stylesheet" href="../styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Signup | EventBrix</title>
+<link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
 
-  <div class="form-box">
-    <h2>Create Vendor Account</h2>
+<h1 class="title">Vendor Signup</h1>
 
-    <form id="vendorSignupForm">
+<div class="form-box">
+  <form id="vendorSignupForm">
 
-      <input type="text" name="name" placeholder="Full Name *" required />
+    <input type="text" id="name" placeholder="Full Name *" required>
 
-      <input type="email" name="email" placeholder="Email *" required autocomplete="username" />
+    <input type="email" id="email" placeholder="Email *" required>
+    <input type="password" id="password" placeholder="Create Password *" required>
 
-      <input type="text" name="phone" placeholder="Phone Number *" required />
+    <button type="submit">Create Vendor Account</button>
+  </form>
 
-      <input type="password" name="password" placeholder="Create Password *" required autocomplete="new-password" />
+  <p style="text-align:center;margin-top:10px;">
+    Already registered? 
+    <a href="vendor-login.html" style="color:#d4a017;">Login</a>
+  </p>
+</div>
 
-      <button type="submit">Sign Up</button>
-    </form>
-
-    <button id="googleSignupBtn" style="margin-top:10px;">Sign up with Google</button>
-
-    <p>Already have an account? <a href="vendor-login.html">Login here</a></p>
-  </div>
-
-  <!-- IMPORTANT: Correct path (vendor folder se ek level upar scripts hai) -->
-  <script type="module" src="../../scripts/vendor-signup.js"></script>
+<script type="module" src="../scripts/vendor-signup.js"></script>
 </body>
 </html>

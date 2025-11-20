@@ -1,49 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendor Profile - EventBrix</title>
-  <link rel="stylesheet" href="/styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Profile | EventBrix</title>
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="bg-black text-white">
+<body>
 
-  <!-- HEADER -->
-  <header class="p-4 bg-yellow-500 text-black font-bold text-xl">
-    Vendor Profile
-  </header>
+<h1 class="title">Vendor Profile</h1>
 
-  <!-- PROFILE CONTAINER -->
-  <div class="max-w-3xl mx-auto mt-6 p-4 bg-black/40 rounded-lg border border-gray-700">
+<img id="headerImg" class="profile-header" src="/images/default.jpg">
 
-    <h2 id="vendorName" class="text-3xl font-bold mb-2"></h2>
+<div class="vendor-info">
+  <h2 id="vendorName"></h2>
 
-    <p class="text-gray-300"><b>Category:</b> <span id="vendorCategory"></span></p>
-    <p class="text-gray-300"><b>City:</b> <span id="vendorCity"></span></p>
-    <p class="text-gray-300"><b>Starting Price:</b> <span id="vendorPrice"></span></p>
+  <p><strong>Category:</strong> <span id="vendorCategory"></span></p>
+  <p><strong>City:</strong> <span id="vendorCity"></span></p>
+  <p><strong>Starting Price:</strong> <span id="vendorPrice"></span></p>
 
-    <div class="mt-4">
-      <h3 class="text-xl font-semibold">About</h3>
-      <p id="vendorAbout" class="text-gray-300"></p>
-    </div>
-
-    <!-- CHAT BUTTON -->
-    <a id="chatBtn"
-       class="mt-5 inline-block px-4 py-2 bg-yellow-500 text-black rounded-lg font-semibold cursor-pointer">
-       Chat With Vendor
-    </a>
+  <div class="action-buttons">
+    <a id="chatBtn">Chat</a>
+    <button id="saveVendorBtn">❤️ Save</button>
   </div>
 
+  <h3>About</h3>
+  <p id="vendorAbout"></p>
 
-  <!-- LISTINGS -->
-  <div class="max-w-3xl mx-auto mt-8">
-    <h3 class="text-2xl font-bold mb-3">Vendor Listings</h3>
+  <h3 style="margin-top:20px;">Listings</h3>
+  <div id="vendorListings"></div>
+</div>
 
-    <div id="vendorListings" class="grid grid-cols-1 gap-4"></div>
-  </div>
-
-  <script type="module" src="/scripts/vendor-profile.js"></script>
-
+<script type="module" src="../scripts/vendor-profile.js"></script>
 </body>
 </html>

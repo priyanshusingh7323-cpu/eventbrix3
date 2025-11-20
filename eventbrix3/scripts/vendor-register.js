@@ -2,47 +2,29 @@ import { auth, db } from "/scripts/firebase.js";
 import {
   doc,
   updateDoc,
-  getDocs,
   collection,
   query,
-  where
+  where,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let vendorDocId = null;
+let vendorId = null;
 
-// ============ FIND THE VENDOR DOCUMENT USING UID ============
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    location.href = "vendor-login.html";
-    return;
-  }
+  if (!user) return location.href = "vendor-login.html";
 
-  try {
-    const q = query(collection(db, "vendors"), where("uid", "==", user.uid));
-    const snap = await getDocs(q);
+  const q = query(
+    collection(db, "vendors"),
+    where("uid", "==", user.uid)
+  );
+  const snap = await getDocs(q);
 
-    if (snap.empty) {
-      alert("Vendor record missing in Firestore!");
-      return;
-    }
-
-    vendorDocId = snap.docs[0].id;
-    console.log("Vendor Doc ID:", vendorDocId);
-
-  } catch (err) {
-    alert(err.message);
-  }
+  vendorId = snap.docs[0].id;
 });
 
-
-// ============ FORM SUBMIT ============
-document.getElementById("vendorRegisterForm").addEventListener("submit", async (e) => {
+document.getElementById("vendorRegisterForm")
+.addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  if (!vendorDocId) {
-    alert("Vendor not found. Reload page!");
-    return;
-  }
 
   const data = {
     businessName: e.target.businessName.value,
@@ -55,12 +37,11 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
   };
 
   try {
-    await updateDoc(doc(db, "vendors", vendorDocId), data);
-
-    alert("Vendor Profile Submitted!");
+    await updateDoc(doc(db, "vendors", vendorId), data);
+    alert("Profile submitted!");
     location.href = "vendor-dashboard.html";
-
-  } catch (err) {
-    alert("ERROR: " + err.message);
+  }
+  catch (err) {
+    alert(err.message);
   }
 });
