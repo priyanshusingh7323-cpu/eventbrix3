@@ -1,6 +1,6 @@
 // File 13: scripts/category-wedding.js
 
-import { db } from "../firebase.js";
+import { db } from "./firebase.js";
 import {
   collection,
   getDocs,
