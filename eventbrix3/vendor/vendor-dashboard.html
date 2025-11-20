@@ -4,82 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vendor Dashboard | EventBrix</title>
-
   <link rel="stylesheet" href="../styles.css" />
 </head>
-
 <body>
 
-  <h2 class="dash-title">Vendor Dashboard</h2>
+  <h2 class="title">Vendor Dashboard</h2>
 
-  <div id="vendorContainer">
+  <!-- EXISTING VENDOR DATA -->
+  <div id="vendorData" style="display:none; margin-top:20px; padding:20px; background:#222; border-radius:10px; color:white;">
 
-    <!-- FIRST-TIME VENDOR FORM -->
-    <div id="vendorFormBox" class="form-box" style="display:none;">
+      <h3 id="vendorName" style="font-size:24px; margin-bottom:10px;"></h3>
 
-      <h3>Complete Your Vendor Profile</h3>
+      <p style="margin:5px 0;">
+        <strong>City:</strong>
+        <span id="vendorCity"></span>
+      </p>
 
-      <form id="vendorForm" enctype="multipart/form-data">
+      <p style="margin:5px 0;">
+        <strong>Vendor ID:</strong>
+        <span id="vendorID"></span>
+      </p>
 
-        <input id="name" type="text" placeholder="Business Name *" required />
-        <input id="owner" type="text" placeholder="Owner Name *" required />
-        <input id="city" type="text" placeholder="City *" required />
+      <p style="margin:5px 0;">
+        <strong>Status:</strong>
+        <span id="vendorStatus"></span>
+      </p>
 
-        <!-- Category -->
-        <select id="mainCategory" required>
-          <option value="">Select Category *</option>
-          <option value="wedding">Wedding</option>
-          <option value="birthday">Birthday</option>
-          <option value="corporate">Corporate</option>
-          <option value="banquet">Banquet / Venue</option>
-          <option value="photo">Photography / Videography</option>
-          <option value="catering">Catering</option>
-          <option value="decoration">Decoration</option>
-          <option value="makeup">Makeup Artist</option>
-        </select>
+      <hr style="margin:20px 0; border-color:#444;" />
 
-        <!-- Subcategory Dynamic Box -->
-        <div id="subCategoryBox" style="display:none;">
-          <select id="subCategory">
-            <option value="">Select Sub-Category *</option>
-          </select>
-        </div>
-
-        <!-- Pricing -->
-        <input id="price" type="number" placeholder="Starting Price (₹) *" required />
-        <input id="perPlate" type="number" placeholder="Price Per Plate (Banquet Only)" style="display:none;" />
-
-        <!-- Services -->
-        <textarea id="services" rows="3" placeholder="Services Offered (comma separated)" required></textarea>
-
-        <!-- Photos -->
-        <label style="color:#ffd24a;">Upload Photos (Up to 10)</label>
-        <input id="photos" type="file" accept="image/*" multiple required />
-
-        <p id="uploadStatus" style="color:#ffd24a;"></p>
-
-        <button type="submit" class="logout-btn">Submit</button>
-      </form>
-    </div>
-
-    <!-- EXISTING VENDOR DATA -->
-    <div id="vendorData" style="display:none;"></div>
-
-    <!-- CHAT BUTTON -->
-    <a id="vendorChatBtn"
-       class="chat-btn"
-       style="margin-top:20px; display:none; text-align:center;">
-      Chat Panel
-    </a>
-
-    <!-- LOGOUT -->
-    <button id="logoutBtn" class="logout-btn" style="margin-top:40px;">
-      Logout
-    </button>
-
+      <h3>Listings</h3>
+      <div id="vendorListings" style="margin-top:10px;"></div>
   </div>
 
-  <script type="module" src="../../scripts/vendor-dashboard.js"></script>
 
+  <!-- CHAT BUTTON -->
+  <a id="vendorChatBtn"
+     class="chat-btn"
+     style="margin-top:20px; display:none; text-align:center; color:#ffd42a; font-size:20px;">
+      Chat Panel
+  </a>
+
+
+  <!-- LOGOUT -->
+  <button id="logoutBtn" class="logout-btn" style="margin-top:40px;">
+    Logout
+  </button>
+
+  <script type="module" src="../scripts/vendor-dashboard.js"></script>
 </body>
 </html>
