@@ -4,62 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vendor Registration | EventBrix</title>
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../../styles.css" />
 </head>
-
 <body>
 
-  <div class="form-box">
-    <h2>Vendor Registration</h2>
+<div class="form-box">
+  <h2>Vendor Registration</h2>
 
-    <form id="vendorRegisterForm" enctype="multipart/form-data">
+  <form id="vendorRegisterForm">
 
-      <input type="text" id="name" placeholder="Business Name *" required />
-      <input type="text" id="owner" placeholder="Owner Name *" required />
-      <input type="text" id="city" placeholder="City *" required />
+    <input type="text" name="businessName" placeholder="Business Name *" required />
 
-      <select id="mainCategory" required>
-        <option value="">Select Category *</option>
-        <option value="wedding">Wedding</option>
-        <option value="birthday">Birthday</option>
-        <option value="corporate">Corporate</option>
-        <option value="banquet">Banquet / Venue</option>
-        <option value="photo">Photography / Videography</option>
-        <option value="catering">Catering</option>
-        <option value="decoration">Decoration</option>
-        <option value="makeup">Makeup Artist</option>
+    <input type="text" name="owner" placeholder="Owner Name *" required />
+
+    <input type="text" name="city" placeholder="City *" required />
+
+    <!-- Category -->
+    <select name="category" id="mainCategory" required>
+      <option value="">Select Category *</option>
+      <option value="wedding">Wedding</option>
+      <option value="birthday">Birthday</option>
+      <option value="corporate">Corporate</option>
+      <option value="banquet">Banquet / Venue</option>
+      <option value="photo">Photography / Videography</option>
+      <option value="catering">Catering</option>
+      <option value="decoration">Decoration</option>
+      <option value="makeup">Makeup Artist</option>
+    </select>
+
+    <!-- Subcategory -->
+    <div id="subcategoryBox" style="display:none;">
+      <select name="subcategory" id="subCategory">
+        <option value="">Select Subcategory *</option>
       </select>
+    </div>
 
-      <!-- Subcategory -->
-      <div id="subCategoryBox" style="display:none;">
-        <select id="subCategory">
-          <option value="">Select Sub-Category *</option>
-        </select>
-      </div>
+    <!-- Price -->
+    <input type="number" name="price" placeholder="Starting Price *" required />
 
-      <!-- Starting Price -->
-      <input type="number" id="price" placeholder="Starting Price (₹) *" required />
+    <!-- About -->
+    <textarea name="about" placeholder="About your service *" required></textarea>
 
-      <!-- Banquet Only Field -->
-      <input 
-        type="number" 
-        id="perPlate" 
-        placeholder="Price per Plate (Banquet Only)" 
-        style="display:none;" 
-      />
+    <button type="submit">Submit</button>
+  </form>
+</div>
 
-      <textarea id="services" placeholder="Services Offered (comma separated) *" rows="3" required></textarea>
+<!-- VERY IMPORTANT script path -->
+<script type="module" src="../../scripts/vendor-register.js"></script>
 
-      <label style="color:#ffd24a;font-size:14px;">Upload Photos (Up to 10)</label>
-      <input type="file" id="photos" accept="image/*" multiple required />
-
-      <p id="uploadStatus" style="color:#ffd24a;margin-top:8px;font-size:14px;"></p>
-
-      <button type="submit">Submit for Approval</button>
-
-    </form>
-  </div>
-
-  <script type="module" src="/scripts/vendor-register.js"></script>
 </body>
 </html>
