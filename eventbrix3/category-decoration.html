@@ -1,0 +1,71 @@
+<!-- File 40: category-decoration.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Decoration Services | EventBrix</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <h2 class="cat-title">Decoration Services</h2>
+
+  <!-- ⭐ FILTER BAR -->
+  <div style="
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  ">
+
+    <!-- CITY FILTER -->
+    <select id="cityFilter" style="
+      padding:10px;
+      border-radius:8px;
+      background:#111;
+      color:white;
+      border:1px solid #444;
+      min-width:160px;
+    ">
+      <option value="">All Cities</option>
+      <option value="delhi">Delhi</option>
+      <option value="mumbai">Mumbai</option>
+      <option value="jaipur">Jaipur</option>
+      <option value="lucknow">Lucknow</option>
+      <option value="kolkata">Kolkata</option>
+    </select>
+
+    <!-- SEARCH BAR -->
+    <input id="searchBar"
+      placeholder="Search Vendors..."
+      style="
+        padding:10px;
+        border-radius:8px;
+        background:#111;
+        color:white;
+        border:1px solid #444;
+        min-width:220px;
+      "
+    />
+
+    <!-- PRICE SORT -->
+    <select id="sortFilter" style="
+      padding:10px;
+      border-radius:8px;
+      background:#111;
+      color:white;
+      border:1px solid #444;
+      min-width:160px;
+    ">
+      <option value="">Sort By</option>
+      <option value="low">Price: Low → High</option>
+      <option value="high">Price: High → Low</option>
+    </select>
+
+  </div>
+
+  <div id="vendorList" class="vendor-grid"></div>
+
+  <script type="module" src="scripts/category-decoration.js"></script>
+</body>
+</html>

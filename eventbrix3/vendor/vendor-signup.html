@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendor Signup | EventBrix</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+
+  <div class="form-box">
+    <h2>Create Vendor Account</h2>
+
+    <form id="vendorSignupForm">
+      <input type="email" id="email" placeholder="Email *" required autocomplete="username" />
+      <input type="password" id="password" placeholder="Create Password *" required autocomplete="new-password" />
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <button id="googleSignupBtn" style="margin-top:10px;">Sign up with Google</button>
+
+    <p>Already have an account? <a href="vendor-login.html">Login here</a></p>
+  </div>
+
+  <script type="module" src="/scripts/vendor-signup.js"></script>
+</body>
+</html>

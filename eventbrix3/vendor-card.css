@@ -1,0 +1,54 @@
+/* File 44: vendor-card.css */
+/* Add this stylesheet if you want cleaner vendor cards on category pages */
+
+.vendor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.vendor-card {
+  background: #111;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.vendor-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.vendor-card h3 {
+  padding: 10px;
+  color: var(--gold);
+  font-size: 20px;
+  margin: 0;
+}
+
+.vendor-card p {
+  padding: 0 10px;
+  margin: 5px 0;
+  font-size: 15px;
+  color: #ccc;
+}
+
+.vendor-card .view-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  background: var(--gold);
+  color: #000;
+  font-weight: 600;
+  text-decoration: none;
+  border-top: 1px solid var(--gold);
+  transition: 0.3s;
+}
+
+.vendor-card:hover {
+  transform: scale(1.03);
+}

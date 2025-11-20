@@ -1,0 +1,23 @@
+<!-- File 24: customer/reveal-number.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reveal Vendor Number | EventBrix</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="reveal-container">
+    <h2>Reveal Vendor Contact</h2>
+    <p>Pay ₹99 to unlock the vendor's phone number.</p>
+
+    <button id="payBtn" class="reveal-btn">Pay ₹99</button>
+
+    <div id="numberBox" class="number-box" style="display:none;"></div>
+  </div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script type="module" src="../scripts/reveal-number.js"></script>
+</body>
+</html>

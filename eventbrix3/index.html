@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EventBrix | Smart Event Management</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">EventBrix</div>
+
+    <nav>
+      <a href="#categories">Categories</a>
+
+      <!-- Vendor (FIXED) -->
+      <a href="vendor/vendor-login.html">Vendor Login / Sign Up</a>
+
+      <!-- Customer -->
+      <a href="customer/customer-register.html">Customer Register</a>
+      <a href="customer/customer-login.html">Customer Login</a>
+
+      <!-- Admin -->
+      <a href="admin/admin-login.html">Admin</a>
+    </nav>
+  </header>
+
+
+  <!-- Hero Section -->
+  <section class="hero" id="heroSection">
+    <div class="hero-inner">
+      <h2>Find the Best Vendors for Your Events</h2>
+      <p>Trusted vendors for weddings, birthdays, corporate events, and more.</p>
+
+      <div class="hero-buttons">
+        <!-- UPDATED BUTTON -->
+        <button onclick="openEventPopup()">
+          Book Event
+        </button>
+
+        <button onclick="document.getElementById('categories').scrollIntoView({ behavior: 'smooth' });">
+          Explore Categories
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Categories Section -->
+  <section class="categories" id="categories">
+    <h2>Explore Categories</h2>
+
+    <div class="category-grid">
+
+      <a class="category-box" href="category-wedding.html">
+        <h3>Wedding Services</h3>
+        <p>Photographers, Decorators, Planners</p>
+      </a>
+
+      <a class="category-box" href="category-banquet.html">
+        <h3>Banquet / Venue</h3>
+        <p>Luxury and Budget Venues</p>
+      </a>
+
+      <a class="category-box" href="category-birthday.html">
+        <h3>Birthday</h3>
+        <p>Cakes, Decor, Event Planners</p>
+      </a>
+
+      <a class="category-box" href="category-corporate.html">
+        <h3>Corporate Events</h3>
+        <p>Meeting Halls, Catering, AV Setup</p>
+      </a>
+
+      <a class="category-box" href="category-photo.html">
+        <h3>Photography & Videography</h3>
+        <p>Wedding, Birthday, Corporate Shoots</p>
+      </a>
+
+      <a class="category-box" href="category-catering.html">
+        <h3>Catering</h3>
+        <p>Veg / Non-Veg, Live Counters</p>
+      </a>
+
+      <a class="category-box" href="category-decoration.html">
+        <h3>Decoration</h3>
+        <p>Stage, Mandap, Balloon, Theme Setup</p>
+      </a>
+
+      <a class="category-box" href="category-makeup.html">
+        <h3>Makeup Artists</h3>
+        <p>Bridal, Party, HD Makeup</p>
+      </a>
+
+    </div>
+  </section>
+
+
+  <!-- =============================
+       POP-UP: BOOK EVENT FORM
+  ============================== -->
+  <div id="eventPopup" style="
+      display:none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height:100%;
+      background: rgba(0,0,0,0.7);
+      display:flex; justify-content:center; align-items:center;
+    ">
+    <div style="
+        background:#111;
+        padding:25px;
+        width:350px;
+        border-radius:16px;
+        border:1px solid #ffd24a;
+      ">
+      
+      <h2 style="color:#ffd24a; text-align:center; margin-bottom:15px;">
+        Book Your Event
+      </h2>
+
+      <input type="text" id="cbName" placeholder="Your Name *" style="width:100%; padding:12px; margin-bottom:12px; background:#1a1a1a; border:1px solid #444; color:white; border-radius:10px;">
+      
+      <input type="text" id="cbPhone" placeholder="Phone Number *" style="width:100%; padding:12px; margin-bottom:12px; background:#1a1a1a; border:1px solid #444; color:white; border-radius:10px;">
+
+      <textarea id="cbDesc" rows="3" placeholder="Event Description *" style="width:100%; padding:12px; margin-bottom:12px; background:#1a1a1a; border:1px solid #444; color:white; border-radius:10px;"></textarea>
+
+      <button onclick="submitEventPopup()" style="
+          width:100%; padding:12px;
+          background:#ffd24a; border:none; border-radius:10px;
+          font-weight:700; cursor:pointer;
+        ">
+        Submit
+      </button>
+
+      <button onclick="closeEventPopup()" style="
+          width:100%; padding:10px; margin-top:10px;
+          background:#333; border:1px solid #666; border-radius:10px;
+          color:white; cursor:pointer;
+        ">
+        Cancel
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- POPUP SCRIPT -->
+  <script>
+    function openEventPopup() {
+      document.getElementById("eventPopup").style.display = "flex";
+    }
+    function closeEventPopup() {
+      document.getElementById("eventPopup").style.display = "none";
+    }
+
+    function submitEventPopup() {
+      const name = document.getElementById("cbName").value;
+      const phone = document.getElementById("cbPhone").value;
+      const desc = document.getElementById("cbDesc").value;
+
+      if (!name || !phone || !desc) {
+        alert("Please fill all fields!");
+        return;
+      }
+
+      alert("Thank you! Your event request has been received.");
+      closeEventPopup();
+    }
+  </script>
+
+
+  <!-- Slideshow Script -->
+  <script>
+    let slides = [
+      "images/slide1.jpg",
+      "images/slide2.jpg",
+      "images/slide3.jpg",
+      "images/slide4.jpg",
+      "images/slide5.jpg",
+      "images/slide6.jpg"
+    ];
+
+    let i = 0;
+
+    function changeHero() {
+      document.getElementById("heroSection").style.backgroundImage =
+        "url('" + slides[i] + "')";
+      i = (i + 1) % slides.length;
+    }
+
+    changeHero();
+    setInterval(changeHero, 3500);
+  </script>
+
+</body>
+</html>
