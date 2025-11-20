@@ -1,23 +1,65 @@
-<!-- File 20: customer/customer-dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customer Dashboard | EventBrix</title>
-  <link rel="stylesheet" href="../styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard | EventBrix</title>
+<link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
-  <h2 class="dash-title">Welcome to EventBrix</h2>
 
-  <div id="customerData" class="customer-info-box"></div>
+<h1 class="title">My Dashboard</h1>
 
-  <a href="chat.html?vendor=YOUR_VENDOR_ID" class="chat-btn">Chats</a>
+<!-- PROFILE -->
+<div class="section" id="profileTab">
+  <h2>My Profile</h2>
+  <p><strong>Name:</strong> <span id="pName"></span></p>
+  <p><strong>Email:</strong> <span id="pEmail"></span></p>
+  <p><strong>Phone:</strong> <span id="pPhone"></span></p>
+  <p><strong>City:</strong> <span id="pCity"></span></p>
+  <p><strong>Joined:</strong> <span id="pJoined"></span></p>
+</div>
 
-  <button id="logoutBtn" class="logout-btn">Logout</button>
-  
-  
+<!-- WISHLIST -->
+<div class="section" id="wishlistTab" style="display:none;">
+  <h2>Saved Vendors</h2>
+  <div id="wishlistBox"></div>
+</div>
 
-  <script type="module" src="../scripts/customer-dashboard.js"></script>
+<!-- RECENT -->
+<div class="section" id="recentTab" style="display:none;">
+  <h2>Recently Viewed</h2>
+  <div id="recentBox"></div>
+</div>
+
+<!-- BOOKINGS -->
+<div class="section" id="bookingsTab" style="display:none;">
+  <h2>My Bookings</h2>
+  <div id="bookingBox"></div>
+</div>
+
+<!-- CHATS -->
+<div class="section" id="chatsTab" style="display:none;">
+  <h2>My Chats</h2>
+  <div id="chatBox"></div>
+</div>
+
+<!-- REVIEWS -->
+<div class="section" id="reviewsTab" style="display:none;">
+  <h2>My Reviews</h2>
+  <div id="reviewBox"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a class="tabBtn" data-tab="profileTab">👤</a>
+  <a class="tabBtn" data-tab="wishlistTab">❤️</a>
+  <a class="tabBtn" data-tab="recentTab">🕒</a>
+  <a class="tabBtn" data-tab="bookingsTab">📅</a>
+  <a class="tabBtn" data-tab="chatsTab">💬</a>
+</div>
+
+<script type="module" src="../scripts/customer-dashboard.js"></script>
 </body>
 </html>

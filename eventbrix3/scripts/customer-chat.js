@@ -1,89 +1,81 @@
 import { auth, db } from "/scripts/firebase.js";
 import {
-  doc,
-  getDoc,
-  addDoc,
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
+  doc, setDoc, addDoc, collection, getDocs,
+  onSnapshot, query, where, orderBy, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let customerId = null;
-let vendorId = null;
+const params = new URLSearchParams(window.location.search);
+const vendorId = params.get("vendor");
+
 let chatId = null;
+const box = document.getElementById("messagesBox");
 
-// ----------------------------
-// AUTH CHECK
-// ----------------------------
+// AUTH
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    alert("Please Login First");
-    location.href = "/customer/customer-login.html";
-    return;
-  }
+  if (!user) return location.href = "customer-login.html";
 
-  customerId = user.uid;  // unique customer ID
-
-  // vendorID from URL
-  const params = new URLSearchParams(window.location.search);
-  vendorId = params.get("vendor");
-
-  if (!vendorId) {
-    alert("Vendor ID Missing");
-    return;
-  }
-
-  chatId = `${customerId}_${vendorId}`;
-  document.getElementById("chatIdBox").innerText = chatId;
-
-  loadMessages();
+  await getOrCreateChat(user.uid);
+  listenMessages();
 });
 
+async function getOrCreateChat(uid) {
+  const qSnap = await getDocs(
+    query(collection(db,"chats"),
+    where("customerId","==", uid),
+    where("vendorId","==", vendorId))
+  );
 
-// ----------------------------
-// LOAD MESSAGES (REALTIME)
-// ----------------------------
-function loadMessages() {
-  const msgRef = collection(db, "chats", chatId, "messages");
-  const q = query(msgRef, orderBy("time", "asc"));
+  if (!qSnap.empty) { chatId = qSnap.docs[0].id; return; }
 
-  onSnapshot(q, (snap) => {
-    const box = document.getElementById("chatMessages");
+  const newChat = await addDoc(collection(db,"chats"),{
+    customerId: uid,
+    vendorId,
+    lastMessage: "",
+    lastMsgTime: Date.now(),
+    lastSender: ""
+  });
+
+  chatId = newChat.id;
+
+  await updateDoc(doc(db,"chats",chatId),{chatId});
+}
+
+document.getElementById("sendBtn").addEventListener("click", sendMsg);
+
+async function sendMsg() {
+  const text = document.getElementById("msgInput").value.trim();
+  if (!text) return;
+
+  document.getElementById("msgInput").value = "";
+
+  await addDoc(collection(db,"chats",chatId,"messages"),{
+    sender:"customer",
+    text,
+    timestamp:Date.now(),
+    seenByVendor:false,
+    seenByCustomer:true
+  });
+
+  await updateDoc(doc(db,"chats",chatId),{
+    lastMessage:text,
+    lastMsgTime:Date.now(),
+    lastSender:"customer"
+  });
+}
+
+function listenMessages() {
+  const q = query(collection(db,"chats",chatId,"messages"), orderBy("timestamp","asc"));
+
+  onSnapshot(q, snap => {
     box.innerHTML = "";
-
-    snap.forEach((m) => {
-      const data = m.data();
-      const side = data.sender === customerId ? "me" : "other";
-
+    snap.forEach(d => {
+      const m = d.data();
       box.innerHTML += `
-        <div class="msg ${side}">
-          ${data.text}
-        </div>
-      `;
+        <div class="${m.sender==="customer" ? "myMsg" : "theirMsg"}">
+          ${m.text}
+        </div>`;
     });
 
     box.scrollTop = box.scrollHeight;
   });
 }
-
-
-// ----------------------------
-// SEND MESSAGE
-// ----------------------------
-document.getElementById("sendBtn").onclick = async () => {
-  const input = document.getElementById("msgInput");
-  const text = input.value.trim();
-
-  if (!text) return;
-
-  await addDoc(collection(db, "chats", chatId, "messages"), {
-    text,
-    sender: customerId,
-    receiver: vendorId,
-    time: serverTimestamp()
-  });
-
-  input.value = "";
-};
