@@ -1,24 +1,38 @@
-import { auth } from "./firebase.js";
+import { auth, db } from "/scripts/firebase.js";
 import {
   createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const form = document.getElementById("customerRegisterForm");
+import {
+  doc, setDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-form.addEventListener("submit", async (e) => {
+document.getElementById("customerRegisterForm")
+.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const name = e.target.name.value;
+  const email = e.target.email.value;
+  const phone = e.target.phone.value;
+  const city = e.target.city.value;
+  const password = e.target.password.value;
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+
+    await setDoc(doc(db, "customers", userCred.user.uid), {
+      uid: userCred.user.uid,
+      name,
+      email,
+      phone,
+      city,
+      createdAt: Date.now(),
+    });
 
     alert("Account created!");
-    window.location.href = "/customer/customer-dashboard.html";
-  } catch (error) {
-    console.error(error);
-    alert("Registration failed.");
+    location.href = "/customer/customer-dashboard.html";
+  }
+  catch (err) {
+    alert(err.message);
   }
 });
