@@ -3,15 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vendor Details | EventBrix</title>
-  <link rel="stylesheet" href="../styles.css" />
+  <title>Vendor Profile - EventBrix</title>
+  <link rel="stylesheet" href="/styles.css" />
 </head>
-<body>
 
-  <div id="vendorProfile" class="vendor-profile"></div>
+<body class="bg-black text-white">
 
-  <!-- FIXED PATH -->
-  <script type="module" src="../scripts/vendor-profile.js"></script>
+  <!-- HEADER -->
+  <header class="p-4 bg-yellow-500 text-black font-bold text-xl">
+    Vendor Profile
+  </header>
+
+  <!-- PROFILE CONTAINER -->
+  <div class="max-w-3xl mx-auto mt-6 p-4 bg-black/40 rounded-lg border border-gray-700">
+
+    <h2 id="vendorName" class="text-3xl font-bold mb-2"></h2>
+
+    <p class="text-gray-300"><b>Category:</b> <span id="vendorCategory"></span></p>
+    <p class="text-gray-300"><b>City:</b> <span id="vendorCity"></span></p>
+    <p class="text-gray-300"><b>Starting Price:</b> <span id="vendorPrice"></span></p>
+
+    <div class="mt-4">
+      <h3 class="text-xl font-semibold">About</h3>
+      <p id="vendorAbout" class="text-gray-300"></p>
+    </div>
+
+    <!-- CHAT BUTTON -->
+    <a id="chatBtn"
+       class="mt-5 inline-block px-4 py-2 bg-yellow-500 text-black rounded-lg font-semibold cursor-pointer">
+       Chat With Vendor
+    </a>
+  </div>
+
+
+  <!-- LISTINGS -->
+  <div class="max-w-3xl mx-auto mt-8">
+    <h3 class="text-2xl font-bold mb-3">Vendor Listings</h3>
+
+    <div id="vendorListings" class="grid grid-cols-1 gap-4"></div>
+  </div>
+
+  <script type="module" src="/scripts/vendor-profile.js"></script>
 
 </body>
 </html>

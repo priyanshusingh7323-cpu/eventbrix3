@@ -1,43 +1,46 @@
-import { auth } from "/scripts/firebase.js";
-import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup
+import { auth, db } from "/scripts/firebase.js";
+import { 
+  createUserWithEmailAndPassword 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-const form = document.getElementById("vendorSignupForm");
+import { 
+  doc, 
+  setDoc 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// SIGNUP FORM SUBMIT
-form.addEventListener("submit", async (e) => {
+import { getNextVendorId } from "/scripts/vendor-id.js";
+
+document.getElementById("vendorSignupForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const name = e.target.name.value;
+  const email = e.target.email.value;
+  const phone = e.target.phone.value;
+  const password = e.target.password.value;
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    alert("Account created!");
+    // 1) Create Firebase Auth user
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCred.user.uid;
 
-    // Redirect to Vendor Registration Form
-    window.location.href = "vendor-register.html";
+    // 2) Generate short VendorID: VEN-1001
+    const vendorId = await getNextVendorId();
+
+    // 3) Create vendor profile in Firestore
+    await setDoc(doc(db, "vendors", vendorId), {
+      vendorId,
+      uid,
+      name,
+      email,
+      phone,
+      createdAt: Date.now(),
+      status: "incomplete",
+    });
+
+    alert("Signup Successful!");
+    location.href = "vendor-register.html";
 
   } catch (err) {
-    alert("Signup failed.");
-    console.error(err);
-  }
-});
-
-// GOOGLE SIGNUP
-const provider = new GoogleAuthProvider();
-document.getElementById("googleSignupBtn").addEventListener("click", async () => {
-  try {
-    await signInWithPopup(auth, provider);
-    alert("Account created!");
-
-    window.location.href = "vendor-register.html";
-
-  } catch (error) {
-    console.error(error);
-    alert("Google signup failed.");
+    alert(err.message);
   }
 });

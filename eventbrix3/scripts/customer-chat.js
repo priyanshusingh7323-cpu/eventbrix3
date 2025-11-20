@@ -2,7 +2,6 @@ import { auth, db } from "/scripts/firebase.js";
 import {
   doc,
   getDoc,
-  setDoc,
   addDoc,
   collection,
   query,
@@ -11,52 +10,41 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-let vendorId = null;
 let customerId = null;
+let vendorId = null;
 let chatId = null;
 
-// Wait until vendor logs in
+// ----------------------------
+// AUTH CHECK
+// ----------------------------
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
-    location.href = "vendor-login.html";
+    alert("Please Login First");
+    location.href = "/customer/customer-login.html";
     return;
   }
 
-  // FIND vendorId using UID
-  const vendorSnap = await db
-    .collection("vendors")
-    .where("uid", "==", user.uid)
-    .get();
+  customerId = user.uid;  // unique customer ID
 
-  if (vendorSnap.empty) {
-    alert("Vendor profile missing!");
-    return;
-  }
-
-  vendorId = vendorSnap.docs[0].id;  // example: VEN-1001
-
-  // Get customerId from URL
+  // vendorID from URL
   const params = new URLSearchParams(window.location.search);
-  customerId = params.get("customer");
+  vendorId = params.get("vendor");
 
-  if (!customerId) {
-    alert("Customer ID missing");
+  if (!vendorId) {
+    alert("Vendor ID Missing");
     return;
   }
 
-  // FINAL CHAT ROOM ID
   chatId = `${customerId}_${vendorId}`;
-
   document.getElementById("chatIdBox").innerText = chatId;
 
   loadMessages();
 });
 
 
-// -----------------------------
-// LOAD CHAT MESSAGES (REALTIME)
-// -----------------------------
-
+// ----------------------------
+// LOAD MESSAGES (REALTIME)
+// ----------------------------
 function loadMessages() {
   const msgRef = collection(db, "chats", chatId, "messages");
   const q = query(msgRef, orderBy("time", "asc"));
@@ -67,7 +55,7 @@ function loadMessages() {
 
     snap.forEach((m) => {
       const data = m.data();
-      const side = data.sender === vendorId ? "me" : "other";
+      const side = data.sender === customerId ? "me" : "other";
 
       box.innerHTML += `
         <div class="msg ${side}">
@@ -81,10 +69,9 @@ function loadMessages() {
 }
 
 
-// -----------------------------
+// ----------------------------
 // SEND MESSAGE
-// -----------------------------
-
+// ----------------------------
 document.getElementById("sendBtn").onclick = async () => {
   const input = document.getElementById("msgInput");
   const text = input.value.trim();
@@ -93,8 +80,8 @@ document.getElementById("sendBtn").onclick = async () => {
 
   await addDoc(collection(db, "chats", chatId, "messages"), {
     text,
-    sender: vendorId,
-    receiver: customerId,
+    sender: customerId,
+    receiver: vendorId,
     time: serverTimestamp()
   });
 

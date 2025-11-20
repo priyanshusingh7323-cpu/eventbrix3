@@ -1,49 +1,80 @@
-// File 15: scripts/vendor-profile.js
-
 import { db } from "/scripts/firebase.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const vendorProfile = document.getElementById("vendorProfile");
+// --------------------------------------
+// GET vendorId FROM URL
+// Example: vendor-profile.html?id=VEN-1001
+// --------------------------------------
 
-// Get vendor ID from URL
-const urlParams = new URLSearchParams(window.location.search);
-const vendorId = urlParams.get("id");
+const params = new URLSearchParams(window.location.search);
+const vendorId = params.get("id");
+
+if (!vendorId) {
+  alert("Vendor ID missing!");
+  throw new Error("Vendor ID missing");
+}
+
+
+// --------------------------------------
+// LOAD VENDOR PROFILE
+// --------------------------------------
 
 async function loadVendorProfile() {
-  const docRef = doc(db, "vendors", vendorId);
-  const snap = await getDoc(docRef);
+  const snap = await getDoc(doc(db, "vendors", vendorId));
 
   if (!snap.exists()) {
-    vendorProfile.innerHTML = "<h2>Vendor Not Found</h2>";
+    document.getElementById("vendorName").innerText = "Vendor Not Found!";
     return;
   }
 
-  const d = snap.data();
+  const v = snap.data();
 
-  vendorProfile.innerHTML = `
-    <div class='vendor-header'>
-      <h2>${d.businessName}</h2>
-      <p>${d.city}</p>
-    </div>
+  document.getElementById("vendorName").innerText = v.businessName || v.name;
+  document.getElementById("vendorCategory").innerText = v.category || "—";
+  document.getElementById("vendorCity").innerText = v.city || "—";
+  document.getElementById("vendorPrice").innerText = v.price ? `₹${v.price}` : "—";
+  document.getElementById("vendorAbout").innerText = v.about || "No description added.";
 
-    <div class='photo-gallery'>
-      ${d.photos.map(url => `<img src='${url}' class='vendor-photo' />`).join('')}
-    </div>
+  // Set Chat button
+  document.getElementById("chatBtn").href = `/customer/chat.html?vendor=${vendorId}`;
 
-    <div class='vendor-details'>
-      <h3>Services Offered</h3>
-      <p>${d.services}</p>
+  loadListings();
+}
 
-      <h3>Pricing</h3>
-      <p>Starting Price: ₹${d.startingPrice}</p>
-      ${d.perPlate ? `<p>Per Plate: ₹${d.perPlate}</p>` : ""}
-    </div>
 
-    <div class='contact-box'>
-      <a href="../customer/chat.html?vendor=${vendorId}" class="chat-btn">Free Chat</a>
-      <a href="../customer/reveal-number.html?vendor=${vendorId}" class="reveal-btn">Pay ₹99 to Reveal Number</a>
-    </div>
-  `;
+// --------------------------------------
+// LOAD VENDOR LISTINGS (If Enabled)
+// --------------------------------------
+
+async function loadListings() {
+  const listRef = collection(db, "vendors", vendorId, "listings");
+  const snap = await getDocs(listRef);
+
+  const box = document.getElementById("vendorListings");
+  box.innerHTML = "";
+
+  if (snap.empty) {
+    box.innerHTML = "<p>No listings added yet.</p>";
+    return;
+  }
+
+  snap.forEach((docx) => {
+    const L = docx.data();
+
+    box.innerHTML += `
+      <div class="listing-card">
+        <img src="${L.photo || '/images/default.jpg'}" />
+        <h3>${L.title}</h3>
+        <p>₹${L.price}</p>
+        <p>${L.city}</p>
+      </div>
+    `;
+  });
 }
 
 loadVendorProfile();
