@@ -1,55 +1,30 @@
-// File 39: scripts/category-catering.js
+import { db } from "/scripts/firebase.js";
+import { collection, query, where, getDocs }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { db } from "../firebase.js";
-import {
-  collection,
-  getDocs,
-  query,
-  where
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const vendorList = document.getElementById("vendorList");
-const cityFilter = document.getElementById("cityFilter");
-const searchBar = document.getElementById("searchBar");
-const sortFilter = document.getElementById("sortFilter");
-
-// MAIN LOADER FUNCTION
 async function loadVendors() {
-  vendorList.innerHTML = "<p style='color:white;'>Loading...</p>";
+  const list = document.getElementById("vendorList");
+  list.innerHTML = "Loading...";
 
-  const selectedCity = cityFilter.value.trim().toLowerCase();
-  const searchTerm = searchBar.value.trim().toLowerCase();
-  const sortOption = sortFilter.value;
+  const q = query(
+    collection(db, "vendors"),
+    where("status", "==", "approved"),
+    where("mainCategory", "==", "Catering")
+  );
 
-  // FIREBASE WHERE CONDITIONS
-  let conditions = [
-    where("mainCategory", "==", "catering"),
-    where("approved", "==", true)
-  ];
-
-  if (selectedCity) {
-    conditions.push(where("city", "==", selectedCity));
-  }
-
-  const q = query(collection(db, "vendors"), ...conditions);
   const snap = await getDocs(q);
+  list.innerHTML = "";
 
-  let vendors = [];
-
-  snap.forEach(doc => {
-    vendors.push({ id: doc.id, ...doc.data() });
+  snap.forEach((docx)=>{
+    const v = docx.data();
+    list.innerHTML += `
+      <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
+        <img src="${v.photos?.[0] || '/images/default.jpg'}">
+        <h3>${v.businessName}</h3>
+        <p>${v.city}</p>
+        <p>₹${v.price}</p>
+      </div>`;
   });
+}
 
-  // 🔍 LOCAL SEARCH FILTER
-  if (searchTerm) {
-    vendors = vendors.filter(v =>
-      v.businessName.toLowerCase().includes(searchTerm) ||
-      v.services.join(" ").toLowerCase().includes(searchTerm)
-    );
-  }
-
-  // 💰 PRICE SORT
-  if (sortOption === "low") {
-    vendors.sort((a, b) => Number(a.startingPrice) - Number(b.startingPrice));
-  }
-  if (sortO
+loadVendors();
