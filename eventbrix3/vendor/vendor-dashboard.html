@@ -9,6 +9,12 @@
 
 <body>
 
+<!-- TOP ACTION BAR -->
+<div style="padding:15px; display:flex; gap:12px;">
+  <button id="homeBtn" class="btn-primary">🏠 Home</button>
+  <button id="logoutTopBtn" class="btn-secondary">🚪 Logout</button>
+</div>
+
 <h1 class="title">Vendor Dashboard</h1>
 
 <!-- MAIN DATA -->
@@ -40,6 +46,34 @@
   <a id="logoutBtn">🚪</a>
 </div>
 
+<script type="module">
+import { auth } from "/scripts/firebase.js";
+import { signOut } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* HOME BUTTON */
+document.getElementById("homeBtn").onclick = () => {
+  location.href = "/index.html";
+};
+
+/* LOGOUT (TOP BAR) */
+document.getElementById("logoutTopBtn").onclick = async () => {
+  await signOut(auth);
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href = "/vendor/vendor-login.html";
+};
+
+/* LOGOUT (BOTTOM NAV) */
+document.getElementById("logoutBtn").onclick = async () => {
+  await signOut(auth);
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href = "/vendor/vendor-login.html";
+};
+</script>
+
 <script type="module" src="../scripts/vendor-dashboard.js"></script>
+
 </body>
 </html>

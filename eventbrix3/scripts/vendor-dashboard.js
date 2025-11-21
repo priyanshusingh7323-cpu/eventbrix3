@@ -8,7 +8,13 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// LOGIN CHECK
+import {
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* -----------------------------------------
+   LOGIN CHECK + LOAD VENDOR INFO
+------------------------------------------ */
 auth.onAuthStateChanged(async (user) => {
   if (!user) return location.href = "vendor-login.html";
 
@@ -30,19 +36,45 @@ auth.onAuthStateChanged(async (user) => {
   loadListings(vendorId);
   loadApprovedLeads(vendorId);
 
-  // Logout
-  document.getElementById("logoutBtn").onclick = () => {
-    auth.signOut();
+  /* -----------------------------------------
+     HOME BUTTON
+  ------------------------------------------ */
+  document.getElementById("homeBtn").onclick = () => {
+    location.href = "/index.html";
+  };
+
+  /* -----------------------------------------
+     LOGOUT BUTTON (TOP)
+  ------------------------------------------ */
+  document.getElementById("logoutTopBtn").onclick = async () => {
+    await signOut(auth);
+    localStorage.clear();
+    sessionStorage.clear();
     location.href = "vendor-login.html";
   };
 
-  // New Listing Button
+  /* -----------------------------------------
+     LOGOUT BUTTON (BOTTOM NAV)
+  ------------------------------------------ */
+  document.getElementById("logoutBtn").onclick = async () => {
+    await signOut(auth);
+    localStorage.clear();
+    sessionStorage.clear();
+    location.href = "vendor-login.html";
+  };
+
+  /* -----------------------------------------
+     NEW LISTING BUTTON
+  ------------------------------------------ */
   document.getElementById("newListingBtn").onclick = () => {
     window.location.href = "vendor-register.html?mode=new";
   };
 });
 
-// LOAD LISTINGS
+
+/* -----------------------------------------
+   LOAD LISTINGS
+------------------------------------------ */
 async function loadListings(vendorId) {
   const listRef = collection(db, "vendors", vendorId, "listings");
   const snap = await getDocs(listRef);
@@ -78,7 +110,10 @@ async function loadListings(vendorId) {
   });
 }
 
-// LOAD APPROVED LEADS
+
+/* -----------------------------------------
+   LOAD APPROVED LEADS
+------------------------------------------ */
 async function loadApprovedLeads(vendorId) {
   const leadsRef = collection(db, "leads_approved", vendorId, "items");
   const snap = await getDocs(leadsRef);
