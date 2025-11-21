@@ -170,59 +170,7 @@ nav a:hover {
 }
 
 /* ============================
-   UPDATED VENDOR CARD
-============================ */
-.vendor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.vendor-card {
-    background: #111;
-    border: 1px solid var(--gold);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: 0.25s ease-in-out;
-    box-shadow: 0 0 20px rgba(255,210,74,0.1);
-}
-
-.vendor-card:hover {
-    transform: scale(1.03);
-}
-
-.vendor-card img {
-    width: 100%;
-    height: 170px;
-    object-fit: cover;
-}
-
-.vendor-card h3 {
-    padding: 10px 15px 0;
-    color: var(--gold);
-    font-size: 19px;
-}
-
-.vendor-card p {
-    padding: 2px 15px;
-    color: #ccc;
-    font-size: 14px;
-}
-
-.view-btn {
-    display: block;
-    background: var(--gold);
-    color: #000;
-    text-align: center;
-    padding: 12px;
-    font-weight: 600;
-    margin-top: 10px;
-    border-top: 1px solid var(--gold);
-}
-
-/* ============================
-   VENDOR PROFILE PAGE
+   VENDOR PROFILE PAGE (KEEPING)
 ============================ */
 .profile-header {
     width: 100%;
@@ -275,30 +223,11 @@ nav a:hover {
     color: var(--gold);
 }
 
-#vendorListings .vendor-card {
-    margin-top: 10px;
-}
+/* Booking Popup Fix */
+#bookingPopup { display: none; }
+#bookingPopup.show { display: block !important; }
 
-/* ===================================================
-   POPUP FIX (THIS WAS MISSING – NOW ADDED)
-=================================================== */
+#popupOverlay { display: none; }
+#popupOverlay.show { display: block !important; }
 
-#bookingPopup {
-    display: none;
-}
-
-#bookingPopup.show {
-    display: block !important;
-}
-
-#popupOverlay {
-    display: none;
-}
-
-#popupOverlay.show {
-    display: block !important;
-}
-
-#thankYouBox {
-    display: none;
-}
+#thankYouBox { display: none; }

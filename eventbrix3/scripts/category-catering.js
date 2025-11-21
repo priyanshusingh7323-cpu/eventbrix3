@@ -1,7 +1,14 @@
 import { db } from "/scripts/firebase.js";
-import { collection, query, where, getDocs }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  collection,
+  query,
+  where,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+let allVendors = [];
+
+// MAIN LOAD FUNCTION
 async function loadVendors() {
   const list = document.getElementById("vendorList");
   list.innerHTML = "Loading...";
@@ -13,18 +20,89 @@ async function loadVendors() {
   );
 
   const snap = await getDocs(q);
+
+  allVendors = [];
+  snap.forEach((docx) => {
+    allVendors.push({
+      id: docx.id,
+      ...docx.data()
+    });
+  });
+
+  renderVendors(allVendors);
+}
+
+// RENDER FUNCTION (Advanced Card Layout)
+function renderVendors(data) {
+  const list = document.getElementById("vendorList");
   list.innerHTML = "";
 
-  snap.forEach((docx)=>{
-    const v = docx.data();
+  if (!data.length) {
+    list.innerHTML = "<p style='text-align:center;color:#ccc;'>No vendors found.</p>";
+    return;
+  }
+
+  data.forEach((v) => {
+    const img = v.photos?.[0] || "/images/default.jpg";
+
     list.innerHTML += `
-      <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
-        <img src="${v.photos?.[0] || '/images/default.jpg'}">
-        <h3>${v.businessName}</h3>
-        <p>${v.city}</p>
-        <p>₹${v.price}</p>
-      </div>`;
+      <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${v.id}'">
+        <div class="v-img">
+          <img src="${img}">
+        </div>
+
+        <div class="v-info">
+          <h3>${v.businessName}</h3>
+
+          <p class="v-city">${v.city}</p>
+
+          <div class="v-bottom">
+            <span class="v-price">₹${v.price}</span>
+            <span class="v-rating">⭐ 4.8</span>
+          </div>
+        </div>
+      </div>
+    `;
   });
 }
 
+// SEARCH FILTER
+document.getElementById("searchBar").addEventListener("input", (e) => {
+  const text = e.target.value.toLowerCase();
+
+  const filtered = allVendors.filter((v) =>
+    v.businessName.toLowerCase().includes(text)
+  );
+
+  renderVendors(filtered);
+});
+
+// CITY FILTER
+document.getElementById("cityFilter").addEventListener("change", (e) => {
+  const city = e.target.value;
+
+  if (!city) return renderVendors(allVendors);
+
+  const filtered = allVendors.filter(
+    (v) => v.city.toLowerCase() === city.toLowerCase()
+  );
+
+  renderVendors(filtered);
+});
+
+// SORT
+document.getElementById("sortFilter").addEventListener("change", (e) => {
+  const type = e.target.value;
+  let sorted = [...allVendors];
+
+  if (type === "low") {
+    sorted.sort((a, b) => a.price - b.price);
+  } else if (type === "high") {
+    sorted.sort((a, b) => b.price - a.price);
+  }
+
+  renderVendors(sorted);
+});
+
+// INIT
 loadVendors();

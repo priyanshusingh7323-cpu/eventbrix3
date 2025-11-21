@@ -2,8 +2,14 @@
 <html>
 <head>
   <title>Wedding Vendors | EventBrix</title>
+
+  <!-- Global style -->
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Advanced Vendor Card CSS -->
+  <link rel="stylesheet" href="vendor/vendor-card.css" />
 </head>
+
 <body>
 
   <h2 class="cat-title">Wedding Vendors</h2>
@@ -29,7 +35,7 @@
       <option value="kolkata">Kolkata</option>
     </select>
 
-    <input id="searchBar" 
+    <input id="searchBar"
       placeholder="Search Vendors..."
       style="
         padding:10px; border-radius:8px;
@@ -49,12 +55,13 @@
 
   </div>
 
+  <!-- Vendor list container -->
   <div id="vendorList" class="vendor-grid"></div>
 
-  <!-- ⭐ LOAD FIREBASE FIRST → FIXES THE 404 ERROR -->
+  <!-- Load Firebase -->
   <script type="module" src="scripts/firebase.js"></script>
 
-  <!-- THEN LOAD THE CATEGORY LOGIC -->
+  <!-- Load category logic -->
   <script type="module" src="scripts/category-wedding.js"></script>
 
 </body>

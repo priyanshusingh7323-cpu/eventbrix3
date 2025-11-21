@@ -10,6 +10,7 @@ async function loadVendors() {
   const list = document.getElementById("vendorList");
   list.innerHTML = "Loading...";
 
+  // Base query
   const q = query(
     collection(db, "vendors"),
     where("status", "==", "approved"),
@@ -19,15 +20,40 @@ async function loadVendors() {
   const snap = await getDocs(q);
   list.innerHTML = "";
 
-  snap.forEach((docx)=>{
+  if (snap.empty) {
+    list.innerHTML = `<p style="text-align:center;color:#ccc;">No vendors found.</p>`;
+    return;
+  }
+
+  snap.forEach((docx) => {
     const v = docx.data();
+
+    const photo = v.photos?.[0] || "/images/default.jpg";
+    const price = v.price ? `₹${v.price}` : "Price Not Set";
+
     list.innerHTML += `
       <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
-        <img src="${v.photos?.[0] || '/images/default.jpg'}">
-        <h3>${v.businessName}</h3>
-        <p>${v.city}</p>
-        <p>₹${v.price}</p>
-      </div>`;
+
+        <div class="v-img-box">
+          <img src="${photo}">
+          <span class="v-badge">Corporate</span>
+        </div>
+
+        <div class="v-info">
+          <h3>${v.businessName || "Vendor Name"}</h3>
+
+          <p class="v-city">
+            <i class="fa-solid fa-location-dot"></i> ${v.city || "Not Set"}
+          </p>
+
+          <p class="v-price">
+            <i class="fa-solid fa-indian-rupee-sign"></i> ${price}
+          </p>
+
+          <button class="v-btn">View Profile</button>
+        </div>
+      </div>
+    `;
   });
 }
 
