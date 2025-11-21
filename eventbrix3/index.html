@@ -18,15 +18,20 @@
   <header>
     <div class="logo">EventBrix</div>
 
-    <nav>
+    <nav id="mainNav">
       <a href="#categories">Categories</a>
 
-      <!-- Vendor (FIXED) -->
+      <!-- Vendor -->
       <a href="vendor/vendor-login.html">Vendor Login / Sign Up</a>
 
       <!-- Customer -->
-      <a href="customer/customer-register.html">Customer Register</a>
-      <a href="customer/customer-login.html">Customer Login</a>
+      <a class="custReg" href="customer/customer-register.html">Customer Register</a>
+      <a class="custLogin" href="customer/customer-login.html">Customer Login</a>
+
+      <!-- Visible AFTER login -->
+      <a id="myAccountBtn" href="customer/customer-dashboard.html" style="display:none;">
+        My Account
+      </a>
 
       <!-- Admin -->
       <a href="admin/admin-login.html">Admin</a>
@@ -41,7 +46,6 @@
       <p>Trusted vendors for weddings, birthdays, corporate events, and more.</p>
 
       <div class="hero-buttons">
-        <!-- UPDATED BUTTON -->
         <button onclick="openEventPopup()">
           Book Event
         </button>
@@ -104,9 +108,7 @@
   </section>
 
 
-  <!-- =============================
-       POP-UP: BOOK EVENT FORM
-  ============================== -->
+  <!-- POP-UP: BOOK EVENT FORM -->
   <div id="eventPopup" style="
       display:none;
       position: fixed;
@@ -153,7 +155,7 @@
   </div>
 
 
-  <!-- POPUP SCRIPT -->
+  <!-- Event Popup Script -->
   <script>
     function openEventPopup() {
       document.getElementById("eventPopup").style.display = "flex";
@@ -199,6 +201,31 @@
 
     changeHero();
     setInterval(changeHero, 3500);
+  </script>
+
+
+  <!-- ⭐ AUTH TOGGLE SCRIPT -->
+  <script type="module">
+    import { auth, onAuthStateChanged } from "/scripts/firebase.js";
+
+    const regBtn = document.querySelector(".custReg");
+    const loginBtn = document.querySelector(".custLogin");
+    const myBtn = document.getElementById("myAccountBtn");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // hide register/login
+        if (regBtn) regBtn.style.display = "none";
+        if (loginBtn) loginBtn.style.display = "none";
+
+        // show my account
+        myBtn.style.display = "inline-block";
+      } else {
+        if (regBtn) regBtn.style.display = "inline-block";
+        if (loginBtn) loginBtn.style.display = "inline-block";
+        myBtn.style.display = "none";
+      }
+    });
   </script>
 
 </body>
