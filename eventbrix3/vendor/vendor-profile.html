@@ -71,8 +71,18 @@
   color: #fff;
 }
 
-</style>
+/* INPUT BASIC STYLE */
+.inputBox {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: white;
+}
 
+</style>
 </head>
 
 <body>
@@ -104,7 +114,72 @@
   <div id="vendorListings"></div>
 </div>
 
-<!-- POPUP + JS -->
+
+
+<!-- ----------------------------------------- -->
+<!-- BOOKING POPUP + OVERLAY + THANK YOU BOX -->
+<!-- ----------------------------------------- -->
+
+<!-- OVERLAY -->
+<div id="popupOverlay" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.7);
+  z-index:998;">
+</div>
+
+<!-- POPUP -->
+<div id="bookingPopup" style="
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:90%;
+  max-width:400px;
+  background:#111;
+  padding:20px;
+  border-radius:12px;
+  z-index:999;
+  color:white;
+">
+
+  <h2 style="margin-bottom:10px;">Book Vendor</h2>
+
+  <input id="cName" placeholder="Your Name" class="inputBox">
+  <input id="cPhone" placeholder="Phone" class="inputBox">
+  <input id="cDate" type="date" class="inputBox">
+  <input id="cCity" placeholder="Event City" class="inputBox">
+  <input id="cVenue" placeholder="Venue Location" class="inputBox">
+  <input id="cGuests" placeholder="Guest Count" class="inputBox">
+  <textarea id="cMsg" placeholder="Message" class="inputBox"></textarea>
+
+  <button id="submitBookingBtn" class="btn-primary" style="width:100%; margin-top:10px;">Submit</button>
+  <button id="closePopupBtn" class="btn-secondary" style="width:100%; margin-top:8px;">Close</button>
+
+</div>
+
+<!-- THANK YOU -->
+<div id="thankYouBox" style="
+  display:none;
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#14c414;
+  color:#fff;
+  padding:12px 20px;
+  border-radius:8px;
+  font-size:14px;
+  z-index:1000;">
+  Booking Sent!
+</div>
+
+
+<!-- JS -->
 <script type="module" src="../scripts/vendor-profile.js"></script>
+
 </body>
 </html>
