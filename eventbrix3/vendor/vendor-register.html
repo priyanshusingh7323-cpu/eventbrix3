@@ -14,13 +14,56 @@
 <div class="form-box">
 
   <form id="vendorRegisterForm">
+
+    <!-- BUSINESS DETAILS -->
     <input type="text" name="businessName" placeholder="Business Name *" required>
+    <input type="text" name="ownerName" placeholder="Owner Name *" required>
     <input type="text" name="city" placeholder="City *" required>
-    <input type="text" name="category" placeholder="Main Category *" required>
-    <input type="text" name="subcategory" placeholder="Sub Category *" required>
+
+    <!-- MAIN CATEGORY DROPDOWN -->
+    <select name="category" id="mainCategory" required>
+      <option value="">Select Main Category *</option>
+      <option value="Banquet">Banquet</option>
+      <option value="Wedding Planner">Wedding Planner</option>
+      <option value="Catering">Catering</option>
+      <option value="Decoration">Decoration</option>
+      <option value="Photography">Photography</option>
+      <option value="Makeup Artist">Makeup Artist</option>
+      <option value="Birthday">Birthday / Kids</option>
+      <option value="Corporate">Corporate</option>
+    </select>
+
+    <!-- SUB CATEGORY AUTO-FILL -->
+    <select name="subcategory" id="subCategory" required>
+      <option value="">Select Sub Category *</option>
+    </select>
+
+    <!-- PRICE FIELDS -->
     <input type="number" name="price" placeholder="Starting Price *" required>
 
+    <!-- PER PLATE ONLY FOR BANQUET -->
+    <input type="number" name="perPlate" id="perPlateField" placeholder="Per Plate Price" style="display:none;">
+
+    <!-- SERVICES OFFERED -->
+    <textarea name="services" placeholder="Services Offered (comma separated) *" required></textarea>
+
+    <!-- ABOUT -->
     <textarea name="about" placeholder="About your service *" required></textarea>
+
+    <!-- VENUE / LOCATION -->
+    <input type="text" name="serviceArea" placeholder="Service Areas / Locations (optional)">
+
+    <!-- EXPERIENCE -->
+    <input type="number" name="experience" placeholder="Experience (Years)">
+
+    <!-- TEAM SIZE -->
+    <input type="number" name="teamSize" placeholder="Team Size">
+
+    <!-- CLOUDINARY MULTIPLE IMAGE UPLOAD -->
+    <label>Upload Photos (1–10)</label>
+    <input type="file" id="photoUpload" accept="image/*" multiple>
+
+    <div id="previewBox" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;"></div>
 
     <button type="submit">Submit</button>
   </form>
@@ -28,5 +71,37 @@
 </div>
 
 <script type="module" src="../scripts/vendor-register.js"></script>
+
+<script>
+// -------------------------
+// AUTO SUBCATEGORY SYSTEM
+// -------------------------
+const subMap = {
+  "Banquet": ["Indoor Hall","Outdoor Lawn","AC Banquet","Resort Venue","Marriage Garden","Destination Venue","Rooftop Venue","Premium Banquet","All Services"],
+  "Wedding Planner": ["Full Wedding","Day Coordination","Luxury Planning","Theme Weddings","Destination Planning","All Services"],
+  "Catering": ["Veg","Non-Veg","Wedding Catering","Corporate Catering","Buffet","Live Counters","All Services"],
+  "Decoration": ["Wedding Decor","Haldi Decor","Mehndi Decor","Flower Decor","Birthday Decor","Corporate Decor","All Services"],
+  "Photography": ["Wedding Photography","Candid","Cinematic","Drone Shots","Pre-Wedding","Birthday Photography","All Services"],
+  "Makeup Artist": ["Bridal","Party","HD","Airbrush","Engagement Makeup","All Services"],
+  "Birthday": ["Theme Birthday","Balloon Decor","Kids Magician","Games Host","Tattoo Artist","All Services"],
+  "Corporate": ["Event Planning","Catering","Photography","Decor","Exhibition Setup","All Services"]
+};
+
+document.getElementById("mainCategory").addEventListener("change", (e)=>{
+  const cat = e.target.value;
+  const sub = document.getElementById("subCategory");
+  sub.innerHTML = `<option value="">Select Sub Category *</option>`;
+  if(subMap[cat]){
+    subMap[cat].forEach(s=>{
+      sub.innerHTML += `<option value="${s}">${s}</option>`;
+    });
+  }
+
+  // Per Plate Logic
+  document.getElementById("perPlateField").style.display = 
+    (cat === "Banquet") ? "block" : "none";
+});
+</script>
+
 </body>
 </html>
