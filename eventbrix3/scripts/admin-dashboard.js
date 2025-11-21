@@ -1,6 +1,6 @@
-// File: scripts/admin-dashboard.js
+// SECURED ADMIN DASHBOARD
 
-import { db } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 import {
   collection,
   getDocs,
@@ -12,7 +12,21 @@ import {
 
 
 // ===============================
-// PENDING VENDORS (ALREADY IN YOUR SYSTEM)
+// 🔥 SECURITY: Allow ONLY the real admin
+// ===============================
+auth.onAuthStateChanged((user) => {
+  if (!user) {
+    window.location.href = "/admin/admin-login.html";
+  } else if (user.email !== "admin@eventbrix.com") {
+    auth.signOut();
+    alert("Unauthorized access!");
+    window.location.href = "/admin/admin-login.html";
+  }
+});
+
+
+// ===============================
+// PENDING VENDORS
 // ===============================
 const pendingBox = document.getElementById("pendingVendors");
 
@@ -36,14 +50,12 @@ async function loadPendingVendors() {
         <button class="reject-btn">Reject</button>
       `;
 
-      // APPROVE VENDOR
       vendorCard.querySelector(".approve-btn").onclick = async () => {
         await updateDoc(doc(db, "vendors", v.id), { status: "approved" });
         alert("Vendor Approved");
         loadPendingVendors();
       };
 
-      // REJECT VENDOR
       vendorCard.querySelector(".reject-btn").onclick = async () => {
         await updateDoc(doc(db, "vendors", v.id), { status: "rejected" });
         alert("Vendor Rejected");
@@ -58,28 +70,23 @@ async function loadPendingVendors() {
 loadPendingVendors();
 
 
-// ========================================================
-// ⭐⭐ ADMIN LEAD APPROVAL SYSTEM ⭐⭐
-// ========================================================
+// ===============================
+// LEAD APPROVAL SYSTEM (Already Added Earlier)
+// ===============================
 
-// Create container for leads
 let leadContainer = document.createElement("div");
 leadContainer.id = "pendingLeads";
 leadContainer.style.marginTop = "30px";
 leadContainer.innerHTML = `<h3>Pending Leads</h3>`;
 document.body.appendChild(leadContainer);
 
-// Load ALL Pending Leads
 async function loadPendingLeads() {
   leadContainer.innerHTML = `<h3>Pending Leads</h3>`;
 
   const leadsPendingSnap = await getDocs(collection(db, "leads_pending"));
 
-  // Each vendor folder = vendor ID
   for (let vendorFolder of leadsPendingSnap.docs) {
     const vendorId = vendorFolder.id;
-
-    // Get items inside vendor folder
     const itemsRef = collection(db, "leads_pending", vendorId, "items");
     const itemsSnap = await getDocs(itemsRef);
 
@@ -103,28 +110,22 @@ async function loadPendingLeads() {
         <button class="reject-btn">Reject Lead</button>
       `;
 
-      // APPROVE LEAD
       card.querySelector(".approve-btn").onclick = async () => {
         await setDoc(
           doc(db, "leads_approved", vendorId, "items", leadDoc.id),
           L
         );
-
         await deleteDoc(doc(db, "leads_pending", vendorId, "items", leadDoc.id));
-
         alert("Lead Approved!");
         loadPendingLeads();
       };
 
-      // REJECT LEAD
       card.querySelector(".reject-btn").onclick = async () => {
         await setDoc(
           doc(db, "leads_rejected", vendorId, "items", leadDoc.id),
           L
         );
-
         await deleteDoc(doc(db, "leads_pending", vendorId, "items", leadDoc.id));
-
         alert("Lead Rejected!");
         loadPendingLeads();
       };
