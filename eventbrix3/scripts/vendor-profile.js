@@ -8,7 +8,9 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Get vendor ID from URL
+// *************************************
+// GET VENDOR ID FROM URL
+// *************************************
 const params = new URLSearchParams(window.location.search);
 const vendorId = params.get("id");
 
@@ -17,7 +19,9 @@ if (!vendorId) {
   throw new Error("Vendor ID missing");
 }
 
-// LOAD VENDOR DETAILS (FROM FIRST LISTING)
+// *************************************
+// LOAD VENDOR PROFILE (FROM FIRST LISTING)
+// *************************************
 async function loadVendorProfile() {
   const listingsRef = collection(db, "vendors", vendorId, "listings");
   const snap = await getDocs(listingsRef);
@@ -27,13 +31,11 @@ async function loadVendorProfile() {
     return;
   }
 
-  // Pick FIRST listing as primary
   const L = snap.docs[0].data();
 
   // HEADER IMAGE
-  if (L.photos && L.photos.length > 0) {
-    document.getElementById("headerImg").src = L.photos[0];
-  }
+  document.getElementById("headerImg").src =
+    (L.photos && L.photos.length > 0) ? L.photos[0] : "/images/default.jpg";
 
   // MAIN DETAILS
   document.getElementById("vendorName").innerText = L.businessName;
@@ -42,13 +44,16 @@ async function loadVendorProfile() {
   document.getElementById("vendorPrice").innerText = `₹${L.price}`;
   document.getElementById("vendorAbout").innerText = L.about;
 
-  // CHAT BUTTON
-  document.getElementById("chatBtn").href = `/customer/chat.html?vendor=${vendorId}`;
+  // CHAT
+  document.getElementById("chatBtn").href =
+    `/customer/chat.html?vendor=${vendorId}`;
 
   loadAllListings();
 }
 
-// SHOW ALL LISTINGS ON PROFILE PAGE
+// *************************************
+// LOAD ALL LISTINGS OF THIS VENDOR
+// *************************************
 async function loadAllListings() {
   const listRef = collection(db, "vendors", vendorId, "listings");
   const snap = await getDocs(listRef);
@@ -58,7 +63,9 @@ async function loadAllListings() {
 
   snap.forEach((docx) => {
     const L = docx.data();
-    const img = (L.photos && L.photos.length > 0) ? L.photos[0] : "/images/default.jpg";
+    const img = (L.photos && L.photos.length > 0)
+      ? L.photos[0]
+      : "/images/default.jpg";
 
     box.innerHTML += `
       <div class="vendor-card">
@@ -74,9 +81,9 @@ async function loadAllListings() {
 loadVendorProfile();
 
 
-// -------------------------------
+// *************************************
 // SAVE TO WISHLIST
-// -------------------------------
+// *************************************
 document.getElementById("saveVendorBtn").addEventListener("click", async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login as customer first!");
@@ -89,29 +96,28 @@ document.getElementById("saveVendorBtn").addEventListener("click", async () => {
   alert("Vendor saved ❤️");
 });
 
-// -------------------------------
-// BOOK NOW POPUP HANDLING
-// -------------------------------
+
+// *************************************
+// POPUP OPEN / CLOSE
+// *************************************
 const popup = document.getElementById("bookingPopup");
 const overlay = document.getElementById("popupOverlay");
 const thankBox = document.getElementById("thankYouBox");
 
-// Open popup
 document.getElementById("bookNowBtn").onclick = () => {
   popup.classList.add("show");
   overlay.style.display = "block";
 };
 
-// Close popup
 document.getElementById("closePopupBtn").onclick = () => {
   popup.classList.remove("show");
   overlay.style.display = "none";
 };
 
 
-// -------------------------------
-// SUBMIT BOOKING → Firebase
-// -------------------------------
+// *************************************
+// SUBMIT BOOKING → SEND TO ADMIN
+// *************************************
 document.getElementById("submitBookingBtn").onclick = async () => {
 
   const lead = {
@@ -124,15 +130,16 @@ document.getElementById("submitBookingBtn").onclick = async () => {
     guestCount: document.getElementById("cGuests").value,
     message: document.getElementById("cMsg").value,
     createdAt: Date.now(),
-    status: "pending"
+    status: "pending",
+    vendorName: document.getElementById("vendorName").innerText
   };
 
   if (!lead.customerName || !lead.phone) {
     return alert("Name & phone are required!");
   }
 
-  // SAVE TO leads_pending/vendorId/items
-  await addDoc(collection(db, "leads_pending", vendorId, "items"), lead);
+  // SAVE FOR ADMIN APPROVAL
+  await addDoc(collection(db, "adminRequests"), lead);
 
   // CLOSE POPUP + SHOW THANK YOU
   popup.classList.remove("show");
