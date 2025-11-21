@@ -22,24 +22,23 @@
 
     <!-- MAIN CATEGORY DROPDOWN -->
     <select name="category" id="mainCategory" required>
-    <option value="">Select Main Category *</option>
-    <option value="Wedding Services">Wedding Services</option>
-    <option value="Banquet / Venue">Banquet / Venue</option>
-    <option value="Birthday">Birthday</option>
-    <option value="Corporate Events">Corporate Events</option>
-    <option value="Catering">Catering</option>
-    <option value="Decoration">Decoration</option>
-    <option value="Makeup Artists">Makeup Artists</option>
-    <option value="Photography">Photography</option>
+      <option value="">Select Main Category *</option>
+      <option value="Wedding Services">Wedding Services</option>
+      <option value="Banquet / Venue">Banquet / Venue</option>
+      <option value="Birthday">Birthday</option>
+      <option value="Corporate Events">Corporate Events</option>
+      <option value="Catering">Catering</option>
+      <option value="Decoration">Decoration</option>
+      <option value="Makeup Artists">Makeup Artists</option>
+      <option value="Photography">Photography</option>
     </select>
-
 
     <!-- SUB CATEGORY AUTO-FILL -->
     <select name="subcategory" id="subCategory" required>
       <option value="">Select Sub Category *</option>
     </select>
 
-    <!-- PRICE FIELDS -->
+    <!-- PRICE FIELD -->
     <input type="number" name="price" placeholder="Starting Price *" required>
 
     <!-- PER PLATE ONLY FOR BANQUET -->
@@ -71,36 +70,117 @@
 
 </div>
 
+<!-- VENDOR REGISTER SCRIPT -->
 <script type="module" src="../scripts/vendor-register.js"></script>
 
 <script>
 // -------------------------
-// AUTO SUBCATEGORY SYSTEM
+// AUTO SUBCATEGORY SYSTEM (FINAL FIXED)
 // -------------------------
+
 const subMap = {
-  "Banquet": ["Indoor Hall","Outdoor Lawn","AC Banquet","Resort Venue","Marriage Garden","Destination Venue","Rooftop Venue","Premium Banquet","All Services"],
-  "Wedding Planner": ["Full Wedding","Day Coordination","Luxury Planning","Theme Weddings","Destination Planning","All Services"],
-  "Catering": ["Veg","Non-Veg","Wedding Catering","Corporate Catering","Buffet","Live Counters","All Services"],
-  "Decoration": ["Wedding Decor","Haldi Decor","Mehndi Decor","Flower Decor","Birthday Decor","Corporate Decor","All Services"],
-  "Photography": ["Wedding Photography","Candid","Cinematic","Drone Shots","Pre-Wedding","Birthday Photography","All Services"],
-  "Makeup Artist": ["Bridal","Party","HD","Airbrush","Engagement Makeup","All Services"],
-  "Birthday": ["Theme Birthday","Balloon Decor","Kids Magician","Games Host","Tattoo Artist","All Services"],
-  "Corporate": ["Event Planning","Catering","Photography","Decor","Exhibition Setup","All Services"]
+  "Wedding Services": [
+    "Photographer",
+    "Decorator",
+    "Wedding Planner",
+    "Makeup Artist",
+    "Mehndi Artist",
+    "Pre-Wedding Shoot",
+    "Cinematography",
+    "All Services"
+  ],
+
+  "Banquet / Venue": [
+    "Indoor Hall",
+    "Outdoor Lawn",
+    "AC Banquet",
+    "Resort Venue",
+    "Marriage Garden",
+    "Destination Venue",
+    "Rooftop Venue",
+    "All Services"
+  ],
+
+  "Birthday": [
+    "Theme Birthday",
+    "Balloon Decor",
+    "Kids Magician",
+    "Games Host",
+    "Tattoo Artist",
+    "Birthday Photography",
+    "All Services"
+  ],
+
+  "Corporate Events": [
+    "Event Planning",
+    "Corporate Catering",
+    "Conference Setup",
+    "Exhibition Setup",
+    "Corporate Decor",
+    "Corporate Photography",
+    "All Services"
+  ],
+
+  "Catering": [
+    "Veg Catering",
+    "Non-Veg Catering",
+    "Wedding Catering",
+    "Corporate Catering",
+    "Buffet",
+    "Live Counters",
+    "All Services"
+  ],
+
+  "Decoration": [
+    "Wedding Decor",
+    "Haldi Decor",
+    "Mehndi Decor",
+    "Flower Decor",
+    "Birthday Decor",
+    "Balloon Decor",
+    "All Services"
+  ],
+
+  "Makeup Artists": [
+    "Bridal Makeup",
+    "HD Makeup",
+    "Party Makeup",
+    "Airbrush Makeup",
+    "Engagement Makeup",
+    "All Services"
+  ],
+
+  "Photography": [
+    "Wedding Photography",
+    "Candid Photography",
+    "Cinematic Film",
+    "Drone Shoots",
+    "Pre-Wedding Shoot",
+    "Birthday Photography",
+    "All Services"
+  ]
 };
 
-document.getElementById("mainCategory").addEventListener("change", (e)=>{
-  const cat = e.target.value;
-  const sub = document.getElementById("subCategory");
-  sub.innerHTML = `<option value="">Select Sub Category *</option>`;
-  if(subMap[cat]){
-    subMap[cat].forEach(s=>{
-      sub.innerHTML += `<option value="${s}">${s}</option>`;
+const mainCat = document.getElementById("mainCategory");
+const subCat = document.getElementById("subCategory");
+const perPlate = document.getElementById("perPlateField");
+
+mainCat.addEventListener("change", () => {
+  const cat = mainCat.value;
+
+  // Reset subcategory
+  subCat.innerHTML = `<option value="">Select Sub Category *</option>`;
+
+  // Fill new subcategories
+  if (subMap[cat]) {
+    subMap[cat].forEach(item => {
+      subCat.innerHTML += `<option value="${item}">${item}</option>`;
     });
   }
 
-  // Per Plate Logic
-  document.getElementById("perPlateField").style.display = 
-    (cat === "Banquet") ? "block" : "none";
+  // Per Plate logic: only for banquet
+  perPlate.style.display =
+    cat === "Banquet / Venue" ? "block" : "none";
 });
 </script>
 
