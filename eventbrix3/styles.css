@@ -158,6 +158,7 @@ nav a:hover {
     margin: 10px 0;
     color: white;
 }
+
 .form-box button {
     width: 100%;
     padding: 12px;
@@ -168,10 +169,9 @@ nav a:hover {
     border-radius: 10px;
 }
 
-
-/* ───────────────────────────────
-   UPDATED VENDOR CARD (OPTION B)
-─────────────────────────────── */
+/* ============================
+   UPDATED VENDOR CARD
+============================ */
 .vendor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -221,10 +221,9 @@ nav a:hover {
     border-top: 1px solid var(--gold);
 }
 
-/* ───────────────────────────────
-   UPDATED VENDOR PROFILE PAGE
-─────────────────────────────── */
-
+/* ============================
+   VENDOR PROFILE PAGE
+============================ */
 .profile-header {
     width: 100%;
     height: 250px;
@@ -280,6 +279,26 @@ nav a:hover {
     margin-top: 10px;
 }
 
-/* Booking Popup already exists in HTML file */
+/* ===================================================
+   POPUP FIX (THIS WAS MISSING – NOW ADDED)
+=================================================== */
 
+#bookingPopup {
+    display: none;
+}
 
+#bookingPopup.show {
+    display: block !important;
+}
+
+#popupOverlay {
+    display: none;
+}
+
+#popupOverlay.show {
+    display: block !important;
+}
+
+#thankYouBox {
+    display: none;
+}
