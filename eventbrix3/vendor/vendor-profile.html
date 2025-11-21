@@ -7,55 +7,70 @@
 <link rel="stylesheet" href="../styles.css">
 
 <style>
-/* SLIDE-UP POPUP */
-#bookingPopup {
-  position: fixed;
-  bottom: -100%;
-  left: 0;
+
+/* HEADER IMAGE */
+.profile-header {
   width: 100%;
-  background: #111;
-  padding: 20px;
-  border-radius: 20px 20px 0 0;
-  transition: 0.4s ease-out;
-  z-index: 9999;
+  height: 260px;
+  object-fit: cover;
+  border-bottom: 2px solid #222;
 }
 
-#bookingPopup.show {
-  bottom: 0;
+/* MAIN INFO BOX */
+.vendor-info {
+  padding: 18px;
+  background: #0e0e0e;
 }
 
-.popup-field {
-  width: 100%;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 8px;
-  background: #222;
-  border: 1px solid #333;
+/* NAME + BOOK BUTTON */
+.vendor-title-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vendor-title-box h2 {
+  font-size: 20px;
+  font-weight: 600;
   color: #fff;
 }
 
-#popupOverlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width:100%; height:100%;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(2px);
-  z-index: 9998;
+/* INFO TEXT */
+.info-line {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #cccccc;
 }
 
-#thankYouBox {
-  display:none;
-  position:fixed;
-  top:50%; left:50%;
-  transform:translate(-50%, -50%);
-  background:#1a1a1a;
-  padding:25px;
-  border-radius:12px;
-  border:1px solid #444;
-  z-index:9999;
-  text-align:center;
+/* SECTIONS */
+.section-title {
+  margin-top: 25px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffd24a;
 }
+
+/* LISTINGS */
+.vendor-listing-card {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 10px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.vendor-listing-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.vendor-listing-card div {
+  padding: 10px;
+  color: #fff;
+}
+
 </style>
 
 </head>
@@ -67,55 +82,29 @@
 <img id="headerImg" class="profile-header" src="/images/default.jpg">
 
 <div class="vendor-info">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
+
+  <div class="vendor-title-box">
       <h2 id="vendorName"></h2>
-      <button id="bookNowBtn" class="btn-primary" style="padding:8px 14px;">Book Now</button>
+      <button id="bookNowBtn" class="btn-primary">Book Now</button>
   </div>
 
-  <p><strong>Category:</strong> <span id="vendorCategory"></span></p>
-  <p><strong>City:</strong> <span id="vendorCity"></span></p>
-  <p><strong>Starting Price:</strong> <span id="vendorPrice"></span></p>
+  <p class="info-line"><strong>Category:</strong> <span id="vendorCategory"></span></p>
+  <p class="info-line"><strong>City:</strong> <span id="vendorCity"></span></p>
+  <p class="info-line"><strong>Starting Price:</strong> <span id="vendorPrice"></span></p>
 
   <div class="action-buttons">
     <a id="chatBtn">Chat</a>
     <button id="saveVendorBtn">❤️ Save</button>
   </div>
 
-  <h3>About</h3>
-  <p id="vendorAbout"></p>
+  <h3 class="section-title">About</h3>
+  <p id="vendorAbout" style="color:#ccc;"></p>
 
-  <h3 style="margin-top:20px;">Listings</h3>
+  <h3 class="section-title">Listings</h3>
   <div id="vendorListings"></div>
 </div>
 
-
-<!-- DARK BACKDROP -->
-<div id="popupOverlay"></div>
-
-<!-- BOOKING POPUP -->
-<div id="bookingPopup">
-
-  <h2 style="text-align:center;">Book This Vendor</h2>
-
-  <input id="cName" class="popup-field" placeholder="Your Name *">
-  <input id="cPhone" class="popup-field" placeholder="Phone Number *">
-  <input id="cDate" type="date" class="popup-field">
-  <input id="cCity" class="popup-field" placeholder="Event City *">
-  <input id="cVenue" class="popup-field" placeholder="Venue Location *">
-  <input id="cGuests" type="number" class="popup-field" placeholder="Guest Count">
-  <textarea id="cMsg" class="popup-field" placeholder="Message / Requirements"></textarea>
-
-  <button id="submitBookingBtn" class="btn-primary" style="margin-top:10px;">Submit Booking</button>
-  <button id="closePopupBtn" class="btn-secondary" style="margin-top:8px;">Close</button>
-
-</div>
-
-<!-- THANK YOU MESSAGE -->
-<div id="thankYouBox">
-  <h3>Thank You!</h3>
-  <p>Your request has been submitted.</p>
-</div>
-
+<!-- POPUP + JS -->
 <script type="module" src="../scripts/vendor-profile.js"></script>
 </body>
 </html>

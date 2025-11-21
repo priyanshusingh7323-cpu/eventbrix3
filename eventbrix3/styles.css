@@ -36,18 +36,6 @@ header .logo {
     color: var(--gold);
 }
 
-nav a {
-    color: var(--white);
-    text-decoration: none;
-    margin-left: 25px;
-    font-size: 16px;
-}
-
-nav a:hover {
-    color: var(--gold);
-}
-
-/* NAV FIX — ALL OPTIONS ALWAYS VISIBLE */
 nav {
     display: flex;
     flex-wrap: wrap;
@@ -55,15 +43,20 @@ nav {
 }
 
 nav a {
-    display: block;
+    color: var(--white);
+    text-decoration: none;
+    font-size: 16px;
+}
+
+nav a:hover {
+    color: var(--gold);
 }
 
 /* ============================
-   HERO SECTION (FIXED)
+   HERO SECTION
 ============================ */
 .hero {
     min-height: 100vh;
-    height: auto;
     background-size: cover;
     background-position: center;
     display: flex;
@@ -78,7 +71,6 @@ nav a {
 
 .hero-inner h2 {
     font-size: 40px;
-    margin-bottom: 10px;
 }
 
 .hero-inner p {
@@ -122,7 +114,6 @@ nav a {
     padding: 25px;
     border-radius: 14px;
     border: 1px solid rgba(255, 210, 74, 0.3);
-    cursor: pointer;
     transition: 0.3s;
     text-decoration: none;
     color: #fff;
@@ -138,7 +129,7 @@ nav a {
 }
 
 /* ============================
-   PREMIUM FORM BOX
+   FORM BOX
 ============================ */
 .form-box {
     width: 360px;
@@ -146,19 +137,16 @@ nav a {
     padding: 35px;
     background: var(--card);
     border-radius: 16px;
-    box-shadow: 0 0 25px rgba(255, 210, 74, 0.15);
     border: 1px solid rgba(255, 210, 74, 0.3);
+    box-shadow: 0 0 25px rgba(255, 210, 74, 0.15);
 }
 
 .form-box h2 {
     color: var(--gold);
     text-align: center;
     margin-bottom: 25px;
-    font-size: 26px;
-    font-weight: 600;
 }
 
-/* INPUT FIELDS */
 .form-box input,
 .form-box select,
 .form-box textarea {
@@ -167,137 +155,131 @@ nav a {
     border: 1px solid #333;
     padding: 12px 14px;
     border-radius: 10px;
-    margin: 8px 0 16px 0;
-    font-size: 15px;
-    color: var(--white);
-    transition: 0.3s;
+    margin: 10px 0;
+    color: white;
 }
-
-.form-box input:focus,
-.form-box select:focus,
-.form-box textarea:focus {
-    border-color: var(--gold);
-    outline: none;
-}
-
-/* BUTTONS */
-.form-box button,
-.logout-btn,
-.reveal-btn {
+.form-box button {
     width: 100%;
     padding: 12px;
     background: var(--gold);
     color: #000;
-    font-size: 17px;
     font-weight: 600;
     border: none;
     border-radius: 10px;
-    cursor: pointer;
-    transition: 0.3s;
 }
 
-.form-box button:hover,
-.logout-btn:hover,
-.reveal-btn:hover {
-    opacity: 0.85;
+
+/* ───────────────────────────────
+   UPDATED VENDOR CARD (OPTION B)
+─────────────────────────────── */
+.vendor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
 }
 
-/* ============================
-   DASHBOARD BOX
-============================ */
-.customer-info-box,
-.vendor-info-box {
-    background: var(--card);
-    margin: 20px auto;
-    padding: 20px;
-    width: 85%;
-    border-radius: 16px;
-    border: 1px solid rgba(255,210,74,0.3);
-    box-shadow: 0 0 20px rgba(255,210,74,0.1);
-}
-
-/* ============================
-   CHAT UI
-============================ */
-.chat-container {
-    width: 90%;
-    max-width: 400px;
-    margin: auto;
-    margin-top: 50px;
-}
-
-.chat-box {
-    background: #0f0f0f;
-    border: 1px solid rgba(255,210,74,0.2);
-    height: 400px;
-    overflow-y: auto;
-    padding: 15px;
-    border-radius: 14px;
-    margin-bottom: 12px;
-}
-
-.chat-input-area {
-    display: flex;
-}
-
-.chat-input-area input {
-    flex: 1;
-    padding: 12px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 10px 0 0 10px;
-    color: #fff;
-}
-
-.chat-input-area button {
-    background: var(--gold);
-    padding: 12px 18px;
-    border: none;
-    border-radius: 0 10px 10px 0;
-    cursor: pointer;
-    color: #000;
-    font-weight: 600;
-}
-
-/* ============================
-   VENDOR CARDS
-============================ */
 .vendor-card {
     background: #111;
     border: 1px solid var(--gold);
-    border-radius: 15px;
+    border-radius: 12px;
     overflow: hidden;
+    transition: 0.25s ease-in-out;
     box-shadow: 0 0 20px rgba(255,210,74,0.1);
-    transition: 0.3s;
 }
 
 .vendor-card:hover {
-    transform: translateY(-5px);
+    transform: scale(1.03);
 }
 
 .vendor-card img {
-    height: 190px;
     width: 100%;
+    height: 170px;
     object-fit: cover;
 }
 
 .vendor-card h3 {
     padding: 10px 15px 0;
     color: var(--gold);
-    font-size: 20px;
+    font-size: 19px;
 }
 
 .vendor-card p {
     padding: 2px 15px;
-    color: var(--light);
+    color: #ccc;
+    font-size: 14px;
 }
 
-.vendor-card .view-btn {
+.view-btn {
     display: block;
     background: var(--gold);
     color: #000;
     text-align: center;
     padding: 12px;
+    font-weight: 600;
+    margin-top: 10px;
     border-top: 1px solid var(--gold);
+}
+
+/* ───────────────────────────────
+   UPDATED VENDOR PROFILE PAGE
+─────────────────────────────── */
+
+.profile-header {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--gold);
+}
+
+.vendor-info {
+    padding: 20px;
+}
+
+.vendor-info h2 {
+    color: var(--gold);
+    font-size: 24px;
+}
+
+.vendor-info p {
+    color: #ccc;
+    margin: 6px 0;
+    font-size: 16px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.action-buttons a,
+.action-buttons button {
+    flex: 1;
+    background: #222;
+    border: 1px solid var(--gold);
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
     font-weight: 600;
 }
+
+.action-buttons a:hover,
+.action-buttons button:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+.vendor-info h3 {
+    margin-top: 20px;
+    color: var(--gold);
+}
+
+#vendorListings .vendor-card {
+    margin-top: 10px;
+}
+
+/* Booking Popup already exists in HTML file */
+
+

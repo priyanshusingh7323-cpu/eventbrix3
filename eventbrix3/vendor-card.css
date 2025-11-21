@@ -1,54 +1,52 @@
-/* File 44: vendor-card.css */
-/* Add this stylesheet if you want cleaner vendor cards on category pages */
-
-.vendor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
+/* =========================================
+   VENDOR CARD — NEW MOBILE FRIENDLY DESIGN
+   ========================================= */
 
 .vendor-card {
+  width: 100%;
   background: #111;
-  border: 1px solid var(--gold);
-  border-radius: 12px;
+  border: 1px solid #333;
+  border-radius: 14px;
+  margin: 15px 0;
+  padding: 0;
   overflow: hidden;
-  transition: 0.3s;
+  transition: 0.25s;
 }
 
+.vendor-card:hover {
+  border-color: #d4a017;
+  transform: translateY(-3px);
+}
+
+/* IMAGE */
 .vendor-card img {
   width: 100%;
   height: 180px;
   object-fit: cover;
+  border-bottom: 1px solid #222;
 }
 
-.vendor-card h3 {
-  padding: 10px;
-  color: var(--gold);
-  font-size: 20px;
-  margin: 0;
+/* CONTENT */
+.vendor-card-content {
+  padding: 12px 14px;
 }
 
-.vendor-card p {
-  padding: 0 10px;
-  margin: 5px 0;
-  font-size: 15px;
-  color: #ccc;
-}
-
-.vendor-card .view-btn {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  text-align: center;
-  background: var(--gold);
-  color: #000;
+.vendor-title {
+  font-size: 17px;
   font-weight: 600;
-  text-decoration: none;
-  border-top: 1px solid var(--gold);
-  transition: 0.3s;
+  color: #fff;
+  margin-bottom: 6px;
+  text-transform: capitalize;
 }
 
-.vendor-card:hover {
-  transform: scale(1.03);
+.vendor-city {
+  font-size: 14px;
+  color: #bbbbbb;
+  margin-bottom: 6px;
+}
+
+.vendor-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffd24a;
 }
