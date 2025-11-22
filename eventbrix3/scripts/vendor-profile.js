@@ -10,6 +10,9 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+/* ------------------------------------
+   GET VENDOR ID FROM URL
+------------------------------------ */
 const params = new URLSearchParams(window.location.search);
 const vendorId = params.get("id");
 
@@ -18,10 +21,20 @@ if (!vendorId) {
   throw new Error("Vendor ID missing");
 }
 
-/* ============================
-   LOAD MAIN PROFILE
-============================ */
+/* ------------------------------------
+   LOAD MAIN PROFILE (Vendor + Listing)
+------------------------------------ */
 async function loadVendorProfile() {
+
+  // Get vendor MAIN document (important for mainCategory fix)
+  const vendorDoc = await getDoc(doc(db, "vendors", vendorId));
+  if (!vendorDoc.exists()) {
+    alert("Vendor not found!");
+    return;
+  }
+  const vendorData = vendorDoc.data();
+
+  // Get vendor FIRST listing
   const listRef = collection(db, "vendors", vendorId, "listings");
   const snap = await getDocs(listRef);
 
@@ -32,10 +45,14 @@ async function loadVendorProfile() {
 
   const L = snap.docs[0].data();
 
-  // SLIDER IMAGES
+  /* ---------------------------
+     SLIDER IMAGES
+  ---------------------------- */
   loadSlider(L.photos || []);
 
-  // MAIN DETAILS
+  /* ---------------------------
+     MAIN INFO FILL
+  ---------------------------- */
   document.getElementById("vendorName").innerText = L.businessName;
   document.getElementById("vendorCategory").innerText =
     `${L.category} → ${L.subcategory}`;
@@ -44,19 +61,20 @@ async function loadVendorProfile() {
   document.getElementById("vendorPrice").innerText = `₹${L.price}`;
   document.getElementById("vendorAbout").innerText = L.about;
 
-  // CHAT
   document.getElementById("chatBtn").href =
     `/customer/chat.html?vendor=${vendorId}`;
 
-  // SUGGESTED VENDORS
-  loadSuggested(L.mainCategory);
+  /* ---------------------------
+     LOAD SUGGESTED VENDORS
+  ---------------------------- */
+  loadSuggested(vendorData.mainCategory);
 }
 
 loadVendorProfile();
 
-/* ============================
+/* ------------------------------------
    SLIDER LOGIC
-============================ */
+------------------------------------ */
 let slideIndex = 0;
 
 function loadSlider(images) {
@@ -93,10 +111,16 @@ function updateSlider() {
     `translateX(-${slideIndex * 100}%)`;
 }
 
-/* ============================
+/* ------------------------------------
    SUGGESTED VENDORS
-============================ */
+------------------------------------ */
 async function loadSuggested(mainCategory) {
+
+  if (!mainCategory) {
+    console.warn("Main category missing — skipping suggested vendors");
+    return;
+  }
+
   const q = query(
     collection(db, "vendors"),
     where("status", "==", "approved"),
@@ -108,11 +132,11 @@ async function loadSuggested(mainCategory) {
   box.innerHTML = "";
 
   for (const docx of snap.docs) {
-    if (docx.id === vendorId) continue;
+    if (docx.id === vendorId) continue; // skip current vendor
 
     const vendorData = docx.data();
 
-    // Find the vendor's first listing to fetch photos
+    // Get vendor's first listing (for photo + price)
     const listRef = collection(db, "vendors", docx.id, "listings");
     const listSnap = await getDocs(listRef);
 
@@ -135,9 +159,9 @@ async function loadSuggested(mainCategory) {
   }
 }
 
-/* ============================
-   SAVE TO WISHLIST
-============================ */
+/* ------------------------------------
+ SAVE TO WISHLIST
+------------------------------------ */
 document.getElementById("saveVendorBtn").onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login as customer first!");
@@ -150,9 +174,9 @@ document.getElementById("saveVendorBtn").onclick = async () => {
   alert("Vendor saved ❤️");
 };
 
-/* ============================
-   BOOKING POPUP
-============================ */
+/* ------------------------------------
+ BOOKING POPUP
+------------------------------------ */
 const popup = document.getElementById("bookingPopup");
 const overlay = document.getElementById("popupOverlay");
 const thankBox = document.getElementById("thankYouBox");
@@ -167,9 +191,9 @@ document.getElementById("closePopupBtn").onclick = () => {
   overlay.style.display = "none";
 };
 
-/* ============================
-   SUBMIT BOOKING
-============================ */
+/* ------------------------------------
+ SUBMIT BOOKING
+------------------------------------ */
 document.getElementById("submitBookingBtn").onclick = async () => {
   const data = {
     vendorId,
