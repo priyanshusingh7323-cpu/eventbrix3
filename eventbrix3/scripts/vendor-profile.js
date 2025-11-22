@@ -1,7 +1,13 @@
 import { db, auth } from "/scripts/firebase.js";
 import {
-  doc, getDoc, collection, getDocs,
-  setDoc, addDoc, query, where
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  setDoc,
+  addDoc,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -19,22 +25,31 @@ async function loadVendorProfile() {
   const listRef = collection(db, "vendors", vendorId, "listings");
   const snap = await getDocs(listRef);
 
-  if (snap.empty) return;
+  if (snap.empty) {
+    console.error("No listings found for vendor:", vendorId);
+    return;
+  }
 
   const L = snap.docs[0].data();
 
-  // multiple image slider
+  // SLIDER IMAGES
   loadSlider(L.photos || []);
 
+  // MAIN DETAILS
   document.getElementById("vendorName").innerText = L.businessName;
-  document.getElementById("vendorCategory").innerText = `${L.category} → ${L.subcategory}`;
+  document.getElementById("vendorCategory").innerText =
+    `${L.category} → ${L.subcategory}`;
+
   document.getElementById("vendorCity").innerText = L.city;
   document.getElementById("vendorPrice").innerText = `₹${L.price}`;
   document.getElementById("vendorAbout").innerText = L.about;
 
-  document.getElementById("chatBtn").href = `/customer/chat.html?vendor=${vendorId}`;
+  // CHAT
+  document.getElementById("chatBtn").href =
+    `/customer/chat.html?vendor=${vendorId}`;
 
-  loadSuggested(L.category);
+  // SUGGESTED VENDORS
+  loadSuggested(L.mainCategory);
 }
 
 loadVendorProfile();
@@ -48,7 +63,7 @@ function loadSlider(images) {
   const box = document.getElementById("sliderImages");
   box.innerHTML = "";
 
-  if (images.length === 0) {
+  if (!images || images.length === 0) {
     images = ["/images/default.jpg"];
   }
 
@@ -56,8 +71,11 @@ function loadSlider(images) {
     box.innerHTML += `<img src="${img}">`;
   });
 
-  document.getElementById("nextSlide").onclick = () => nextSlide(images.length);
-  document.getElementById("prevSlide").onclick = () => prevSlide(images.length);
+  document.getElementById("nextSlide").onclick =
+    () => nextSlide(images.length);
+
+  document.getElementById("prevSlide").onclick =
+    () => prevSlide(images.length);
 }
 
 function nextSlide(total) {
@@ -78,37 +96,47 @@ function updateSlider() {
 /* ============================
    SUGGESTED VENDORS
 ============================ */
-async function loadSuggested(category) {
+async function loadSuggested(mainCategory) {
   const q = query(
     collection(db, "vendors"),
     where("status", "==", "approved"),
-    where("mainCategory", "==", category)
+    where("mainCategory", "==", mainCategory)
   );
 
   const snap = await getDocs(q);
   const box = document.getElementById("suggestedVendors");
   box.innerHTML = "";
 
-  snap.forEach(docx => {
-    if (docx.id === vendorId) return;
+  for (const docx of snap.docs) {
+    if (docx.id === vendorId) continue;
 
-    const v = docx.data();
-    const img = v.photos?.[0] || "/images/default.jpg";
+    const vendorData = docx.data();
+
+    // Find the vendor's first listing to fetch photos
+    const listRef = collection(db, "vendors", docx.id, "listings");
+    const listSnap = await getDocs(listRef);
+
+    if (listSnap.empty) continue;
+
+    const L = listSnap.docs[0].data();
+    const img =
+      (L.photos && L.photos.length > 0) ? L.photos[0] : "/images/default.jpg";
 
     box.innerHTML += `
       <div class="suggest-card"
            onclick="location.href='vendor-profile.html?id=${docx.id}'">
+
         <img src="${img}">
-        <h4>${v.businessName}</h4>
-        <p>${v.city}</p>
-        <p>₹${v.price}</p>
+        <h4>${vendorData.businessName}</h4>
+        <p>${L.city}</p>
+        <p>₹${L.price}</p>
       </div>
     `;
-  });
+  }
 }
 
 /* ============================
- SAVE TO WISHLIST
+   SAVE TO WISHLIST
 ============================ */
 document.getElementById("saveVendorBtn").onclick = async () => {
   const user = auth.currentUser;
@@ -123,7 +151,7 @@ document.getElementById("saveVendorBtn").onclick = async () => {
 };
 
 /* ============================
-  BOOKING POPUP
+   BOOKING POPUP
 ============================ */
 const popup = document.getElementById("bookingPopup");
 const overlay = document.getElementById("popupOverlay");
@@ -140,7 +168,7 @@ document.getElementById("closePopupBtn").onclick = () => {
 };
 
 /* ============================
-  SUBMIT BOOKING
+   SUBMIT BOOKING
 ============================ */
 document.getElementById("submitBookingBtn").onclick = async () => {
   const data = {
@@ -166,5 +194,7 @@ document.getElementById("submitBookingBtn").onclick = async () => {
   overlay.style.display = "none";
 
   thankBox.style.display = "block";
-  setTimeout(() => thankBox.style.display = "none", 2000);
+  setTimeout(() => {
+    thankBox.style.display = "none";
+  }, 2000);
 };
