@@ -19,7 +19,6 @@
     <input type="email" id="email" placeholder="Email *" required>
     <input type="text" id="phone" placeholder="Phone *" required>
     <input type="text" id="city" placeholder="City *" required>
-
     <button type="submit">Register</button>
   </form>
 
@@ -62,8 +61,6 @@
 
 </div>
 
-
-<!-- MAIN SCRIPT -->
 <script type="module">
 import { 
   auth, googleProvider, appleProvider,
@@ -73,28 +70,21 @@ import {
 
 let confirmationResult;
 
-
-// ⭐ CORRECT RECAPTCHA INITIALIZATION ⭐
+/* ⭐ CORRECT FIREBASE v10+ RECAPTCHA ⭐ */
 window.recaptchaVerifier = new RecaptchaVerifier(
-  "recaptcha-container",
-  { 
-     size: "invisible"
-   },
-  auth
+  auth,                 // FIRST: auth object
+  "recaptcha-container", // SECOND: container ID
+  {
+    size: "invisible"
+  }
 );
 
-// ⭐ MUST HAVE THIS IN v10+
 await window.recaptchaVerifier.render();
 
-
-// ⭐ SEND OTP
+/* ⭐ SEND OTP */
 document.getElementById("otpSignupBtn").onclick = async () => {
   const phone = document.getElementById("phone").value;
-
-  if (!phone) {
-    alert("Enter phone number!");
-    return;
-  }
+  if (!phone) return alert("Enter phone number!");
 
   const number = "+91" + phone;
 
@@ -108,36 +98,31 @@ document.getElementById("otpSignupBtn").onclick = async () => {
     document.getElementById("otpBox").style.display = "block";
     alert("OTP sent!");
   } catch (err) {
-    console.error(err);
     alert("OTP failed: " + err.message);
   }
 };
 
-
-
-// ⭐ VERIFY OTP
+/* ⭐ VERIFY OTP */
 document.getElementById("verifyOtpBtn").onclick = async () => {
   const otp = document.getElementById("otpInput").value;
+  if (!otp) return alert("Enter OTP");
 
   try {
     await confirmationResult.confirm(otp);
     alert("Account created!");
     window.location.href = "../customer/customer-dashboard.html";
-  } catch (err) {
+  } catch {
     alert("Invalid OTP");
   }
 };
 
-
-
-// ⭐ GOOGLE SIGNUP
+/* ⭐ GOOGLE SIGNUP */
 document.getElementById("googleRegisterBtn").onclick = async () => {
   await signInWithPopup(auth, googleProvider);
   window.location.href = "../customer/customer-dashboard.html";
 };
 
-
-// ⭐ APPLE SIGNUP
+/* ⭐ APPLE SIGNUP */
 document.getElementById("appleRegisterBtn").onclick = async () => {
   await signInWithPopup(auth, appleProvider);
   window.location.href = "../customer/customer-dashboard.html";
@@ -145,8 +130,6 @@ document.getElementById("appleRegisterBtn").onclick = async () => {
 
 </script>
 
-
 <script src="../scripts/smooth-ui.js"></script>
 </body>
 </html>
-re

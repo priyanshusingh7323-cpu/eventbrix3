@@ -68,30 +68,22 @@ import {
 
 let loginConfirmation;
 
-// -----------------------------
 // DISABLE OLD EMAIL LOGIN
-// -----------------------------
 document.getElementById("customerLoginForm").onsubmit = (e) => {
   e.preventDefault();
   alert("Email/Password login disabled. Use OTP login.");
 };
 
-
-// -----------------------------
-// OTP LOGIN: RECAPTCHA SETUP
-// -----------------------------
+// 🔥 CORRECT RECAPTCHA FOR LOGIN (Firebase v10+)
 window.recaptchaLoginVerifier = new RecaptchaVerifier(
-  "recaptcha-login-container",
-  { size: "invisible" },
-  auth
+  auth,                           // 1st → auth
+  "recaptcha-login-container",    // 2nd → div ID
+  { size: "invisible" }           // 3rd → config
 );
 
 await window.recaptchaLoginVerifier.render();
 
-
-// -----------------------------
 // SEND OTP
-// -----------------------------
 document.getElementById("otpLoginBtn").onclick = async () => {
   const phone = "+91" + prompt("Enter phone number:");
 
@@ -111,10 +103,7 @@ document.getElementById("otpLoginBtn").onclick = async () => {
   }
 };
 
-
-// -----------------------------
 // VERIFY OTP
-// -----------------------------
 document.getElementById("verifyOtpLoginBtn").onclick = async () => {
   try {
     await loginConfirmation.confirm(
@@ -123,24 +112,18 @@ document.getElementById("verifyOtpLoginBtn").onclick = async () => {
 
     alert("Login Successful!");
     window.location.href = "../customer/customer-dashboard.html";
-  } catch (err) {
+  } catch {
     alert("Wrong OTP!");
   }
 };
 
-
-// -----------------------------
 // GOOGLE LOGIN
-// -----------------------------
 document.getElementById("googleLoginBtn").onclick = async () => {
   await signInWithPopup(auth, googleProvider);
   window.location.href = "../customer/customer-dashboard.html";
 };
 
-
-// -----------------------------
 // APPLE LOGIN
-// -----------------------------
 document.getElementById("appleLoginBtn").onclick = async () => {
   await signInWithPopup(auth, appleProvider);
   window.location.href = "../customer/customer-dashboard.html";
