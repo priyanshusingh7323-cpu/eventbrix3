@@ -1,0 +1,215 @@
+/* ============================
+   GLOBAL DASHBOARD STYLING
+============================ */
+body {
+    background: #0b0b0b;
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================
+   NAVBAR
+============================ */
+.vd-nav {
+    width: 100%;
+    padding: 15px 20px;
+    background: #0d0d0d;
+    border-bottom: 1px solid rgba(255, 210, 74, 0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vd-logo {
+    font-size: 24px;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.vd-nav-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 210, 74, 0.4);
+    padding: 8px 14px;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.vd-nav-btn:hover {
+    background: rgba(255, 210, 74, 0.2);
+}
+
+/* ============================
+   HEADER CARD
+============================ */
+.vd-header {
+    margin: 20px;
+    padding: 20px;
+    background: #111;
+    border: 1px solid rgba(255, 210, 74, 0.3);
+    border-radius: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vd-title {
+    color: var(--gold);
+    font-size: 24px;
+}
+
+.vd-gold-btn {
+    padding: 10px 16px;
+    background: var(--gold);
+    border: none;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #000;
+}
+
+.vd-gold-btn:hover {
+    opacity: 0.85;
+}
+
+/* ============================
+   QUICK ACTIONS
+============================ */
+.vd-quick-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px;
+}
+
+.vd-action-btn {
+    flex: 1;
+    padding: 14px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,210,74,0.3);
+    border-radius: 10px;
+    cursor: pointer;
+    color: #fff;
+    text-align: center;
+}
+
+.vd-action-btn:hover {
+    border-color: var(--gold);
+}
+
+/* ============================
+   STATS CARDS
+============================ */
+.vd-stats {
+    display: flex;
+    gap: 15px;
+    padding: 20px;
+}
+
+.vd-stat-card {
+    flex: 1;
+    background: #111;
+    border: 1px solid rgba(255,210,74,0.3);
+    padding: 20px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.vd-stat-card h3 {
+    color: var(--gold);
+    font-size: 28px;
+    margin-bottom: 5px;
+}
+
+/* ============================
+   SECTION TITLES
+============================ */
+.vd-section-title {
+    font-size: 22px;
+    color: var(--gold);
+    padding: 20px;
+}
+
+/* ============================
+   LISTINGS GRID
+============================ */
+.vd-listings {
+    padding: 20px;
+}
+
+.listing-card {
+    background: #151515;
+    padding: 15px;
+    border: 1px solid rgba(255,210,74,0.3);
+    border-radius: 14px;
+    margin-bottom: 15px;
+}
+
+.listing-card img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.listing-card h3 {
+    color: var(--gold);
+    margin-top: 10px;
+}
+
+/* ============================
+   LEAD CARDS
+============================ */
+.vd-leads {
+    padding: 20px;
+}
+
+.lead-card {
+    background: #151515;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,210,74,0.3);
+}
+
+.lead-card h3 {
+    color: var(--gold);
+}
+
+/* ============================
+   CHAT DRAWER
+============================ */
+.vd-chat-drawer {
+    position: fixed;
+    top: 0;
+    right: -360px;
+    width: 360px;
+    height: 100vh;
+    background: #111;
+    border-left: 2px solid var(--gold);
+    transition: 0.3s ease;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+}
+
+.vd-chat-header {
+    padding: 15px;
+    background: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vd-chat-close {
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.vd-chat-body {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+    color: #fff;
+}

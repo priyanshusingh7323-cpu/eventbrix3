@@ -1,11 +1,19 @@
-// File 4: firebase.js
+// firebase.js (FULL UPGRADED VERSION)
 
+// -------------------------------
+// IMPORTS
+// -------------------------------
 import { initializeApp } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import { 
   getAuth,
-  onAuthStateChanged       // ✅ ADD THIS
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  OAuthProvider,             // ⭐ Apple login
+  signInWithPopup,           // ⭐ Apple & Google login
+  RecaptchaVerifier,         // ⭐ OTP
+  signInWithPhoneNumber      // ⭐ OTP
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import { 
@@ -16,6 +24,10 @@ import {
   getStorage 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+
+// -------------------------------
+// FIREBASE CONFIG
+// -------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyBV5XvzfX-h0gEbGSaXpF1fCdvo3m9SsDk",
   authDomain: "eventbrix-87889.firebaseapp.com",
@@ -26,10 +38,35 @@ const firebaseConfig = {
   measurementId: "G-5LGVD5BENS"
 };
 
+
+// -------------------------------
+// INITIALIZE
+// -------------------------------
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-// ✅ EXPORT THIS TOO
+
+// -------------------------------
+// EXPORT PROVIDERS FOR LOGIN
+// -------------------------------
+export const googleProvider = new GoogleAuthProvider();
+
+// ⭐ Apple Sign-In Provider
+export const appleProvider = new OAuthProvider('apple.com');
+
+
+// -------------------------------
+// EXPORT OTP FUNCTIONS
+// -------------------------------
+export { 
+  RecaptchaVerifier,
+  signInWithPhoneNumber
+};
+
+
+// -------------------------------
+// STATE CHECK EXPORT
+// -------------------------------
 export { onAuthStateChanged };

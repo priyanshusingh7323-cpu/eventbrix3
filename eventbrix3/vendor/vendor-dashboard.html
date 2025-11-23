@@ -4,78 +4,103 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vendor Dashboard | EventBrix</title>
-<link rel="stylesheet" href="../styles.css">
-</head>
 
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="vendor-dashboard.css">
+
+</head>
 <body>
 
-<!-- TOP ACTION BAR -->
-<div style="padding:15px; display:flex; gap:12px;">
-  <button id="homeBtn" class="btn-primary">🏠 Home</button>
-  <button id="logoutTopBtn" class="btn-secondary">🚪 Logout</button>
+<!-- ============================
+   TOP NAVBAR
+============================ -->
+<div class="vd-nav">
+  <div class="vd-nav-left">
+    <h2 class="vd-logo">EventBrix Vendor</h2>
+  </div>
+
+  <div class="vd-nav-right">
+    <button id="homeBtn" class="vd-nav-btn">Home</button>
+    <button id="messagesBtn" class="vd-nav-btn">Messages</button>
+    <button id="logoutTopBtn" class="vd-nav-btn">Logout</button>
+  </div>
 </div>
 
-<h1 class="title">Vendor Dashboard</h1>
+<!-- ============================
+   VENDOR HEADER CARD
+============================ -->
+<div class="vd-header">
+  <div>
+    <h1 id="vendorName" class="vd-title"></h1>
+    <p><strong>Status:</strong> <span id="vendorStatus"></span></p>
+    <p><strong>City:</strong> <span id="vendorCity"></span></p>
+    <p><strong>Vendor ID:</strong> <span id="vendorID"></span></p>
+  </div>
 
-<!-- MAIN DATA -->
-<div class="section" id="vendorData">
-
-  <h2 id="vendorName"></h2>
-
-  <p><strong>City:</strong> <span id="vendorCity"></span></p>
-  <p><strong>Vendor ID:</strong> <span id="vendorID"></span></p>
-  <p><strong>Status:</strong> <span id="vendorStatus"></span></p>
-
-  <hr style="margin:15px 0; border-color:#333;">
-
-  <button id="newListingBtn" class="btn-primary">+ Create New Listing</button>
-
-  <h2 style="margin-top:20px;">Your Listings</h2>
-  <div id="vendorListings"></div>
-
-  <h2 style="margin-top:25px;">Approved Leads</h2>
-  <div id="vendorLeads"></div>
-
+  <div class="vd-actions">
+    <button id="newListingBtn" class="vd-gold-btn">Create New Listing</button>
+  </div>
 </div>
 
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <a href="vendor-dashboard.html">🏠</a>
-  <a href="vendor-register.html">📝</a>
-  <a href="chat.html">💬</a>
-  <a id="logoutBtn">🚪</a>
+<!-- ============================
+   QUICK ACTIONS
+============================ -->
+<div class="vd-quick-actions">
+  <button class="vd-action-btn" id="qaListings">Listings</button>
+  <button class="vd-action-btn" id="qaLeads">Approved Leads</button>
+  <button class="vd-action-btn" id="qaMessages">Messages</button>
+  <button class="vd-action-btn" id="qaProfile">Edit Profile</button>
 </div>
 
-<script type="module">
-import { auth } from "/scripts/firebase.js";
-import { signOut } 
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<!-- ============================
+   ANALYTICS CARDS
+============================ -->
+<div class="vd-stats">
+  <div class="vd-stat-card">
+    <h3 id="statViews">0</h3>
+    <p>Profile Views</p>
+  </div>
 
-/* HOME BUTTON */
-document.getElementById("homeBtn").onclick = () => {
-  location.href = "/index.html";
-};
+  <div class="vd-stat-card">
+    <h3 id="statLeads">0</h3>
+    <p>Total Leads</p>
+  </div>
 
-/* LOGOUT (TOP BAR) */
-document.getElementById("logoutTopBtn").onclick = async () => {
-  await signOut(auth);
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href = "/vendor/vendor-login.html";
-};
+  <div class="vd-stat-card">
+    <h3 id="statMessages">0</h3>
+    <p>Messages</p>
+  </div>
+</div>
 
-/* LOGOUT (BOTTOM NAV) */
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href = "/vendor/vendor-login.html";
-};
-</script>
+<!-- ============================
+   LISTINGS SECTION
+============================ -->
+<h2 class="vd-section-title">Your Listings</h2>
+<div id="vendorListings" class="vd-listings"></div>
 
+<!-- ============================
+   APPROVED LEADS
+============================ -->
+<h2 class="vd-section-title">Approved Leads</h2>
+<div id="vendorLeads" class="vd-leads"></div>
+
+<!-- ============================
+   CHAT DRAWER (vendor side)
+============================ -->
+<div id="vdChatDrawer" class="vd-chat-drawer">
+
+  <div class="vd-chat-header">
+    <span class="vd-chat-title">Messages</span>
+    <span id="vdChatClose" class="vd-chat-close">&times;</span>
+  </div>
+
+  <div id="vdChatList" class="vd-chat-body"></div>
+</div>
+
+<!-- ============================
+   SCRIPT
+============================ -->
 <script type="module" src="../scripts/vendor-dashboard.js"></script>
-<script src="../scripts/smooth-ui.js"></script>
-
 
 </body>
 </html>

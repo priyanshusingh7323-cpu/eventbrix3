@@ -13,12 +13,17 @@
 
 <div class="form-box">
 
-  <form id="customerLoginForm">
-    <input type="email" id="email" placeholder="Email *" required>
-    <input type="password" id="password" placeholder="Password *" required>
+  <!-- OTP LOGIN -->
+  <input type="text" id="loginPhone" placeholder="Enter Mobile Number *">
+  <button id="sendOtpBtn">Send OTP</button>
 
-    <button type="submit">Login</button>
-  </form>
+  <!-- OTP BOX (HIDDEN UNTIL SENT) -->
+  <div id="otpBox" style="display:none; margin-top:10px;">
+    <input type="text" id="otpInput" placeholder="Enter OTP *">
+    <button id="verifyOtpBtn">Verify OTP</button>
+  </div>
+
+  <div id="recaptcha-container"></div>
 
   <!-- GOOGLE LOGIN BUTTON -->
   <button id="googleLoginBtn" style="
@@ -34,15 +39,95 @@
     Continue with Google
   </button>
 
+  <!-- APPLE LOGIN BUTTON -->
+  <button id="appleLoginBtn" style="
+      margin-top:12px;
+      width:100%;
+      padding:12px;
+      background:black;
+      color:white;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+    ">
+    Continue with Apple
+  </button>
+
   <p style="text-align:center;margin-top:10px;">
-    Don’t have an account?
-    <a href="customer-register.html" style="color:#d4a017;">Register</a>
+    New here?
+    <a href="customer-register.html" style="color:#d4a017;">Create Account</a>
   </p>
 
 </div>
 
-<script type="module" src="../scripts/customer-login.js"></script>
-<script src="../scripts/smooth-ui.js"></script>
+<script type="module">
+import { 
+  auth, googleProvider, appleProvider,
+  RecaptchaVerifier, signInWithPhoneNumber,
+  signInWithPopup 
+} from "../scripts/firebase.js";
 
+// -----------------------------
+// OTP LOGIN
+// -----------------------------
+
+// Create Recaptcha (Required by Firebase)
+window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+  size: "invisible"
+});
+
+let confirmationResult;
+
+// Send OTP
+document.getElementById("sendOtpBtn").onclick = async () => {
+  const number = "+91" + document.getElementById("loginPhone").value.trim();
+
+  if (!document.getElementById("loginPhone").value) {
+    alert("Enter phone number!");
+    return;
+  }
+
+  confirmationResult = await signInWithPhoneNumber(
+    auth,
+    number,
+    window.recaptchaVerifier
+  );
+
+  document.getElementById("otpBox").style.display = "block";
+  alert("OTP sent!");
+};
+
+// Verify OTP
+document.getElementById("verifyOtpBtn").onclick = async () => {
+  const otp = document.getElementById("otpInput").value;
+
+  try {
+    await confirmationResult.confirm(otp);
+    alert("Logged in successfully!");
+    window.location.href = "../customer/customer-dashboard.html";
+  } catch (err) {
+    alert("Invalid OTP!");
+  }
+};
+
+// -----------------------------
+// GOOGLE LOGIN
+// -----------------------------
+document.getElementById("googleLoginBtn").onclick = async () => {
+  await signInWithPopup(auth, googleProvider);
+  window.location.href = "../customer/customer-dashboard.html";
+};
+
+// -----------------------------
+// APPLE LOGIN
+// -----------------------------
+document.getElementById("appleLoginBtn").onclick = async () => {
+  await signInWithPopup(auth, appleProvider);
+  window.location.href = "../customer/customer-dashboard.html";
+};
+
+</script>
+
+<script src="../scripts/smooth-ui.js"></script>
 </body>
 </html>

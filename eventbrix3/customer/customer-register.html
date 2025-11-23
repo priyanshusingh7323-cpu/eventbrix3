@@ -13,18 +13,38 @@
 
 <div class="form-box">
 
+  <!-- SIGNUP FORM (same as before) -->
   <form id="customerRegisterForm">
 
     <input type="text" id="name" placeholder="Full Name *" required>
     <input type="email" id="email" placeholder="Email *" required>
     <input type="text" id="phone" placeholder="Phone *" required>
     <input type="text" id="city" placeholder="City *" required>
-    <input type="password" id="password" placeholder="Create Password *" required>
 
     <button type="submit">Register</button>
   </form>
 
-  <!-- GOOGLE REGISTER BUTTON -->
+  <!-- OTP SIGNUP BUTTON -->
+  <button id="otpSignupBtn" style="
+      margin-top:12px;
+      width:100%;
+      padding:12px;
+      background:#d4a017;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+    ">
+    Sign Up with Phone (OTP)
+  </button>
+
+  <div id="otpBox" style="display:none;margin-top:10px;">
+    <input type="text" id="otpInput" placeholder="Enter OTP *">
+    <button id="verifyOtpBtn">Verify OTP</button>
+  </div>
+
+  <div id="recaptcha-container"></div>
+
+  <!-- GOOGLE SIGNUP BUTTON -->
   <button id="googleRegisterBtn" style="
       margin-top:12px;
       width:100%;
@@ -38,6 +58,20 @@
     Sign Up with Google
   </button>
 
+  <!-- APPLE SIGNUP BUTTON -->
+  <button id="appleRegisterBtn" style="
+      margin-top:12px;
+      width:100%;
+      padding:12px;
+      background:black;
+      color:white;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+    ">
+    Sign Up with Apple
+  </button>
+
   <p style="text-align:center;margin-top:10px;">
     Already a member?
     <a href="customer-login.html" style="color:#d4a017;">Login</a>
@@ -45,8 +79,61 @@
 
 </div>
 
-<script type="module" src="../scripts/customer-register.js"></script>
-<script src="../scripts/smooth-ui.js"></script>
+<script type="module">
+import { 
+  auth, googleProvider, appleProvider,
+  RecaptchaVerifier, signInWithPhoneNumber,
+  signInWithPopup 
+} from "../scripts/firebase.js";
 
+let confirmationResult;
+
+// Recaptcha for OTP
+window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+  size: "invisible",
+});
+
+// OTP SIGNUP BUTTON
+document.getElementById("otpSignupBtn").onclick = async () => {
+  const number = "+91" + document.getElementById("phone").value;
+
+  if (!document.getElementById("phone").value) {
+    alert("Enter phone number!");
+    return;
+  }
+
+  confirmationResult = await signInWithPhoneNumber(
+    auth,
+    number,
+    window.recaptchaVerifier
+  );
+
+  document.getElementById("otpBox").style.display = "block";
+  alert("OTP sent!");
+};
+
+// VERIFY OTP
+document.getElementById("verifyOtpBtn").onclick = async () => {
+  const otp = document.getElementById("otpInput").value;
+  await confirmationResult.confirm(otp);
+  alert("Account created!");
+  window.location.href = "../customer/customer-dashboard.html";
+};
+
+// GOOGLE SIGNUP
+document.getElementById("googleRegisterBtn").onclick = async () => {
+  await signInWithPopup(auth, googleProvider);
+  window.location.href = "../customer/customer-dashboard.html";
+};
+
+// APPLE SIGNUP
+document.getElementById("appleRegisterBtn").onclick = async () => {
+  await signInWithPopup(auth, appleProvider);
+  window.location.href = "../customer/customer-dashboard.html";
+};
+
+</script>
+
+<script src="../scripts/smooth-ui.js"></script>
 </body>
 </html>
