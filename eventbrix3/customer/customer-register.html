@@ -13,9 +13,8 @@
 
 <div class="form-box">
 
-  <!-- SIGNUP FORM (same as before) -->
+  <!-- SIGNUP FORM -->
   <form id="customerRegisterForm">
-
     <input type="text" id="name" placeholder="Full Name *" required>
     <input type="email" id="email" placeholder="Email *" required>
     <input type="text" id="phone" placeholder="Phone *" required>
@@ -24,16 +23,11 @@
     <button type="submit">Register</button>
   </form>
 
-  <!-- OTP SIGNUP BUTTON -->
+  <!-- OTP SIGNUP -->
   <button id="otpSignupBtn" style="
-      margin-top:12px;
-      width:100%;
-      padding:12px;
-      background:#d4a017;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-    ">
+      margin-top:12px;width:100%;padding:12px;
+      background:#d4a017;border-radius:10px;
+      font-weight:600;cursor:pointer;">
     Sign Up with Phone (OTP)
   </button>
 
@@ -42,33 +36,22 @@
     <button id="verifyOtpBtn">Verify OTP</button>
   </div>
 
+  <!-- REQUIRED FOR OTP -->
   <div id="recaptcha-container"></div>
 
-  <!-- GOOGLE SIGNUP BUTTON -->
+  <!-- GOOGLE SIGNUP -->
   <button id="googleRegisterBtn" style="
-      margin-top:12px;
-      width:100%;
-      padding:12px;
-      background:white;
-      color:black;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-    ">
+      margin-top:12px;width:100%;padding:12px;
+      background:white;color:black;border-radius:10px;
+      font-weight:600;cursor:pointer;">
     Sign Up with Google
   </button>
 
-  <!-- APPLE SIGNUP BUTTON -->
+  <!-- APPLE SIGNUP -->
   <button id="appleRegisterBtn" style="
-      margin-top:12px;
-      width:100%;
-      padding:12px;
-      background:black;
-      color:white;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-    ">
+      margin-top:12px;width:100%;padding:12px;
+      background:black;color:white;border-radius:10px;
+      font-weight:600;cursor:pointer;">
     Sign Up with Apple
   </button>
 
@@ -79,6 +62,8 @@
 
 </div>
 
+
+<!-- MAIN SCRIPT -->
 <script type="module">
 import { 
   auth, googleProvider, appleProvider,
@@ -88,51 +73,76 @@ import {
 
 let confirmationResult;
 
-// Recaptcha for OTP
-window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-  size: "invisible",
-});
 
-// OTP SIGNUP BUTTON
+// ⭐ CORRECT RECAPTCHA INITIALIZATION ⭐
+window.recaptchaVerifier = new RecaptchaVerifier(
+  "recaptcha-container",
+  { size: "invisible" },
+  auth
+);
+
+// ⭐ MUST HAVE THIS IN v10+
+await window.recaptchaVerifier.render();
+
+
+// ⭐ SEND OTP
 document.getElementById("otpSignupBtn").onclick = async () => {
-  const number = "+91" + document.getElementById("phone").value;
+  const phone = document.getElementById("phone").value;
 
-  if (!document.getElementById("phone").value) {
+  if (!phone) {
     alert("Enter phone number!");
     return;
   }
 
-  confirmationResult = await signInWithPhoneNumber(
-    auth,
-    number,
-    window.recaptchaVerifier
-  );
+  const number = "+91" + phone;
 
-  document.getElementById("otpBox").style.display = "block";
-  alert("OTP sent!");
+  try {
+    confirmationResult = await signInWithPhoneNumber(
+      auth,
+      number,
+      window.recaptchaVerifier
+    );
+
+    document.getElementById("otpBox").style.display = "block";
+    alert("OTP sent!");
+  } catch (err) {
+    console.error(err);
+    alert("OTP failed: " + err.message);
+  }
 };
 
-// VERIFY OTP
+
+
+// ⭐ VERIFY OTP
 document.getElementById("verifyOtpBtn").onclick = async () => {
   const otp = document.getElementById("otpInput").value;
-  await confirmationResult.confirm(otp);
-  alert("Account created!");
-  window.location.href = "../customer/customer-dashboard.html";
+
+  try {
+    await confirmationResult.confirm(otp);
+    alert("Account created!");
+    window.location.href = "../customer/customer-dashboard.html";
+  } catch (err) {
+    alert("Invalid OTP");
+  }
 };
 
-// GOOGLE SIGNUP
+
+
+// ⭐ GOOGLE SIGNUP
 document.getElementById("googleRegisterBtn").onclick = async () => {
   await signInWithPopup(auth, googleProvider);
   window.location.href = "../customer/customer-dashboard.html";
 };
 
-// APPLE SIGNUP
+
+// ⭐ APPLE SIGNUP
 document.getElementById("appleRegisterBtn").onclick = async () => {
   await signInWithPopup(auth, appleProvider);
   window.location.href = "../customer/customer-dashboard.html";
 };
 
 </script>
+
 
 <script src="../scripts/smooth-ui.js"></script>
 </body>
