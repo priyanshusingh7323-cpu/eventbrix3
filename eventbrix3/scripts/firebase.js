@@ -1,8 +1,6 @@
-// firebase.js (FINAL FIXED VERSION)
+// firebase.js (FINAL ✓ FIXED FOR OTP + RECAPTCHA ENTERPRISE)
 
-// -------------------------------
 // IMPORTS
-// -------------------------------
 import { initializeApp } 
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
@@ -16,18 +14,14 @@ import {
   signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import { 
-  getFirestore 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { 
-  getStorage 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+import { getStorage } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 
-// -------------------------------
-// CONFIG
-// -------------------------------
+// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBV5XvzfX-h0gEbGSaXpF1fCdvo3m9SsDk",
   authDomain: "eventbrix-87889.firebaseapp.com",
@@ -38,29 +32,25 @@ const firebaseConfig = {
   measurementId: "G-5LGVD5BENS"
 };
 
-
-// -------------------------------
 // INITIALIZE
-// -------------------------------
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 
-
-// -------------------------------
 // PROVIDERS
-// -------------------------------
 export const googleProvider = new GoogleAuthProvider();
 export const appleProvider = new OAuthProvider("apple.com");
 
 
-// -------------------------------
-// EXPORT FUNCTIONS (IMPORTANT)
-// -------------------------------
+// ⭐ REQUIRED FOR OTP (Recaptcha Enterprise v10+)  
+auth.settings.appVerificationDisabledForTesting = false;
+
+
+// EXPORTS
 export { 
-  signInWithPopup,       // ⭐ FIXED
-  RecaptchaVerifier, 
+  signInWithPopup,
+  RecaptchaVerifier,
   signInWithPhoneNumber,
-  onAuthStateChanged 
+  onAuthStateChanged
 };

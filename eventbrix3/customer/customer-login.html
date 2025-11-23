@@ -13,60 +13,42 @@
 
 <div class="form-box">
 
-  <!-- EMAIL LOGIN -->
+  <!-- EMAIL LOGIN (DISABLED) -->
   <form id="customerLoginForm">
     <input type="email" id="email" placeholder="Email *" required>
     <input type="password" id="password" placeholder="Password *" required>
-
     <button type="submit">Login</button>
   </form>
 
-  <!-- OTP Login Button -->
+  <!-- OTP LOGIN -->
   <button id="otpLoginBtn" style="
-      margin-top:12px;
-      width:100%;
-      padding:12px;
-      background:#d4a017;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-    ">
+      margin-top:12px;width:100%;padding:12px;
+      background:#d4a017;border-radius:10px;
+      font-weight:600;cursor:pointer;">
     Login with Phone (OTP)
   </button>
 
-  <!-- OTP Box -->
-  <div id="otpLoginBox" style="display:none; margin-top:10px;">
+  <div id="otpLoginBox" style="display:none;margin-top:10px;">
     <input type="text" id="otpLoginInput" placeholder="Enter OTP *">
     <button id="verifyOtpLoginBtn">Verify OTP</button>
   </div>
 
+  <!-- REQUIRED -->
   <div id="recaptcha-login-container"></div>
 
   <!-- GOOGLE LOGIN -->
   <button id="googleLoginBtn" style="
-      margin-top:12px;
-      width:100%;
-      padding:12px;
-      background:white;
-      color:black;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-    ">
+      margin-top:12px;width:100%;padding:12px;
+      background:white;color:black;border-radius:10px;
+      font-weight:600;cursor:pointer;">
     Continue with Google
   </button>
 
   <!-- APPLE LOGIN -->
   <button id="appleLoginBtn" style="
-      margin-top:12px;
-      width:100%;
-      padding:12px;
-      background:black;
-      color:white;
-      border-radius:10px;
-      font-weight:600;
-      cursor:pointer;
-    ">
+      margin-top:12px;width:100%;padding:12px;
+      background:black;color:white;border-radius:10px;
+      font-weight:600;cursor:pointer;">
     Continue with Apple
   </button>
 
@@ -87,27 +69,29 @@ import {
 let loginConfirmation;
 
 // -----------------------------
-// EMAIL + PASSWORD LOGIN
+// DISABLE OLD EMAIL LOGIN
 // -----------------------------
-document.getElementById("customerLoginForm").onsubmit = async (e) => {
+document.getElementById("customerLoginForm").onsubmit = (e) => {
   e.preventDefault();
-  alert("Email login is currently disabled because OTP login is enabled.");
+  alert("Email/Password login disabled. Use OTP login.");
 };
 
 
 // -----------------------------
-// OTP LOGIN FLOW
+// OTP LOGIN: RECAPTCHA SETUP
 // -----------------------------
 window.recaptchaLoginVerifier = new RecaptchaVerifier(
   "recaptcha-login-container",
-  {
-    size: "invisible",
-  },
+  { size: "invisible" },
   auth
 );
 
 await window.recaptchaLoginVerifier.render();
 
+
+// -----------------------------
+// SEND OTP
+// -----------------------------
 document.getElementById("otpLoginBtn").onclick = async () => {
   const phone = "+91" + prompt("Enter phone number:");
 
@@ -123,16 +107,20 @@ document.getElementById("otpLoginBtn").onclick = async () => {
     document.getElementById("otpLoginBox").style.display = "block";
     alert("OTP Sent!");
   } catch (err) {
-    alert(err.message);
+    alert("OTP Sending Failed: " + err.message);
   }
 };
 
-document.getElementById("verifyOtpLoginBtn").onclick = async () => {
-  const otp = document.getElementById("otpLoginInput").value;
-  if (!otp) return alert("Enter OTP");
 
+// -----------------------------
+// VERIFY OTP
+// -----------------------------
+document.getElementById("verifyOtpLoginBtn").onclick = async () => {
   try {
-    await loginConfirmation.confirm(otp);
+    await loginConfirmation.confirm(
+      document.getElementById("otpLoginInput").value
+    );
+
     alert("Login Successful!");
     window.location.href = "../customer/customer-dashboard.html";
   } catch (err) {
@@ -148,6 +136,7 @@ document.getElementById("googleLoginBtn").onclick = async () => {
   await signInWithPopup(auth, googleProvider);
   window.location.href = "../customer/customer-dashboard.html";
 };
+
 
 // -----------------------------
 // APPLE LOGIN
