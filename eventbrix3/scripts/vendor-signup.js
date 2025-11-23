@@ -5,17 +5,26 @@ import {
   createUserWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import {
-  doc,
-  setDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { getNextVendorId } from "/scripts/vendor-id.js";
 
 
-// ------------------------------
-// RECAPTCHA INVISIBLE
-// ------------------------------
+// ------------------------------------
+// FIX: PHONE FORMAT TO E.164 (+91...)
+// ------------------------------------
+function formatPhone(num) {
+  num = num.trim();
+
+  if (num.startsWith("+91")) return num;
+  if (num.startsWith("91")) return "+" + num;
+  return "+91" + num;
+}
+
+
+// ------------------------------------
+// RECAPTCHA
+// ------------------------------------
 window.recaptchaVerifier = new RecaptchaVerifier(auth, "sendOtpBtn", {
   size: "invisible",
 });
@@ -23,11 +32,12 @@ window.recaptchaVerifier = new RecaptchaVerifier(auth, "sendOtpBtn", {
 let confirmationResult;
 
 
-// ------------------------------
+// ------------------------------------
 // SEND OTP
-// ------------------------------
+// ------------------------------------
 document.getElementById("sendOtpBtn").onclick = async () => {
-  const phone = document.getElementById("phone").value;
+  let phone = document.getElementById("phone").value;
+  phone = formatPhone(phone);
 
   if (!phone) return alert("Enter phone number");
 
@@ -41,31 +51,31 @@ document.getElementById("sendOtpBtn").onclick = async () => {
     document.getElementById("otpCode").style.display = "block";
     document.getElementById("verifyOtpBtn").style.display = "block";
 
-    alert("OTP sent!");
-  
+    alert("OTP Sent!");
+
   } catch (err) {
     alert(err.message);
   }
 };
 
 
-// ------------------------------
+// ------------------------------------
 // VERIFY OTP
-// ------------------------------
+// ------------------------------------
 document.getElementById("verifyOtpBtn").onclick = async () => {
   const otp = document.getElementById("otpCode").value;
+
   if (!otp) return alert("Enter OTP");
 
   try {
-    const result = await confirmationResult.confirm(otp);
-    const user = result.user;
+    await confirmationResult.confirm(otp);
 
-    // Show email + password fields
+    // Show remaining inputs
     document.getElementById("email").style.display = "block";
     document.getElementById("password").style.display = "block";
     document.getElementById("createAccountBtn").style.display = "block";
 
-    alert("OTP Verified! Now complete your signup.");
+    alert("OTP Verified! Complete your signup.");
 
   } catch (err) {
     alert("Invalid OTP");
@@ -73,26 +83,26 @@ document.getElementById("verifyOtpBtn").onclick = async () => {
 };
 
 
-// ------------------------------
-// FINAL EMAIL + PASSWORD ACCOUNT CREATE
-// ------------------------------
+// ------------------------------------
+// FINAL ACCOUNT CREATION
+// ------------------------------------
 document.getElementById("vendorSignupForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const name = e.target.name.value;
   const email = e.target.email.value;
   const password = e.target.password.value;
-  const phone = document.getElementById("phone").value;
+  let phone = document.getElementById("phone").value;
+  phone = formatPhone(phone);
 
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = cred.user.uid;
+    const userCred = await createUserWithEmailAndPassword(auth, email, password);
 
     const vendorId = await getNextVendorId();
 
     await setDoc(doc(db, "vendors", vendorId), {
       vendorId,
-      uid,
+      uid: userCred.user.uid,
       name,
       email,
       phone,
