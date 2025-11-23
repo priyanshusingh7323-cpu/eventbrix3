@@ -70,4 +70,4 @@ document.getElementById("sendOtpBtn").onclick = async () => {
   let phone = document.getElementById("phoneLogin").value;
   phone = formatPhone(phone);
 
-  if (!phone) return alert("Enter p
+  if (!phone) return alert("Enter phone number");
