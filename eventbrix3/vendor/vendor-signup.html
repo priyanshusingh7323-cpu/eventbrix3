@@ -14,12 +14,34 @@
 <div class="form-box">
   <form id="vendorSignupForm">
 
-    <input type="text" id="name" placeholder="Full Name *" required>
+    <input type="text" id="name" name="name" placeholder="Full Name *" required>
 
-    <input type="email" id="email" placeholder="Email *" required>
-    <input type="password" id="password" placeholder="Create Password *" required>
+    <!-- PHONE NUMBER -->
+    <input type="tel" id="phone" placeholder="Phone Number *" required>
 
-    <button type="submit">Create Vendor Account</button>
+    <!-- SEND OTP -->
+    <button type="button" id="sendOtpBtn" 
+      style="background:#d4a017;color:white;margin-top:8px;">
+      Send OTP
+    </button>
+
+    <!-- OTP INPUT -->
+    <input type="text" id="otpCode" placeholder="Enter OTP" style="display:none;">
+
+    <!-- VERIFY OTP -->
+    <button type="button" id="verifyOtpBtn" 
+      style="display:none;background:#28a745;color:white;">
+      Verify OTP
+    </button>
+
+    <!-- EMAIL + PASSWORD (Only after OTP verified) -->
+    <input type="email" id="email" name="email" placeholder="Email *" required style="display:none;">
+    <input type="password" id="password" name="password" placeholder="Create Password *" required style="display:none;">
+
+    <button type="submit" id="createAccountBtn" style="display:none;">
+      Create Vendor Account
+    </button>
+
   </form>
 
   <p style="text-align:center;margin-top:10px;">

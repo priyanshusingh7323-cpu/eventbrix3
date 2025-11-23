@@ -2,7 +2,9 @@ import { auth, db } from "/scripts/firebase.js";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
@@ -14,36 +16,21 @@ import {
 
 
 // ===============================
-// EMAIL + PASSWORD LOGIN
+// EMAIL PASSWORD LOGIN
 // ===============================
-document.getElementById("vendorLoginForm")
-.addEventListener("submit", async (e) => {
+document.getElementById("vendorLoginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   try {
-    const cred = await signInWithEmailAndPassword(
-      auth,
-      e.target.email.value,
-      e.target.password.value
-    );
+    const user = (await signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value)).user;
 
-    const user = cred.user;
-
-    // Find vendor doc linked to this UID
     const q = query(collection(db, "vendors"), where("uid", "==", user.uid));
     const snap = await getDocs(q);
 
-    if (snap.empty) {
-      alert("Vendor account not found!");
-      return;
-    }
+    if (snap.empty) return alert("Vendor not found");
 
     const V = snap.docs[0].data();
-
-    // REDIRECT BASED ON STATUS
-    if (V.status === "incomplete") {
-      return location.href = "vendor-register.html";
-    }
+    if (V.status === "incomplete") return location.href = "vendor-register.html";
 
     return location.href = "vendor-dashboard.html";
 
@@ -54,52 +41,51 @@ document.getElementById("vendorLoginForm")
 
 
 // ===============================
-// ⭐ GOOGLE LOGIN BUTTON ADDED ⭐
+// SIMPLE PHONE OTP LOGIN
 // ===============================
-const googleBtn = document.createElement("button");
-googleBtn.innerText = "Login with Google";
-googleBtn.style = `
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  background:#4285f4;
-  color:white;
-  border:none;
-  border-radius:8px;
-  font-size:16px;
-  cursor:pointer;
-`;
-document.querySelector(".form-box").appendChild(googleBtn);
+let confirmationResult;
 
-googleBtn.onclick = googleLogin;
+window.recaptchaVerifier = new RecaptchaVerifier(auth, "sendOtpBtn", { size: "invisible" });
 
-async function googleLogin() {
-  const provider = new GoogleAuthProvider();
+document.getElementById("sendOtpBtn").onclick = async () => {
+  const phone = document.getElementById("phoneLogin").value;
+
+  if (!phone) return alert("Enter phone number");
 
   try {
-    const result = await signInWithPopup(auth, provider);
+    confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+
+    document.getElementById("otpInput").style.display = "block";
+    document.getElementById("verifyOtpBtn").style.display = "block";
+
+    alert("OTP sent!");
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
+document.getElementById("verifyOtpBtn").onclick = async () => {
+  const otp = document.getElementById("otpInput").value;
+
+  if (!otp) return alert("Enter OTP");
+
+  try {
+    const result = await confirmationResult.confirm(otp);
     const user = result.user;
 
-    // Find vendor linked to this google uid
-    const q = query(collection(db, "vendors"), where("uid", "==", user.uid));
+    const q = query(collection(db, "vendors"), where("phone", "==", user.phoneNumber));
     const snap = await getDocs(q);
 
-    if (snap.empty) {
-      // No vendor created yet → go to signup
-      alert("No vendor account found. Please sign up first.");
-      return location.href = "vendor-signup.html";
-    }
+    if (snap.empty) return alert("Vendor not found");
 
     const V = snap.docs[0].data();
 
-    // REDIRECT BASED ON STATUS
-    if (V.status === "incomplete") {
-      return location.href = "vendor-register.html";
-    }
+    if (V.status === "incomplete") return location.href = "vendor-register.html";
 
     return location.href = "vendor-dashboard.html";
 
   } catch (err) {
     alert(err.message);
   }
-}
+};
