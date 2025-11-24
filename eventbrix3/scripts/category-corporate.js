@@ -10,7 +10,6 @@ async function loadVendors() {
   const list = document.getElementById("vendorList");
   list.innerHTML = "Loading...";
 
-  // Base query
   const q = query(
     collection(db, "vendors"),
     where("status", "==", "approved"),
@@ -31,6 +30,11 @@ async function loadVendors() {
     const photo = v.photos?.[0] || "/images/default.jpg";
     const price = v.price ? `₹${v.price}` : "Price Not Set";
 
+    // ⭐ NEW: locality added
+    let locationText = v.locality
+      ? `${v.locality}, ${v.city}`
+      : v.city;
+
     list.innerHTML += `
       <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
 
@@ -43,7 +47,7 @@ async function loadVendors() {
           <h3>${v.businessName || "Vendor Name"}</h3>
 
           <p class="v-city">
-            <i class="fa-solid fa-location-dot"></i> ${v.city || "Not Set"}
+            📍 ${locationText}
           </p>
 
           <p class="v-price">

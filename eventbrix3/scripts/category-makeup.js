@@ -10,7 +10,6 @@ async function loadVendors() {
   const list = document.getElementById("vendorList");
   list.innerHTML = "Loading...";
 
-  // 🔥 Load only approved Makeup Artists
   const q = query(
     collection(db, "vendors"),
     where("status", "==", "approved"),
@@ -23,18 +22,25 @@ async function loadVendors() {
   snap.forEach((docx) => {
     const v = docx.data();
 
+    const img = v.photos?.[0] || "/images/default.jpg";
+
+    // ⭐ ADD LOCALITY HERE
+    let locationText = v.locality
+      ? `${v.locality}, ${v.city}`
+      : v.city;
+
     list.innerHTML += `
       <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
 
         <div class="vendor-card-img">
-          <img src="${v.photos?.[0] || '/images/default.jpg'}">
+          <img src="${img}">
           <span class="vendor-badge">💄 Makeup Pro</span>
         </div>
 
         <div class="vendor-card-content">
           <h3>${v.businessName}</h3>
 
-          <p class="vendor-city">📍 ${v.city}</p>
+          <p class="vendor-city">📍 ${locationText}</p>
 
           <p class="vendor-price">
             Starting at <strong>₹${v.price}</strong>

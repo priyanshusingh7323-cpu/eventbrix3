@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vendor Registration</title>
 
-<!-- MAIN SITE CSS -->
 <link rel="stylesheet" href="../styles.css">
 
 <!-- GOOGLE MAPS AUTOCOMPLETE -->
@@ -38,16 +37,16 @@
     <input type="text" name="businessName" placeholder="Business Name *" required>
     <input type="text" name="ownerName" placeholder="Owner Name *" required>
 
-    <!-- CITY AUTOCOMPLETE -->
+    <!-- CITY INPUT -->
     <input 
       type="text" 
       id="cityInput"
       name="city"
-      placeholder="Enter City *"
+      placeholder="Enter Area / City (e.g., Chattarpur Delhi)*"
       required
     >
 
-    <!-- DETECT MY LOCATION -->
+    <!-- DETECT LOCATION -->
     <button type="button" id="detectLocation" class="location-btn">
       Detect My Location
     </button>
@@ -56,7 +55,13 @@
     <input type="hidden" id="vendorLat" name="latitude">
     <input type="hidden" id="vendorLng" name="longitude">
 
-    <!-- MAIN CATEGORY DROPDOWN -->
+    <!-- NEW HIDDEN LOCALITY FIELDS -->
+    <input type="hidden" id="vendorLocality">
+    <input type="hidden" id="vendorFullAddress">
+    <input type="hidden" id="vendorPlaceId">
+    <input type="hidden" id="vendorPincode">
+
+    <!-- CATEGORY -->
     <select name="category" id="mainCategory" required>
       <option value="">Select Main Category *</option>
       <option value="Wedding Services">Wedding Services</option>
@@ -69,18 +74,16 @@
       <option value="Photography">Photography</option>
     </select>
 
-    <!-- SUB CATEGORY AUTO-FILL -->
+    <!-- SUB CATEGORY -->
     <select name="subcategory" id="subCategory" required>
       <option value="">Select Sub Category *</option>
     </select>
 
-    <!-- PRICE FIELD -->
+    <!-- PRICING -->
     <input type="number" name="price" placeholder="Starting Price *" required>
-
-    <!-- PER PLATE ONLY FOR BANQUET -->
     <input type="number" name="perPlate" id="perPlateField" placeholder="Per Plate Price" style="display:none;">
 
-    <!-- SERVICES OFFERED -->
+    <!-- SERVICES -->
     <textarea name="services" placeholder="Services Offered (comma separated) *" required></textarea>
 
     <!-- ABOUT -->
@@ -95,10 +98,9 @@
     <!-- TEAM SIZE -->
     <input type="number" name="teamSize" placeholder="Team Size">
 
-    <!-- CLOUDINARY MULTIPLE IMAGE UPLOAD -->
+    <!-- IMAGES -->
     <label>Upload Photos (1–10)</label>
     <input type="file" id="photoUpload" accept="image/*" multiple>
-
     <div id="previewBox" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;"></div>
 
     <button type="submit">Submit</button>
@@ -106,93 +108,72 @@
 
 </div>
 
-<!-- ---------------------
-     SUBCATEGORY LOGIC
------------------------ -->
+<!-- SUBCATEGORY LOGIC -->
 <script>
 const subMap = {
-  "Wedding Services": [
-    "Photographer","Decorator","Wedding Planner","Makeup Artist",
-    "Mehndi Artist","Pre-Wedding Shoot","Cinematography","All Services"
-  ],
-  "Banquet / Venue": [
-    "Indoor Hall","Outdoor Lawn","AC Banquet","Resort Venue",
-    "Marriage Garden","Destination Venue","Rooftop Venue","All Services"
-  ],
-  "Birthday": [
-    "Theme Birthday","Balloon Decor","Kids Magician","Games Host",
-    "Tattoo Artist","Birthday Photography","All Services"
-  ],
-  "Corporate Events": [
-    "Event Planning","Corporate Catering","Conference Setup",
-    "Exhibition Setup","Corporate Decor","Corporate Photography","All Services"
-  ],
-  "Catering": [
-    "Veg Catering","Non-Veg Catering","Wedding Catering",
-    "Corporate Catering","Buffet","Live Counters","All Services"
-  ],
-  "Decoration": [
-    "Wedding Decor","Haldi Decor","Mehndi Decor","Flower Decor",
-    "Birthday Decor","Balloon Decor","All Services"
-  ],
-  "Makeup Artists": [
-    "Bridal Makeup","HD Makeup","Party Makeup","Airbrush Makeup",
-    "Engagement Makeup","All Services"
-  ],
-  "Photography": [
-    "Wedding Photography","Candid Photography","Cinematic Film",
-    "Drone Shoots","Pre-Wedding Shoot","Birthday Photography","All Services"
-  ]
+  "Wedding Services": ["Photographer","Decorator","Wedding Planner","Makeup Artist","Mehndi Artist","Pre-Wedding Shoot","Cinematography","All Services"],
+  "Banquet / Venue": ["Indoor Hall","Outdoor Lawn","AC Banquet","Resort Venue","Marriage Garden","Destination Venue","Rooftop Venue","All Services"],
+  "Birthday": ["Theme Birthday","Balloon Decor","Kids Magician","Games Host","Tattoo Artist","Birthday Photography","All Services"],
+  "Corporate Events": ["Event Planning","Corporate Catering","Conference Setup","Exhibition Setup","Corporate Decor","Corporate Photography","All Services"],
+  "Catering": ["Veg Catering","Non-Veg Catering","Wedding Catering","Corporate Catering","Buffet","Live Counters","All Services"],
+  "Decoration": ["Wedding Decor","Haldi Decor","Mehndi Decor","Flower Decor","Birthday Decor","Balloon Decor","All Services"],
+  "Makeup Artists": ["Bridal Makeup","HD Makeup","Party Makeup","Airbrush Makeup","Engagement Makeup","All Services"],
+  "Photography": ["Wedding Photography","Candid Photography","Cinematic Film","Drone Shoots","Pre-Wedding Shoot","Birthday Photography","All Services"]
 };
 
-const mainCat = document.getElementById("mainCategory");
-const subCat = document.getElementById("subCategory");
-const perPlate = document.getElementById("perPlateField");
-
-mainCat.addEventListener("change", () => {
-  const cat = mainCat.value;
-  subCat.innerHTML = `<option value="">Select Sub Category *</option>`;
-
+document.getElementById("mainCategory").addEventListener("change", () => {
+  const cat = mainCategory.value;
+  subCategory.innerHTML = `<option value="">Select Sub Category *</option>`;
   if (subMap[cat]) {
-    subMap[cat].forEach(item => {
-      subCat.innerHTML += `<option value="${item}">${item}</option>`;
-    });
+    subMap[cat].forEach(item =>
+      subCategory.innerHTML += `<option value="${item}">${item}</option>`
+    );
   }
-
-  perPlate.style.display = cat === "Banquet / Venue" ? "block" : "none";
+  document.getElementById("perPlateField").style.display = 
+    cat === "Banquet / Venue" ? "block" : "none";
 });
 </script>
 
-<!-- ---------------------
-     GOOGLE AUTOCOMPLETE
------------------------ -->
+<!-- GOOGLE AUTOCOMPLETE + LOCALITY EXTRACTION -->
 <script>
-// CITY AUTOCOMPLETE
 let autocomplete;
 
 function initAutocomplete() {
   autocomplete = new google.maps.places.Autocomplete(
     document.getElementById("cityInput"),
-    { types: ["(cities)"], componentRestrictions: { country: "in" } }
+    { componentRestrictions: { country: "in" } }
   );
 
   autocomplete.addListener("place_changed", () => {
-    const place = autocomplete.getPlace();
-    console.log("City selected:", place.formatted_address);
+    const p = autocomplete.getPlace();
+    if (!p.geometry) return;
+
+    document.getElementById("vendorLat").value = p.geometry.location.lat();
+    document.getElementById("vendorLng").value = p.geometry.location.lng();
+
+    const comps = p.address_components;
+
+    const locality =
+      comps.find(c => c.types.includes("sublocality_level_1"))?.long_name ||
+      comps.find(c => c.types.includes("locality"))?.long_name ||
+      "";
+
+    const pincode =
+      comps.find(c => c.types.includes("postal_code"))?.long_name || "";
+
+    document.getElementById("vendorLocality").value = locality;
+    document.getElementById("vendorFullAddress").value = p.formatted_address;
+    document.getElementById("vendorPlaceId").value = p.place_id;
+    document.getElementById("vendorPincode").value = pincode;
   });
 }
 google.maps.event.addDomListener(window, "load", initAutocomplete);
 </script>
 
-<!-- ---------------------
-     DETECT MY LOCATION
------------------------ -->
+<!-- GPS LOCATION -->
 <script>
 document.getElementById("detectLocation").onclick = () => {
-  if (!navigator.geolocation) {
-    alert("GPS not supported!");
-    return;
-  }
+  if (!navigator.geolocation) return alert("GPS not supported!");
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const lat = pos.coords.latitude;
@@ -201,27 +182,26 @@ document.getElementById("detectLocation").onclick = () => {
     document.getElementById("vendorLat").value = lat;
     document.getElementById("vendorLng").value = lng;
 
-    // REVERSE GEOCODE
-    const url =
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`;
-
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_API_KEY`;
     const res = await fetch(url);
     const data = await res.json();
 
-    const cityRes = data.results.find(r => 
-      r.types.includes("locality") || r.types.includes("administrative_area_level_2")
-    );
+    if (!data.results.length) return alert("Location not found!");
 
-    if (cityRes) {
-      document.getElementById("cityInput").value = cityRes.address_components[0].long_name;
-    }
+    const comps = data.results[0].address_components;
 
-    alert("Location detected!");
+    const locality =
+      comps.find(c => c.types.includes("sublocality_level_1"))?.long_name ||
+      comps.find(c => c.types.includes("locality"))?.long_name ||
+      "";
+
+    document.getElementById("cityInput").value = locality;
+    document.getElementById("vendorLocality").value = locality;
   });
 };
 </script>
 
-<!-- VENDOR REGISTER SCRIPT -->
+<!-- VENDOR REGISTER LOGIC -->
 <script type="module" src="../scripts/vendor-register.js"></script>
 
 <script src="../scripts/smooth-ui.js"></script>

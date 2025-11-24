@@ -59,9 +59,20 @@ async function loadVendors() {
   snap.forEach((docx) => {
     const v = docx.data();
 
-    const img   = v.photos?.[0] || "/images/default.jpg";
-    const rating = v.rating || "4.8";
+    const img      = v.photos?.[0] || "/images/default.jpg";
+    const rating   = v.rating || "4.8";
     const verified = v.isVerified !== false;
+
+    /* ⭐ NEW: LOCALITY TEXT BUILD */
+    let locationText = "";
+    if (v.locality) {
+      // Example: Chattarpur, Delhi
+      const cityName = v.city?.split(" ")[0] || "Delhi";  
+      locationText = `${v.locality}, ${cityName}`;
+    } else {
+      // fallback
+      locationText = v.city || "Location not available";
+    }
 
     let distance = "";
     if (userLat && userLng && v.latitude && v.longitude) {
@@ -85,7 +96,7 @@ async function loadVendors() {
           <div class="vendor-sub">${v.subcategory}</div>
 
           <div class="vendor-row">
-            <span>📍 ${v.city}</span>
+            <span>📍 ${locationText}</span>   <!-- ⭐ UPDATED -->
             <span>⭐ ${rating}</span>
           </div>
 

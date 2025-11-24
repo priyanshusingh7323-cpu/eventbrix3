@@ -89,20 +89,35 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
   /* READ FORM VALUES */
   const businessName = e.target.businessName.value;
   const ownerName = e.target.ownerName.value;
-  const city = e.target.city.value; // 👍 GOOGLE AUTOCOMPLETE CITY
+  const city = e.target.city.value;
   const category = e.target.category.value;
   const subcategory = e.target.subcategory.value;
   const price = Number(e.target.price.value);
   const services = e.target.services.value;
   const about = e.target.about.value;
   const serviceArea = e.target.serviceArea.value || "";
-
   const experience = Number(e.target.experience.value || 0);
   const teamSize = Number(e.target.teamSize.value || 0);
 
   // ⭐ NEW LOCATION FIELDS
   const latitude = Number(document.getElementById("vendorLat").value || 0);
   const longitude = Number(document.getElementById("vendorLng").value || 0);
+
+  // ⭐⭐⭐ NEW FEATURE: AUTO LOCALITY EXTRACT (Chattarpur / Dwarka / Munirka etc.)
+  let locality = "";
+  const cityLower = city.toLowerCase();
+
+  if (cityLower.includes("chattarpur")) locality = "Chattarpur";
+  else if (cityLower.includes("dwarka")) locality = "Dwarka";
+  else if (cityLower.includes("munirka")) locality = "Munirka";
+  else if (cityLower.includes("rohini")) locality = "Rohini";
+  else if (cityLower.includes("saket")) locality = "Saket";
+  else if (cityLower.includes("noida")) locality = "Noida";
+  else if (cityLower.includes("gurgaon")) locality = "Gurgaon";
+  else if (cityLower.includes("janakpuri")) locality = "Janakpuri";
+  else if (cityLower.includes("lajpat")) locality = "Lajpat Nagar";
+  else if (cityLower.includes("karol")) locality = "Karol Bagh";
+  else locality = city; // fallback
 
   const perPlate =
     category === "Banquet / Venue" ? Number(e.target.perPlate.value || 0) : null;
@@ -129,6 +144,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
     businessName,
     ownerName,
     city,
+    locality,   // ⭐ ADDED
     latitude,
     longitude,
     category,
@@ -156,6 +172,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
         ownerName,
         businessName,
         city,
+        locality,    // ⭐ ADDED
         latitude,
         longitude,
         mainCategory: category,

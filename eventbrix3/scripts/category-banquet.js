@@ -7,6 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 async function loadVendors() {
+
   const list = document.getElementById("vendorList");
   list.innerHTML = "Loading...";
 
@@ -31,6 +32,11 @@ async function loadVendors() {
     const rating = v.rating || "4.7";
     const verified = v.isVerified !== false;
 
+    // ⭐ NEW: locality + city formatting
+    let locationText = v.locality
+      ? `${v.locality}, ${v.city}`
+      : v.city;
+
     list.innerHTML += `
       <div class="vendor-card-adv" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
 
@@ -47,7 +53,7 @@ async function loadVendors() {
           <div class="vendor-sub">${v.subcategory || "Banquet / Venue"}</div>
 
           <div class="vendor-row">
-            <span>📍 ${v.city}</span>
+            <span>📍 ${locationText}</span>
             <span>⭐ ${rating}</span>
           </div>
 
