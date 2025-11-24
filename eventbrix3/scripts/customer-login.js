@@ -1,65 +1,34 @@
-import { auth, db } from "/scripts/firebase.js";
+// updated customer-login.js
+import { auth, db, googleProvider, RecaptchaVerifier, signInWithPhoneNumber, signInWithPopup } 
+  from "../scripts/firebase.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-import {
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+signOut(auth);
 
-import {
-  doc, setDoc, getDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+let loginConfirmation;
+window.recaptchaLoginVerifier=new RecaptchaVerifier(auth,"recaptcha-login-container",{size:"invisible"});
+await window.recaptchaLoginVerifier.render();
 
+async function verifyCustomer(){
+  const ref=doc(db,"customers",auth.currentUser.uid);
+  const snap=await getDoc(ref);
+  if(!snap.exists()){ alert("Account not found!"); await signOut(auth); return false; }
+  return true;
+}
 
-// ==============================
-// EMAIL LOGIN
-// ==============================
-document.getElementById("customerLoginForm")
-.addEventListener("submit", async (e) => {
-  e.preventDefault();
+document.getElementById("otpLoginBtn").onclick=async()=>{
+  const phone="+91"+prompt("Enter phone");
+  loginConfirmation=await signInWithPhoneNumber(auth,phone,window.recaptchaLoginVerifier);
+  document.getElementById("otpLoginBox").style.display="block";
+};
 
-  const email = e.target.email.value;
-  const password = e.target.password.value;
+document.getElementById("verifyOtpLoginBtn").onclick=async()=>{
+  await loginConfirmation.confirm(document.getElementById("otpLoginInput").value);
+  if(await verifyCustomer()) location.href="../customer/customer-dashboard.html";
+};
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-
-    // Redirect to HOME
-    location.href = "/index.html";
-  } 
-  catch (err) {
-    alert(err.message);
-  }
-});
-
-
-// ==============================
-// GOOGLE LOGIN
-// ==============================
-const provider = new GoogleAuthProvider();
-
-document.getElementById("googleLoginBtn")?.addEventListener("click", async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-
-    // Create profile if new user
-    const ref = doc(db, "customers", result.user.uid);
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-      await setDoc(ref, {
-        uid: result.user.uid,
-        name: result.user.displayName || "",
-        email: result.user.email,
-        phone: "",
-        city: "",
-        createdAt: Date.now()
-      });
-    }
-
-    location.href = "/index.html";
-  }
-  catch (err) {
-    alert("Google login failed!");
-  }
-});
+document.getElementById("googleLoginBtn").onclick=async()=>{
+  await signInWithPopup(auth,googleProvider);
+  if(await verifyCustomer()) location.href="../customer/customer-dashboard.html";
+};
