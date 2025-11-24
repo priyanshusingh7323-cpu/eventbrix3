@@ -1,119 +1,50 @@
+// updated vendor-signup.js
 import { auth, db } from "/scripts/firebase.js";
-import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  createUserWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { RecaptchaVerifier, signInWithPhoneNumber, createUserWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { doc, setDoc } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getNextVendorId } from "/scripts/vendor-id.js";
 
+signOut(auth);
 
-// ------------------------------------
-// FIX: PHONE FORMAT TO E.164 (+91...)
-// ------------------------------------
-function formatPhone(num) {
-  num = num.trim();
-
-  if (num.startsWith("+91")) return num;
-  if (num.startsWith("91")) return "+" + num;
-  return "+91" + num;
+function formatPhone(n){
+  n=n.trim();
+  if(n.startsWith("+91")) return n;
+  if(n.startsWith("91")) return "+"+n;
+  return "+91"+n;
 }
 
-
-// ------------------------------------
-// RECAPTCHA
-// ------------------------------------
-window.recaptchaVerifier = new RecaptchaVerifier(auth, "sendOtpBtn", {
-  size: "invisible",
-});
-
+window.recaptchaVerifier=new RecaptchaVerifier(auth,"sendOtpBtn",{size:"invisible"});
 let confirmationResult;
 
-
-// ------------------------------------
-// SEND OTP
-// ------------------------------------
-document.getElementById("sendOtpBtn").onclick = async () => {
-  let phone = document.getElementById("phone").value;
-  phone = formatPhone(phone);
-
-  if (!phone) return alert("Enter phone number");
-
-  try {
-    confirmationResult = await signInWithPhoneNumber(
-      auth,
-      phone,
-      window.recaptchaVerifier
-    );
-
-    document.getElementById("otpCode").style.display = "block";
-    document.getElementById("verifyOtpBtn").style.display = "block";
-
-    alert("OTP Sent!");
-
-  } catch (err) {
-    alert(err.message);
-  }
+document.getElementById("sendOtpBtn").onclick=async()=>{
+  let phone=formatPhone(document.getElementById("phone").value);
+  confirmationResult=await signInWithPhoneNumber(auth,phone,window.recaptchaVerifier);
+  document.getElementById("otpCode").style.display="block";
+  document.getElementById("verifyOtpBtn").style.display="block";
 };
 
-
-// ------------------------------------
-// VERIFY OTP
-// ------------------------------------
-document.getElementById("verifyOtpBtn").onclick = async () => {
-  const otp = document.getElementById("otpCode").value;
-
-  if (!otp) return alert("Enter OTP");
-
-  try {
-    await confirmationResult.confirm(otp);
-
-    // Show remaining inputs
-    document.getElementById("email").style.display = "block";
-    document.getElementById("password").style.display = "block";
-    document.getElementById("createAccountBtn").style.display = "block";
-
-    alert("OTP Verified! Complete your signup.");
-
-  } catch (err) {
-    alert("Invalid OTP");
-  }
+document.getElementById("verifyOtpBtn").onclick=async()=>{
+  await confirmationResult.confirm(document.getElementById("otpCode").value);
+  document.getElementById("email").style.display="block";
+  document.getElementById("password").style.display="block";
+  document.getElementById("createAccountBtn").style.display="block";
 };
 
-
-// ------------------------------------
-// FINAL ACCOUNT CREATION
-// ------------------------------------
-document.getElementById("vendorSignupForm").addEventListener("submit", async (e) => {
+document.getElementById("vendorSignupForm").addEventListener("submit",async(e)=>{
   e.preventDefault();
-
-  const name = e.target.name.value;
-  const email = e.target.email.value;
-  const password = e.target.password.value;
-  let phone = document.getElementById("phone").value;
-  phone = formatPhone(phone);
-
-  try {
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
-
-    const vendorId = await getNextVendorId();
-
-    await setDoc(doc(db, "vendors", vendorId), {
-      vendorId,
-      uid: userCred.user.uid,
-      name,
-      email,
-      phone,
-      createdAt: Date.now(),
-      status: "incomplete"
-    });
-
-    alert("Account Created!");
-    location.href = "vendor-register.html";
-
-  } catch (err) {
-    alert(err.message);
-  }
+  const userCred=await createUserWithEmailAndPassword(auth,e.target.email.value,e.target.password.value);
+  const vendorId=await getNextVendorId();
+  await setDoc(doc(db,"vendors",vendorId),{
+    vendorId,
+    uid:userCred.user.uid,
+    name:e.target.name.value,
+    email:e.target.email.value,
+    phone:formatPhone(document.getElementById("phone").value),
+    createdAt:Date.now(),
+    status:"incomplete"
+  });
+  location.href="vendor-register.html";
 });
