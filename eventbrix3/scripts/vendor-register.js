@@ -28,7 +28,6 @@ auth.onAuthStateChanged(async (user) => {
   const snap = await getDocs(q);
 
   if (snap.empty) {
-    // CREATE NEW VENDOR ROOT DOCUMENT
     vendorId = "VEN-" + user.uid;
 
     await setDoc(doc(db, "vendors", vendorId), {
@@ -90,18 +89,23 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
   /* READ FORM VALUES */
   const businessName = e.target.businessName.value;
   const ownerName = e.target.ownerName.value;
-  const city = e.target.city.value;
+  const city = e.target.city.value; // 👍 GOOGLE AUTOCOMPLETE CITY
   const category = e.target.category.value;
   const subcategory = e.target.subcategory.value;
   const price = Number(e.target.price.value);
   const services = e.target.services.value;
   const about = e.target.about.value;
-
-  const perPlate = category === "Banquet" ? Number(e.target.perPlate.value || 0) : null;
-
   const serviceArea = e.target.serviceArea.value || "";
+
   const experience = Number(e.target.experience.value || 0);
   const teamSize = Number(e.target.teamSize.value || 0);
+
+  // ⭐ NEW LOCATION FIELDS
+  const latitude = Number(document.getElementById("vendorLat").value || 0);
+  const longitude = Number(document.getElementById("vendorLng").value || 0);
+
+  const perPlate =
+    category === "Banquet / Venue" ? Number(e.target.perPlate.value || 0) : null;
 
   if (uploadedImages.length === 0) {
     return alert("Please upload at least 1 image.");
@@ -125,6 +129,8 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
     businessName,
     ownerName,
     city,
+    latitude,
+    longitude,
     category,
     subcategory,
     price,
@@ -150,6 +156,8 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
         ownerName,
         businessName,
         city,
+        latitude,
+        longitude,
         mainCategory: category,
         subcategory,
         price,
