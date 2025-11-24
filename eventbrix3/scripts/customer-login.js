@@ -1,6 +1,4 @@
-(async () => {
-
-// IMPORTS
+// IMPORTS MUST BE AT TOP LEVEL (outside any function)
 import {
   auth, db, googleProvider, appleProvider,
   RecaptchaVerifier, signInWithPhoneNumber,
@@ -14,11 +12,15 @@ import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
-// AUTO LOGOUT (prevents auto-login bug)
+// WRAP ONLY THE REST OF THE CODE
+(async () => {
+
+let loginConfirmation;
+
+// AUTO LOGOUT
 await signOut(auth);
 
-
-// RECAPTCHA SETUP
+// RECAPTCHA
 window.recaptchaLoginVerifier = new RecaptchaVerifier(
   auth,
   "recaptcha-login-container",
@@ -27,8 +29,7 @@ window.recaptchaLoginVerifier = new RecaptchaVerifier(
 
 await window.recaptchaLoginVerifier.render();
 
-
-// CHECK IF CUSTOMER EXISTS
+// VERIFY CUSTOMER
 async function verifyCustomer() {
   const user = auth.currentUser;
   if (!user) return false;
@@ -43,8 +44,6 @@ async function verifyCustomer() {
 
   return true;
 }
-
-
 
 // OTP LOGIN
 document.getElementById("otpLoginBtn").onclick = async () => {
@@ -67,8 +66,6 @@ document.getElementById("otpLoginBtn").onclick = async () => {
   }
 };
 
-
-
 // OTP VERIFY
 document.getElementById("verifyOtpLoginBtn").onclick = async () => {
   try {
@@ -84,8 +81,6 @@ document.getElementById("verifyOtpLoginBtn").onclick = async () => {
   }
 };
 
-
-
 // GOOGLE LOGIN
 document.getElementById("googleLoginBtn").onclick = async () => {
   try {
@@ -98,8 +93,6 @@ document.getElementById("googleLoginBtn").onclick = async () => {
     alert("Google login failed: " + e.message);
   }
 };
-
-
 
 // APPLE LOGIN
 document.getElementById("appleLoginBtn").onclick = async () => {
