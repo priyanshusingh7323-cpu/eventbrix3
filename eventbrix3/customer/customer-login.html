@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Customer Login | EventBrix</title>
-<link rel="stylesheet" href="../styles.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login | EventBrix</title>
+<link rel="stylesheet" href="../styles.css" />
 </head>
 
 <body>
 
-<h1 class="title">Welcome Back</h1>
+<h1 class="title">Customer Login</h1>
 
 <div class="form-box">
 
-  <!-- EMAIL LOGIN (DISABLED) -->
-  <form id="customerLoginForm">
-    <input type="email" id="email" placeholder="Email *" required>
-    <input type="password" id="password" placeholder="Password *" required>
-    <button type="submit">Login</button>
-  </form>
-
-  <!-- OTP LOGIN -->
   <button id="otpLoginBtn" style="
       margin-top:12px;width:100%;padding:12px;
       background:#d4a017;border-radius:10px;
@@ -29,11 +21,10 @@
   </button>
 
   <div id="otpLoginBox" style="display:none;margin-top:10px;">
-    <input type="text" id="otpLoginInput" placeholder="Enter OTP *">
+    <input type="text" id="otpLoginInput" placeholder="Enter OTP *" />
     <button id="verifyOtpLoginBtn">Verify OTP</button>
   </div>
 
-  <!-- REQUIRED -->
   <div id="recaptcha-login-container"></div>
 
   <!-- GOOGLE LOGIN -->
@@ -41,95 +32,20 @@
       margin-top:12px;width:100%;padding:12px;
       background:white;color:black;border-radius:10px;
       font-weight:600;cursor:pointer;">
-    Continue with Google
-  </button>
-
-  <!-- APPLE LOGIN -->
-  <button id="appleLoginBtn" style="
-      margin-top:12px;width:100%;padding:12px;
-      background:black;color:white;border-radius:10px;
-      font-weight:600;cursor:pointer;">
-    Continue with Apple
+    Login with Google
   </button>
 
   <p style="text-align:center;margin-top:10px;">
-    New user?
-    <a href="customer-register.html" style="color:#d4a017;">Create Account</a>
+    Not a member?
+    <a href="customer-register.html" style="color:#d4a017;">Sign Up</a>
   </p>
 
 </div>
 
-<script type="module">
-import {
-  auth, googleProvider, appleProvider,
-  RecaptchaVerifier, signInWithPhoneNumber,
-  signInWithPopup
-} from "../scripts/firebase.js";
-
-let loginConfirmation;
-
-// DISABLE OLD EMAIL LOGIN
-document.getElementById("customerLoginForm").onsubmit = (e) => {
-  e.preventDefault();
-  alert("Email/Password login disabled. Use OTP login.");
-};
-
-// 🔥 CORRECT RECAPTCHA FOR LOGIN (Firebase v10+)
-window.recaptchaLoginVerifier = new RecaptchaVerifier(
-  auth,                           // 1st → auth
-  "recaptcha-login-container",    // 2nd → div ID
-  { size: "invisible" }           // 3rd → config
-);
-
-await window.recaptchaLoginVerifier.render();
-
-// SEND OTP
-document.getElementById("otpLoginBtn").onclick = async () => {
-  const phone = "+91" + prompt("Enter phone number:");
-
-  if (!phone) return alert("Enter phone number!");
-
-  try {
-    loginConfirmation = await signInWithPhoneNumber(
-      auth,
-      phone,
-      window.recaptchaLoginVerifier
-    );
-
-    document.getElementById("otpLoginBox").style.display = "block";
-    alert("OTP Sent!");
-  } catch (err) {
-    alert("OTP Sending Failed: " + err.message);
-  }
-};
-
-// VERIFY OTP
-document.getElementById("verifyOtpLoginBtn").onclick = async () => {
-  try {
-    await loginConfirmation.confirm(
-      document.getElementById("otpLoginInput").value
-    );
-
-    alert("Login Successful!");
-    window.location.href = "../customer/customer-dashboard.html";
-  } catch {
-    alert("Wrong OTP!");
-  }
-};
-
-// GOOGLE LOGIN
-document.getElementById("googleLoginBtn").onclick = async () => {
-  await signInWithPopup(auth, googleProvider);
-  window.location.href = "../customer/customer-dashboard.html";
-};
-
-// APPLE LOGIN
-document.getElementById("appleLoginBtn").onclick = async () => {
-  await signInWithPopup(auth, appleProvider);
-  window.location.href = "../customer/customer-dashboard.html";
-};
-</script>
+<!-- IMPORTANT: external JS load -->
+<script type="module" src="../scripts/customer-login.js"></script>
 
 <script src="../scripts/smooth-ui.js"></script>
+
 </body>
 </html>

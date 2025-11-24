@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Create Account | EventBrix</title>
-<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../styles.css" />
 </head>
 
 <body>
-
 <h1 class="title">Create Account</h1>
 
 <div class="form-box">
 
   <!-- SIGNUP FORM -->
   <form id="customerRegisterForm">
-    <input type="text" id="name" placeholder="Full Name *" required>
-    <input type="email" id="email" placeholder="Email *" required>
-    <input type="text" id="phone" placeholder="Phone *" required>
-    <input type="text" id="city" placeholder="City *" required>
+    <input type="text" id="name" placeholder="Full Name *" required />
+    <input type="email" id="email" placeholder="Email *" required />
+    <input type="text" id="phone" placeholder="Phone *" required />
+    <input type="text" id="city" placeholder="City *" required />
     <button type="submit">Register</button>
   </form>
 
   <!-- OTP SIGNUP -->
-  <button id="otpSignupBtn" style="
-      margin-top:12px;width:100%;padding:12px;
-      background:#d4a017;border-radius:10px;
-      font-weight:600;cursor:pointer;">
+  <button id="otpSignupBtn" style="margin-top:12px;width:100%;padding:12px;
+      background:#d4a017;border-radius:10px;font-weight:600;cursor:pointer;">
     Sign Up with Phone (OTP)
   </button>
 
   <div id="otpBox" style="display:none;margin-top:10px;">
-    <input type="text" id="otpInput" placeholder="Enter OTP *">
+    <input type="text" id="otpInput" placeholder="Enter OTP *" />
     <button id="verifyOtpBtn">Verify OTP</button>
   </div>
 
@@ -39,18 +36,14 @@
   <div id="recaptcha-container"></div>
 
   <!-- GOOGLE SIGNUP -->
-  <button id="googleRegisterBtn" style="
-      margin-top:12px;width:100%;padding:12px;
-      background:white;color:black;border-radius:10px;
-      font-weight:600;cursor:pointer;">
+  <button id="googleRegisterBtn" style="margin-top:12px;width:100%;padding:12px;
+      background:white;color:black;border-radius:10px;font-weight:600;cursor:pointer;">
     Sign Up with Google
   </button>
 
   <!-- APPLE SIGNUP -->
-  <button id="appleRegisterBtn" style="
-      margin-top:12px;width:100%;padding:12px;
-      background:black;color:white;border-radius:10px;
-      font-weight:600;cursor:pointer;">
+  <button id="appleRegisterBtn" style="margin-top:12px;width:100%;padding:12px;
+      background:black;color:white;border-radius:10px;font-weight:600;cursor:pointer;">
     Sign Up with Apple
   </button>
 
@@ -58,78 +51,11 @@
     Already a member?
     <a href="customer-login.html" style="color:#d4a017;">Login</a>
   </p>
-
 </div>
 
-<script type="module">
-import { 
-  auth, googleProvider, appleProvider,
-  RecaptchaVerifier, signInWithPhoneNumber,
-  signInWithPopup 
-} from "../scripts/firebase.js";
-
-let confirmationResult;
-
-/* ⭐ CORRECT FIREBASE v10+ RECAPTCHA ⭐ */
-window.recaptchaVerifier = new RecaptchaVerifier(
-  auth,                 // FIRST: auth object
-  "recaptcha-container", // SECOND: container ID
-  {
-    size: "invisible"
-  }
-);
-
-await window.recaptchaVerifier.render();
-
-/* ⭐ SEND OTP */
-document.getElementById("otpSignupBtn").onclick = async () => {
-  const phone = document.getElementById("phone").value;
-  if (!phone) return alert("Enter phone number!");
-
-  const number = "+91" + phone;
-
-  try {
-    confirmationResult = await signInWithPhoneNumber(
-      auth,
-      number,
-      window.recaptchaVerifier
-    );
-
-    document.getElementById("otpBox").style.display = "block";
-    alert("OTP sent!");
-  } catch (err) {
-    alert("OTP failed: " + err.message);
-  }
-};
-
-/* ⭐ VERIFY OTP */
-document.getElementById("verifyOtpBtn").onclick = async () => {
-  const otp = document.getElementById("otpInput").value;
-  if (!otp) return alert("Enter OTP");
-
-  try {
-    await confirmationResult.confirm(otp);
-    alert("Account created!");
-    window.location.href = "../customer/customer-dashboard.html";
-  } catch {
-    alert("Invalid OTP");
-  }
-};
-
-/* ⭐ GOOGLE SIGNUP */
-document.getElementById("googleRegisterBtn").onclick = async () => {
-  await signInWithPopup(auth, googleProvider);
-  window.location.href = "../customer/customer-dashboard.html";
-};
-
-/* ⭐ APPLE SIGNUP */
-document.getElementById("appleRegisterBtn").onclick = async () => {
-  await signInWithPopup(auth, appleProvider);
-  window.location.href = "../customer/customer-dashboard.html";
-};
-
-</script>
-
+<!-- ⭐ VERY IMPORTANT: LINK EXTERNAL JS -->
+<script type="module" src="../scripts/customer-register.js"></script>
 <script src="../scripts/smooth-ui.js"></script>
+
 </body>
 </html>
