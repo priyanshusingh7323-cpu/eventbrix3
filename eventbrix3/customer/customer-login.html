@@ -1,51 +1,104 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Login | EventBrix</title>
-<link rel="stylesheet" href="../styles.css" />
-</head>
+// IMPORTS MUST ALWAYS BE AT TOP
+import {
+  auth, db, googleProvider, appleProvider,
+  RecaptchaVerifier, signInWithPhoneNumber,
+  signInWithPopup
+} from "../scripts/firebase.js";
 
-<body>
+import { doc, getDoc }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<h1 class="title">Customer Login</h1>
+import { signOut }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-<div class="form-box">
 
-  <button id="otpLoginBtn" style="
-      margin-top:12px;width:100%;padding:12px;
-      background:#d4a017;border-radius:10px;
-      font-weight:600;cursor:pointer;">
-    Login with Phone (OTP)
-  </button>
+// WAIT FOR DOM
+document.addEventListener("DOMContentLoaded", () => {
 
-  <div id="otpLoginBox" style="display:none;margin-top:10px;">
-    <input type="text" id="otpLoginInput" placeholder="Enter OTP *" />
-    <button id="verifyOtpLoginBtn">Verify OTP</button>
-  </div>
+(async () => {
 
-  <div id="recaptcha-login-container"></div>
+console.log("customer-login.js loaded");
 
-  <!-- GOOGLE LOGIN -->
-  <button id="googleLoginBtn" style="
-      margin-top:12px;width:100%;padding:12px;
-      background:white;color:black;border-radius:10px;
-      font-weight:600;cursor:pointer;">
-    Login with Google
-  </button>
+// LOGOUT OLD USER
+await signOut(auth);
 
-  <p style="text-align:center;margin-top:10px;">
-    Not a member?
-    <a href="customer-register.html" style="color:#d4a017;">Sign Up</a>
-  </p>
+let loginConfirmation;
 
-</div>
 
-<!-- IMPORTANT: external JS load -->
-<script type="module" src="../scripts/customer-login.js"></script>
+// RECAPTCHA
+window.recaptchaLoginVerifier = new RecaptchaVerifier(
+  auth,
+  "recaptcha-login-container",
+  { size: "invisible" }
+);
 
-<script src="../scripts/smooth-ui.js"></script>
+await window.recaptchaLoginVerifier.render();
 
-</body>
-</html>
+
+// CHECK CUSTOMER
+async function verifyCustomer() {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  const snap = await getDoc(doc(db, "customers", user.uid));
+
+  if (!snap.exists()) {
+    alert("Customer not registered!");
+    await signOut(auth);
+    return false;
+  }
+
+  return true;
+}
+
+
+// OTP LOGIN
+document.getElementById("otpLoginBtn").onclick = async () => {
+  const phone = "+91" + prompt("Enter phone number:");
+
+  try {
+    loginConfirmation = await signInWithPhoneNumber(
+      auth,
+      phone,
+      window.recaptchaLoginVerifier
+    );
+
+    document.getElementById("otpLoginBox").style.display = "block";
+    alert("OTP sent!");
+  } catch (e) {
+    alert("OTP failed: " + e.message);
+  }
+};
+
+
+// OTP VERIFY
+document.getElementById("verifyOtpLoginBtn").onclick = async () => {
+  try {
+    await loginConfirmation.confirm(
+      document.getElementById("otpLoginInput").value
+    );
+
+    if (await verifyCustomer()) {
+      window.location.href = "../customer/customer-dashboard.html";
+    }
+  } catch {
+    alert("Wrong OTP!");
+  }
+};
+
+
+// GOOGLE LOGIN
+document.getElementById("googleLoginBtn").onclick = async () => {
+  try {
+    await signInWithPopup(auth, googleProvider);
+
+    if (await verifyCustomer()) {
+      window.location.href = "../customer/customer-dashboard.html";
+    }
+  } catch (e) {
+    alert("Google login failed: " + e.message);
+  }
+};
+
+})();
+});
