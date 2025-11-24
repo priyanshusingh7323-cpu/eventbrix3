@@ -1,104 +1,134 @@
 /* ===============================
-   ADVANCED VENDOR CARD (PREMIUM)
+   PREMIUM BLACK-GOLD VENDOR CARD
+   Fully Mobile Optimized
 ================================ */
 
 .vendor-card-adv {
   position: relative;
-  background: rgba(20,20,20,0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
+  background: #0e0e0e;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(255, 210, 74, 0.35);
-  box-shadow: 0 0 30px rgba(255,210,74,0.15);
+
+  /* Better border glow */
+  border: 1px solid rgba(255, 210, 74, 0.4);
+  box-shadow: 0 0 18px rgba(255, 210, 74, 0.18);
+
   transition: transform .25s ease, box-shadow .25s ease;
-  cursor: pointer;
 }
 
 .vendor-card-adv:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 0 35px rgba(255,210,74,0.25);
+  transform: translateY(-6px);
+  box-shadow: 0 0 24px rgba(255,210,74,0.28);
 }
 
-/* IMAGE */
+/* ================= IMAGE ================= */
 .vendor-img-box {
   width: 100%;
-  height: 190px;
-  overflow: hidden;
+  height: 170px;
 }
 
 .vendor-img-box img {
   width: 100%;
-  height: 190px;
+  height: 100%;
   object-fit: cover;
   transition: transform .35s ease;
 }
 
 .vendor-card-adv:hover .vendor-img-box img {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
-/* BADGE */
+/* =============== VERIFIED BADGE =============== */
 .vendor-badge {
   position: absolute;
   top: 12px;
   left: 12px;
-  background: linear-gradient(45deg, #ffd24a, #ffae00);
-  padding: 6px 12px;
-  border-radius: 30px;
-  color: #000;
-  font-size: 13px;
-  font-weight: 700;
+
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+
+  background: rgba(255, 210, 74, 0.95);
+  padding: 6px 12px;
+  border-radius: 20px;
+
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #000;
 }
 
-/* CONTENT */
+/* =============== CARD CONTENT =============== */
 .vendor-details {
-  padding: 15px 18px;
+  padding: 14px 16px;
 }
 
 .vendor-name {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
   color: #ffd24a;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .vendor-sub {
-  color: #ddd;
-  font-size: 14px;
-  margin-bottom: 10px;
+  color: #ccc;
+  font-size: 13px;
+  margin-bottom: 6px;
 }
 
+/* ============ LOCATION + RATING ROW ============ */
 .vendor-row {
   display: flex;
   justify-content: space-between;
-  color: #ccc;
-  font-size: 14px;
-  margin-bottom: 4px;
+  align-items: center;
+  color: #e9e9e9;
+  font-size: 13px;
+  margin-bottom: 6px;
 }
 
+/* ================= PRICE ================= */
 .vendor-price {
   font-size: 17px;
+  font-weight: 700;
   color: #ffd24a;
-  font-weight: 600;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
-/* BUTTON */
+/* ================ BUTTON ================= */
 .vendor-view-btn {
-  display: block;
-  text-align: center;
   background: linear-gradient(45deg, #ffd24a, #ffb800);
-  padding: 10px;
-  border-radius: 10px;
-  font-weight: 700;
   color: #000;
-  margin-top: 12px;
-  transition: .2s;
+  padding: 12px;
+  text-align: center;
+  border-radius: 10px;
+  margin-top: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: opacity .2s ease;
 }
 
 .vendor-view-btn:hover {
-  opacity: 0.85;
+  opacity: .85;
+}
+
+/* ================= MOBILE FIXES ================= */
+@media (max-width: 500px) {
+  .vendor-card-adv {
+    border-radius: 14px;
+  }
+
+  .vendor-img-box {
+    height: 160px;
+  }
+
+  .vendor-name {
+    font-size: 17px;
+  }
+
+  .vendor-price {
+    font-size: 16px;
+  }
+
+  .vendor-view-btn {
+    padding: 10px;
+  }
 }
