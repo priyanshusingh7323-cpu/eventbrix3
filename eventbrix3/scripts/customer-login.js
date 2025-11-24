@@ -1,4 +1,4 @@
-// IMPORTS MUST BE AT TOP LEVEL (outside any function)
+// IMPORTS MUST ALWAYS BE AT TOP
 import {
   auth, db, googleProvider, appleProvider,
   RecaptchaVerifier, signInWithPhoneNumber,
@@ -12,13 +12,18 @@ import { signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 
-// WRAP ONLY THE REST OF THE CODE
+// WAIT FOR DOM
+document.addEventListener("DOMContentLoaded", () => {
+
 (async () => {
+
+console.log("customer-login.js loaded");
+
+// LOGOUT OLD USER
+await signOut(auth);
 
 let loginConfirmation;
 
-// AUTO LOGOUT
-await signOut(auth);
 
 // RECAPTCHA
 window.recaptchaLoginVerifier = new RecaptchaVerifier(
@@ -29,7 +34,8 @@ window.recaptchaLoginVerifier = new RecaptchaVerifier(
 
 await window.recaptchaLoginVerifier.render();
 
-// VERIFY CUSTOMER
+
+// CHECK CUSTOMER
 async function verifyCustomer() {
   const user = auth.currentUser;
   if (!user) return false;
@@ -37,7 +43,7 @@ async function verifyCustomer() {
   const snap = await getDoc(doc(db, "customers", user.uid));
 
   if (!snap.exists()) {
-    alert("Customer account not found!");
+    alert("Customer not registered!");
     await signOut(auth);
     return false;
   }
@@ -45,12 +51,10 @@ async function verifyCustomer() {
   return true;
 }
 
+
 // OTP LOGIN
 document.getElementById("otpLoginBtn").onclick = async () => {
-  const phoneRaw = prompt("Enter phone number:");
-  if (!phoneRaw) return;
-
-  const phone = "+91" + phoneRaw;
+  const phone = "+91" + prompt("Enter phone number:");
 
   try {
     loginConfirmation = await signInWithPhoneNumber(
@@ -65,6 +69,7 @@ document.getElementById("otpLoginBtn").onclick = async () => {
     alert("OTP failed: " + e.message);
   }
 };
+
 
 // OTP VERIFY
 document.getElementById("verifyOtpLoginBtn").onclick = async () => {
@@ -81,6 +86,7 @@ document.getElementById("verifyOtpLoginBtn").onclick = async () => {
   }
 };
 
+
 // GOOGLE LOGIN
 document.getElementById("googleLoginBtn").onclick = async () => {
   try {
@@ -94,17 +100,5 @@ document.getElementById("googleLoginBtn").onclick = async () => {
   }
 };
 
-// APPLE LOGIN
-document.getElementById("appleLoginBtn").onclick = async () => {
-  try {
-    await signInWithPopup(auth, appleProvider);
-
-    if (await verifyCustomer()) {
-      window.location.href = "../customer/customer-dashboard.html";
-    }
-  } catch (e) {
-    alert("Apple login failed: " + e.message);
-  }
-};
-
 })();
+});
