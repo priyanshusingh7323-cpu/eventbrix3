@@ -4,79 +4,112 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Dashboard | EventBrix</title>
+
+<!-- OLD CSS (don’t touch) -->
 <link rel="stylesheet" href="../styles.css">
+
+<!-- NEW PREMIUM DASHBOARD CSS -->
+<link rel="stylesheet" href="../styles-dashboard.css">
+
 </head>
 
 <body>
 
-<h1 class="title">My Dashboard</h1>
-
-<!-- PROFILE -->
-<div class="section" id="profileTab">
-  <h2>My Profile</h2>
-  <p><strong>Name:</strong> <span id="pName"></span></p>
-  <p><strong>Email:</strong> <span id="pEmail"></span></p>
-  <p><strong>Phone:</strong> <span id="pPhone"></span></p>
-  <p><strong>City:</strong> <span id="pCity"></span></p>
-  <p><strong>Joined:</strong> <span id="pJoined"></span></p>
-
-  <!-- LOGOUT BUTTON -->
-  <button id="logoutBtn" style="
-    margin-top:15px;
-    padding:12px;
-    width:100%;
-    background:#d9534f;
-    color:white;
-    font-weight:600;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;">
-    Logout
-  </button>
-
+<!-- HEADER -->
+<div class="dash-header">
+  <h1>My Dashboard</h1>
 </div>
 
-<!-- WISHLIST -->
+<!-- PROFILE CARD -->
+<div class="profile-card">
+  <div class="profile-info">
+    <h2 id="pName"></h2>
+    <p id="pEmail"></p>
+    <p id="pPhone"></p>
+    <p id="pCity"></p>
+    <p><small id="pJoined"></small></p>
+  </div>
+
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</div>
+
+<!-- SECTIONS -->
+<div class="section" id="profileTab"></div>
+
 <div class="section" id="wishlistTab" style="display:none;">
-  <h2>Saved Vendors</h2>
+  <h2 class="section-title">Saved Vendors</h2>
   <div id="wishlistBox"></div>
 </div>
 
-<!-- RECENT -->
 <div class="section" id="recentTab" style="display:none;">
-  <h2>Recently Viewed</h2>
+  <h2 class="section-title">Recently Viewed</h2>
   <div id="recentBox"></div>
 </div>
 
-<!-- BOOKINGS -->
 <div class="section" id="bookingsTab" style="display:none;">
-  <h2>My Bookings</h2>
+  <h2 class="section-title">My Bookings</h2>
   <div id="bookingBox"></div>
 </div>
 
-<!-- CHATS -->
 <div class="section" id="chatsTab" style="display:none;">
-  <h2>My Chats</h2>
+  <h2 class="section-title">My Chats</h2>
   <div id="chatBox"></div>
 </div>
 
-<!-- REVIEWS -->
 <div class="section" id="reviewsTab" style="display:none;">
-  <h2>My Reviews</h2>
+  <h2 class="section-title">My Reviews</h2>
   <div id="reviewBox"></div>
 </div>
 
+<!-- CHAT SLIDER -->
+<div id="chatPanel" class="chat-slider">
+  <div class="chat-header">
+    <span>Chat Support</span>
+    <button id="closeChatPanel">✕</button>
+  </div>
+  <iframe src="/customer/chat.html" class="chat-iframe"></iframe>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" class="overlay"></div>
+
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <a class="tabBtn" data-tab="profileTab">👤</a>
-  <a class="tabBtn" data-tab="wishlistTab">❤️</a>
-  <a class="tabBtn" data-tab="recentTab">🕒</a>
-  <a class="tabBtn" data-tab="bookingsTab">📅</a>
-  <a class="tabBtn" data-tab="chatsTab">💬</a>
+  <a class="tabBtn active" data-tab="profileTab">
+    <img src="/icons/home-gold.png"><span>Home</span>
+  </a>
+
+  <a class="tabBtn" data-tab="wishlistTab">
+    <img src="/icons/heart-gold.png"><span>Saved</span>
+  </a>
+
+  <a class="tabBtn" data-tab="recentTab">
+    <img src="/icons/time-gold.png"><span>Recent</span>
+  </a>
+
+  <a class="tabBtn" data-tab="bookingsTab">
+    <img src="/icons/calendar-gold.png"><span>Bookings</span>
+  </a>
+
+  <a id="openChatPanel">
+    <img src="/icons/chat-gold.png"><span>Chat</span>
+  </a>
 </div>
 
 <script type="module" src="../scripts/customer-dashboard.js"></script>
 <script src="../scripts/smooth-ui.js"></script>
+
+<script>
+document.getElementById("openChatPanel").addEventListener("click", () => {
+  document.getElementById("chatPanel").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
+});
+
+document.getElementById("closeChatPanel").addEventListener("click", () => {
+  document.getElementById("chatPanel").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+});
+</script>
 
 </body>
 </html>

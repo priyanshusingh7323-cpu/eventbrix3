@@ -1,0 +1,137 @@
+/* PREMIUM DARK + GOLD THEME */
+body {
+  background: #0d0d0d;
+  color: white;
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* HEADER */
+.dash-header {
+  background: #111;
+  padding: 18px;
+  text-align: center;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 200, 50, 0.2);
+}
+
+/* PROFILE CARD */
+.profile-card {
+  background: #1b1b1b;
+  margin: 15px;
+  padding: 18px;
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(255, 200, 60, 0.12);
+}
+
+.profile-card p {
+  margin: 3px 0;
+  opacity: 0.8;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  background: #d9534f;
+  color: white;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* SECTION TITLES */
+.section-title {
+  padding: 10px 15px;
+  font-size: 20px;
+  color: gold;
+}
+
+/* VENDOR CARDS */
+.vendor-card, .booking-card, .chat-card {
+  background: #161616;
+  border: 1px solid rgba(255, 200, 60, 0.2);
+  border-radius: 12px;
+  margin: 10px 15px;
+  padding: 12px;
+  color: white;
+}
+
+.vendor-card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #111;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 200, 60, 0.2);
+}
+
+.bottom-nav a {
+  width: 20%;
+  text-align: center;
+  color: gold;
+  font-size: 12px;
+}
+
+.bottom-nav img {
+  width: 22px;
+  display: block;
+  margin: 0 auto -2px auto;
+}
+
+/* CHAT SLIDER */
+.chat-slider {
+  position: fixed;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 80%;
+  background: #1a1a1a;
+  box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+  transition: 0.3s ease;
+  z-index: 1002;
+}
+
+.chat-slider.open {
+  bottom: 0;
+}
+
+.chat-header {
+  background: #111;
+  color: gold;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,200,60,0.2);
+}
+
+.chat-iframe {
+  width: 100%;
+  height: calc(100% - 50px);
+  border: none;
+}
+
+/* OVERLAY */
+.overlay {
+  display: none;
+}
+
+.overlay.show {
+  display: block;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 1001;
+}
