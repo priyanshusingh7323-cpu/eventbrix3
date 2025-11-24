@@ -32,10 +32,8 @@ async function loadVendors() {
     const rating = v.rating || "4.7";
     const verified = v.isVerified !== false;
 
-    // ⭐ LOCALITY ADDED
-    let locationText = v.locality
-      ? `${v.locality}, ${v.city}`
-      : v.city;
+    // ⭐ LOCALITY ONLY
+    let locationText = v.locality || "Location";
 
     list.innerHTML += `
       <div class="vendor-card-adv" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">

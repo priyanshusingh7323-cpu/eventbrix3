@@ -79,6 +79,38 @@ document.getElementById("photoUpload").addEventListener("change", async (e) => {
 });
 
 /* ------------------------------------------
+   GOOGLE AUTOCOMPLETE LOCALITY EXTRACTION
+------------------------------------------- */
+let selectedLocality = "";
+
+window.initAutocomplete = function () {
+  const input = document.getElementById("cityInput");
+
+  const autocomplete = new google.maps.places.Autocomplete(input, {
+    types: ["geocode"],
+    componentRestrictions: { country: "in" }
+  });
+
+  autocomplete.addListener("place_changed", () => {
+    const place = autocomplete.getPlace();
+
+    let locality = "";
+
+    place.address_components.forEach((c) => {
+      if (c.types.includes("sublocality") || c.types.includes("sublocality_level_1")) {
+        locality = c.long_name;
+      }
+      if (c.types.includes("locality")) {
+        locality = c.long_name;
+      }
+    });
+
+    selectedLocality = locality || input.value;
+    document.getElementById("vendorLocality").value = selectedLocality;
+  });
+};
+
+/* ------------------------------------------
    SUBMIT FORM
 ------------------------------------------- */
 document.getElementById("vendorRegisterForm").addEventListener("submit", async (e) => {
@@ -99,25 +131,12 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
   const experience = Number(e.target.experience.value || 0);
   const teamSize = Number(e.target.teamSize.value || 0);
 
-  // ⭐ NEW LOCATION FIELDS
+  // ⭐ Latitude & longitude
   const latitude = Number(document.getElementById("vendorLat").value || 0);
   const longitude = Number(document.getElementById("vendorLng").value || 0);
 
-  // ⭐⭐⭐ NEW FEATURE: AUTO LOCALITY EXTRACT (Chattarpur / Dwarka / Munirka etc.)
-  let locality = "";
-  const cityLower = city.toLowerCase();
-
-  if (cityLower.includes("chattarpur")) locality = "Chattarpur";
-  else if (cityLower.includes("dwarka")) locality = "Dwarka";
-  else if (cityLower.includes("munirka")) locality = "Munirka";
-  else if (cityLower.includes("rohini")) locality = "Rohini";
-  else if (cityLower.includes("saket")) locality = "Saket";
-  else if (cityLower.includes("noida")) locality = "Noida";
-  else if (cityLower.includes("gurgaon")) locality = "Gurgaon";
-  else if (cityLower.includes("janakpuri")) locality = "Janakpuri";
-  else if (cityLower.includes("lajpat")) locality = "Lajpat Nagar";
-  else if (cityLower.includes("karol")) locality = "Karol Bagh";
-  else locality = city; // fallback
+  // ⭐ FINAL LOCALITY (GOOGLE EXTRACTED)
+  const locality = document.getElementById("vendorLocality").value || selectedLocality || "";
 
   const perPlate =
     category === "Banquet / Venue" ? Number(e.target.perPlate.value || 0) : null;
@@ -144,7 +163,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
     businessName,
     ownerName,
     city,
-    locality,   // ⭐ ADDED
+    locality,   // ⭐ SAVE LOCALITY
     latitude,
     longitude,
     category,
@@ -162,9 +181,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
   };
 
   try {
-    /* ------------------------------------------
-       UPDATE MAIN VENDOR PROFILE (MERGE)
-    ------------------------------------------- */
+    /* UPDATE MAIN PROFILE */
     await setDoc(
       doc(db, "vendors", vendorId),
       {
@@ -172,7 +189,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
         ownerName,
         businessName,
         city,
-        locality,    // ⭐ ADDED
+        locality,  // ⭐ SAVE LOCALITY
         latitude,
         longitude,
         mainCategory: category,
@@ -191,9 +208,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
       { merge: true }
     );
 
-    /* ------------------------------------------
-       CREATE LISTING DOCUMENT
-    ------------------------------------------- */
+    /* CREATE LISTING */
     await setDoc(
       doc(db, "vendors", vendorId, "listings", category),
       listingData

@@ -25,10 +25,8 @@ async function loadVendors() {
     const img = v.photos?.[0] || "/images/default.jpg";
     const price = v.price || "--";
 
-    // ⭐ LOCALITY FIX ADDED
-    let locationText = v.locality
-      ? `${v.locality}, ${v.city}`
-      : v.city;
+    // ⭐ LOCALITY ONLY
+    let locationText = v.locality || "Location";
 
     list.innerHTML += `
       <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
@@ -43,9 +41,7 @@ async function loadVendors() {
 
           <p class="vendor-city">📍 ${locationText}</p>
 
-          <p class="vendor-price">
-            Starting at <strong>₹${price}</strong>
-          </p>
+          <p class="v-price">Starting at <strong>₹${price}</strong></p>
 
           <button class="vendor-view-btn">View Details</button>
         </div>

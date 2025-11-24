@@ -63,17 +63,10 @@ async function loadVendors() {
     const rating   = v.rating || "4.8";
     const verified = v.isVerified !== false;
 
-    /* ⭐ NEW: LOCALITY TEXT BUILD */
-    let locationText = "";
-    if (v.locality) {
-      // Example: Chattarpur, Delhi
-      const cityName = v.city?.split(" ")[0] || "Delhi";  
-      locationText = `${v.locality}, ${cityName}`;
-    } else {
-      // fallback
-      locationText = v.city || "Location not available";
-    }
+    /* ⭐ ONLY LOCALITY (no city) */
+    let locationText = v.locality || "Location";
 
+    /* ⭐ DISTANCE IF USER ALLOWS */
     let distance = "";
     if (userLat && userLng && v.latitude && v.longitude) {
       const d = haversine(userLat, userLng, v.latitude, v.longitude);
@@ -96,7 +89,7 @@ async function loadVendors() {
           <div class="vendor-sub">${v.subcategory}</div>
 
           <div class="vendor-row">
-            <span>📍 ${locationText}</span>   <!-- ⭐ UPDATED -->
+            <span>📍 ${locationText}</span>
             <span>⭐ ${rating}</span>
           </div>
 

@@ -44,10 +44,8 @@ function renderVendors(data) {
 
     const img = v.photos?.[0] || "/images/default.jpg";
 
-    // ⭐ NEW: locality merge
-    let locationText = v.locality
-      ? `${v.locality}, ${v.city}`
-      : v.city;
+    // ⭐ LOCALITY ONLY
+    let locationText = v.locality || "Location";
 
     list.innerHTML += `
       <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${v.id}'">
@@ -82,7 +80,7 @@ document.getElementById("cityFilter").addEventListener("change", (e) => {
   const city = e.target.value;
   if (!city) return renderVendors(allVendors);
   const filtered = allVendors.filter(
-    (v) => v.city.toLowerCase() === city.toLowerCase()
+    (v) => (v.city || "").toLowerCase() === city.toLowerCase()
   );
   renderVendors(filtered);
 });

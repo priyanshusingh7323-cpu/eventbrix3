@@ -7,6 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 async function loadVendors() {
+
   const list = document.getElementById("vendorList");
   list.innerHTML = "Loading...";
 
@@ -19,36 +20,43 @@ async function loadVendors() {
   const snap = await getDocs(q);
   list.innerHTML = "";
 
+  if (snap.empty) {
+    list.innerHTML = "<p style='text-align:center;color:#aaa;'>No vendors found</p>";
+    return;
+  }
+
   snap.forEach((docx) => {
     const v = docx.data();
 
     const img = v.photos?.[0] || "/images/default.jpg";
+    const rating = v.rating || "4.8";
 
-    // ⭐ LOCALITY FIX
-    let locationText = v.locality
-      ? `${v.locality}, ${v.city}`
-      : v.city;
+    // ⭐ LOCALITY ONLY
+    let locationText = v.locality || "Location";
 
     list.innerHTML += `
-      <div class="vendor-card" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
-
-        <div class="vendor-card-img">
+      <div class="vendor-card-adv" onclick="location.href='/vendor/vendor-profile.html?id=${docx.id}'">
+        
+        <div class="vendor-img-box">
           <img src="${img}">
-          <span class="vendor-badge">📸 Pro Shoot</span>
         </div>
 
-        <div class="vendor-card-content">
-          <h3>${v.businessName}</h3>
+        <div class="vendor-details">
 
-          <p class="vendor-city">📍 ${locationText}</p>
+          <div class="vendor-name">${v.businessName}</div>
 
-          <p class="vendor-price">
-            Starting at <strong>₹${v.price}</strong>
-          </p>
+          <div class="vendor-sub">${v.subcategory}</div>
 
-          <button class="vendor-view-btn">View Details</button>
+          <div class="vendor-row">
+            <span>📍 ${locationText}</span>
+            <span>⭐ ${rating}</span>
+          </div>
+
+          <div class="vendor-price">₹${v.price?.toLocaleString() || "--"}</div>
+
+          <div class="vendor-view-btn">View Details</div>
+
         </div>
-
       </div>
     `;
   });
