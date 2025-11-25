@@ -13,7 +13,8 @@ import {
   where,
   updateDoc,
   onSnapshot,
-  orderBy
+  orderBy,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ======================================
@@ -107,7 +108,7 @@ async function loadSuggested(mainCategory) {
 }
 
 /* ======================================
-   SAVE
+   SAVE VENDOR (WISHLIST)
 ====================================== */
 document.getElementById("saveVendorBtn").onclick = async () => {
   const user = auth.currentUser;
@@ -138,9 +139,22 @@ document.getElementById("closePopupBtn").onclick = () => {
   overlay.style.display = "none";
 };
 
+/* ======================================
+   FIXED BOOKING SUBMIT
+====================================== */
 document.getElementById("submitBookingBtn").onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) return alert("Please login first!");
+
+  // Fetch vendor name directly from page
+  const vendorName = document.getElementById("vendorName").innerText;
+
+  // Get form values
   const data = {
     vendorId,
+    vendorName,
+    customerId: user.uid,
+
     customerName: cName.value,
     phone: cPhone.value,
     eventDate: cDate.value,
@@ -148,13 +162,25 @@ document.getElementById("submitBookingBtn").onclick = async () => {
     venueLocation: cVenue.value,
     guestCount: cGuests.value,
     message: cMsg.value,
-    createdAt: Date.now(),
-    status: "pending"
+
+    amount: 0,             // you can upgrade later
+
+    status: "pending",     // admin approval needed
+    paymentStatus: "not_paid",
+    visitStatus: "not_visited",
+    payoutStage: 0,
+
+    createdAt: Date.now()
   };
 
-  if (!data.customerName || !data.phone) return alert("Required!");
+  // Required field validation
+  if (!data.customerName || !data.phone || !data.eventDate) {
+    return alert("Please fill required fields");
+  }
 
-  await addDoc(collection(db, "adminRequests"), data);
+  // SAVE TO BOOKINGS (CORRECT)
+  await addDoc(collection(db, "bookings"), data);
+
   popup.style.display = "none";
   overlay.style.display = "none";
 
@@ -163,7 +189,7 @@ document.getElementById("submitBookingBtn").onclick = async () => {
 };
 
 /* ======================================================
-   CHAT DRAWER (FULL PREMIUM WITH TYPING, SEEN, TIME)
+   CHAT DRAWER (unchanged)
 ====================================================== */
 
 const drawer = document.getElementById("chatDrawer");
@@ -188,7 +214,7 @@ drawerClose.onclick = () => {
   drawer.style.right = "-360px";
 };
 
-/* FETCH OR CREATE CHAT */
+/* CHAT LOGIC — NO CHANGE */
 async function startDrawerChat() {
   auth.onAuthStateChanged(async (user) => {
     if (!user) return alert("Login required!");
@@ -223,7 +249,6 @@ async function startDrawerChat() {
   });
 }
 
-/* REALTIME MESSAGES */
 function listenMessages() {
   const q = query(
     collection(db, "chats", drawerChatId, "messages"),
@@ -260,7 +285,6 @@ function listenMessages() {
   });
 }
 
-/* SEND MESSAGE */
 drawerSend.onclick = async () => {
   const text = drawerInput.value.trim();
   if (!text) return;
@@ -283,7 +307,6 @@ drawerSend.onclick = async () => {
   });
 };
 
-/* TYPING INDICATOR */
 drawerInput.addEventListener("input", async () => {
   const user = auth.currentUser;
   if (!user) return;
@@ -305,15 +328,10 @@ function listenTyping() {
     const data = d.data();
     if (!data) return;
 
-    if (data.vendorTyping) {
-      typingStatus.style.display = "inline";
-    } else {
-      typingStatus.style.display = "none";
-    }
+    typingStatus.style.display = data.vendorTyping ? "inline" : "none";
   });
 }
 
-/* SEEN SYSTEM */
 function listenSeen() {
   onSnapshot(
     query(

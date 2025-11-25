@@ -1,7 +1,6 @@
 // ===============================
-// SECURED ADMIN DASHBOARD
+// ADMIN AUTH CHECK
 // ===============================
-
 import { auth, db } from "./firebase.js";
 import {
   collection,
@@ -10,133 +9,190 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+import { processRefund } from "./refund.js";
+import { releasePayout } from "./payout.js";
 
-// SECURITY CHECK
+// AUTH GUARD
 auth.onAuthStateChanged((user) => {
-  if (!user) {
-    window.location.href = "/admin/admin-login.html";
-  } else if (user.email !== "admin@eventbrix.com") {
-    auth.signOut();
-    alert("Unauthorized access!");
+  if (!user || user.email !== "admin@eventbrix.com") {
+    alert("Unauthorized!");
     window.location.href = "/admin/admin-login.html";
   }
 });
 
 
 // ===============================
-// LOAD PENDING VENDORS
+// 1) LOAD PENDING VENDORS
 // ===============================
+export async function loadPendingVendors() {
+  const box = document.getElementById("vendorsBox");
+  box.innerHTML = "";
 
-const pendingBox = document.getElementById("pendingVendors");
+  const snap = await getDocs(collection(db, "vendors"));
 
-async function loadPendingVendors() {
-  const snapshot = await getDocs(collection(db, "vendors"));
-  pendingBox.innerHTML = "";
-
-  snapshot.forEach((v) => {
+  snap.forEach((v) => {
     const d = v.data();
 
     if (d.status === "pending") {
-      const card = document.createElement("div");
-      card.classList.add("admin-card");
-
-      card.innerHTML = `
-        <h3>${d.businessName}</h3>
-        <p>${d.city}</p>
-        <p>Category: ${d.mainCategory || "N/A"}</p>
-
-        <button class="approve-btn">Approve</button>
-        <button class="reject-btn">Reject</button>
+      box.innerHTML += `
+        <div class="admin-card">
+          <h3>${d.businessName}</h3>
+          <p>${d.city}</p>
+          <button class="green" onclick="approveVendor('${v.id}')">Approve</button>
+          <button class="danger" onclick="rejectVendor('${v.id}')">Reject</button>
+        </div>
       `;
+    }
+  });
+}
 
-      // APPROVE VENDOR
-      card.querySelector(".approve-btn").onclick = async () => {
-        await updateDoc(doc(db, "vendors", v.id), { status: "approved" });
-        alert("Vendor Approved");
-        loadDashboard();
-      };
+window.approveVendor = async (id) => {
+  await updateDoc(doc(db, "vendors", id), { status: "approved" });
+  loadDashboard();
+};
 
-      // REJECT VENDOR
-      card.querySelector(".reject-btn").onclick = async () => {
-        await updateDoc(doc(db, "vendors", v.id), { status: "rejected" });
-        alert("Vendor Rejected");
-        loadDashboard();
-      };
+window.rejectVendor = async (id) => {
+  await updateDoc(doc(db, "vendors", id), { status: "rejected" });
+  loadDashboard();
+};
 
-      pendingBox.appendChild(card);
+
+// ===============================
+// 2) LOAD PENDING BOOKINGS
+// ===============================
+export async function loadPendingBookings() {
+  const box = document.getElementById("pendingBookingsBox");
+  box.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "bookings"));
+
+  snap.forEach((b) => {
+    const d = b.data();
+
+    if (d.status === "pending") {
+      box.innerHTML += `
+        <div class="admin-card">
+          <h3>${d.vendorName}</h3>
+          <p><strong>Customer:</strong> ${d.customerName}</p>
+          <p><strong>Event:</strong> ${d.eventCity} — ${d.eventDate}</p>
+
+          <button class="green" onclick="approveBooking('${b.id}')">Approve</button>
+          <button class="danger" onclick="rejectBooking('${b.id}')">Reject</button>
+        </div>
+      `;
+    }
+  });
+}
+
+window.approveBooking = async (id) => {
+  await updateDoc(doc(db, "bookings", id), { status: "approved" });
+  loadDashboard();
+};
+
+window.rejectBooking = async (id) => {
+  await updateDoc(doc(db, "bookings", id), { status: "rejected" });
+  loadDashboard();
+};
+
+
+// ===============================
+// 3) APPROVED BOOKINGS
+// ===============================
+export async function loadApprovedBookings() {
+  const box = document.getElementById("approvedBookingsBox");
+  box.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "bookings"));
+
+  snap.forEach((b) => {
+    const d = b.data();
+
+    if (d.status === "approved") {
+      box.innerHTML += `
+        <div class="admin-card">
+          <h3>${d.vendorName}</h3>
+          <p>${d.customerName}</p>
+          <p><strong>Status:</strong> ${d.status}</p>
+        </div>
+      `;
     }
   });
 }
 
 
-
 // ===============================
-// LOAD PENDING BOOKINGS (adminRequests)
+// 4) REFUND PANEL
 // ===============================
+export async function loadRefundPanel() {
+  const box = document.getElementById("refundBox");
+  box.innerHTML = "";
 
-const bookingBox = document.createElement("div");
-bookingBox.innerHTML = `<h3 style="margin-top:30px;">Pending Bookings</h3>`;
-document.body.appendChild(bookingBox);
+  const snap = await getDocs(collection(db, "bookings"));
 
-async function loadPendingBookings() {
-  bookingBox.innerHTML = `<h3 style="margin-top:30px;">Pending Bookings</h3>`;
+  snap.forEach((b) => {
+    const d = b.data();
 
-  const snap = await getDocs(collection(db, "adminRequests"));
+    if (d.paymentStatus === "paid") {
+      box.innerHTML += `
+        <div class="admin-card">
+          <h3>${d.vendorName}</h3>
+          <p>${d.customerName}</p>
 
-  snap.forEach((req) => {
-    const L = req.data();
-    if (L.status !== "pending") return;
-
-    const card = document.createElement("div");
-    card.classList.add("admin-card");
-
-    card.innerHTML = `
-      <h3>${L.vendorName}</h3>
-
-      <p><strong>Customer:</strong> ${L.customerName}</p>
-      <p><strong>Phone:</strong> ${L.phone}</p>
-      <p><strong>Event:</strong> ${L.eventCity} — ${L.eventDate}</p>
-      <p><strong>Venue:</strong> ${L.venueLocation}</p>
-      <p><strong>Guests:</strong> ${L.guestCount}</p>
-      <p><strong>Message:</strong> ${L.message}</p>
-
-      <button class="approve-btn">Approve Booking</button>
-      <button class="reject-btn">Reject Booking</button>
-    `;
-
-    // APPROVE BOOKING
-    card.querySelector(".approve-btn").onclick = async () => {
-      await updateDoc(doc(db, "adminRequests", req.id), {
-        status: "approved"
-      });
-
-      alert("Booking Approved");
-      loadDashboard();
-    };
-
-    // REJECT BOOKING
-    card.querySelector(".reject-btn").onclick = async () => {
-      await updateDoc(doc(db, "adminRequests", req.id), {
-        status: "rejected"
-      });
-
-      alert("Booking Rejected");
-      loadDashboard();
-    };
-
-    bookingBox.appendChild(card);
+          <button onclick="refundBooking('${b.id}')">Process Refund</button>
+        </div>
+      `;
+    }
   });
 }
 
+window.refundBooking = async (id) => {
+  await processRefund(id);
+  loadDashboard();
+};
 
 
 // ===============================
-// LOAD EVERYTHING
+// 5) PAYOUT PANEL
 // ===============================
+export async function loadPayoutPanel() {
+  const box = document.getElementById("payoutBox");
+  box.innerHTML = "";
 
-function loadDashboard() {
+  const snap = await getDocs(collection(db, "bookings"));
+
+  snap.forEach((b) => {
+    const d = b.data();
+
+    if (d.paymentStatus === "paid") {
+      box.innerHTML += `
+        <div class="admin-card">
+          <h3>${d.vendorName}</h3>
+          <p>${d.customerName}</p>
+
+          <button onclick="payout('${b.id}', 50)">Payout 50%</button>
+          <button onclick="payout('${b.id}', 80)">Payout 80%</button>
+          <button onclick="payout('${b.id}', 100)">Payout 100%</button>
+        </div>
+      `;
+    }
+  });
+}
+
+window.payout = async (id, stage) => {
+  await releasePayout(id, stage);
+  loadDashboard();
+};
+
+
+// ===============================
+// LOAD ALL SECTIONS
+// ===============================
+export function loadDashboard() {
   loadPendingVendors();
   loadPendingBookings();
+  loadApprovedBookings();
+  loadRefundPanel();
+  loadPayoutPanel();
 }
 
 loadDashboard();

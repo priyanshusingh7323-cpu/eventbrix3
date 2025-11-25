@@ -4,42 +4,113 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | EventBrix</title>
+
   <link rel="stylesheet" href="../styles.css" />
+
+  <style>
+    body { padding: 20px; color: white; background: #111; }
+
+    .section {
+      background: #1a1a1a;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #444;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffd24a;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .section-content {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .admin-card {
+      background: #222;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid #333;
+    }
+
+    button {
+      background: #ffd24a;
+      color: black;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 5px;
+      margin-top: 8px;
+    }
+
+    .danger {
+      background: red;
+      color: white;
+    }
+
+    .green {
+      background: #4caf50;
+      color: white;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h2 class="dash-title">Admin Dashboard</h2>
+  <h1 style="color:#ffd24a; margin-bottom:20px;">Admin Dashboard</h1>
 
-  <h3>Pending Vendors</h3>
-  <div id="pendingVendors" class="admin-vendor-list"></div>
+  <!-- SECTION 1 – PENDING VENDORS -->
+  <div class="section">
+    <h2 class="section-title" data-target="vendorsBox">Pending Vendors</h2>
+    <div id="vendorsBox" class="section-content"></div>
+  </div>
 
-  <!-- Firebase FIRST -->
+  <!-- SECTION 2 – PENDING BOOKINGS -->
+  <div class="section">
+    <h2 class="section-title" data-target="pendingBookingsBox">Pending Bookings</h2>
+    <div id="pendingBookingsBox" class="section-content"></div>
+  </div>
+
+  <!-- SECTION 3 – APPROVED BOOKINGS -->
+  <div class="section">
+    <h2 class="section-title" data-target="approvedBookingsBox">Approved Bookings</h2>
+    <div id="approvedBookingsBox" class="section-content"></div>
+  </div>
+
+  <!-- SECTION 4 – REFUND ACTIONS -->
+  <div class="section">
+    <h2 class="section-title" data-target="refundBox">Refund Actions</h2>
+    <div id="refundBox" class="section-content"></div>
+  </div>
+
+  <!-- SECTION 5 – PAYOUT ACTIONS -->
+  <div class="section">
+    <h2 class="section-title" data-target="payoutBox">Payout Controls</h2>
+    <div id="payoutBox" class="section-content"></div>
+  </div>
+
+  <!-- FIREBASE -->
   <script type="module" src="../scripts/firebase.js"></script>
 
-  <!-- 🔥 SECURITY CHECK SCRIPT -->
-  <script type="module">
-    import { auth } from "../scripts/firebase.js";
+  <!-- MAIN ADMIN JS -->
+  <script type="module" src="../scripts/admin-dashboard.js"></script>
 
-    auth.onAuthStateChanged((user) => {
-      if (!user) {
-        // Not logged in → go to admin login
-        window.location.href = "/admin/admin-login.html";
-      } else {
-        // Check allowed admin email
-        if (user.email !== "admin@eventbrix.com") {
-          auth.signOut();
-          alert("Unauthorized Access!");
-          window.location.href = "/admin/admin-login.html";
-        }
-      }
+  <script>
+    // Accordion dropdown toggle
+    document.querySelectorAll(".section-title").forEach(title => {
+      title.addEventListener("click", () => {
+        const target = document.getElementById(title.dataset.target);
+        target.style.display = target.style.display === "block" ? "none" : "block";
+      });
     });
   </script>
-
-  <!-- ADMIN JS FILE -->
-  <script type="module" src="../scripts/admin-dashboard.js"></script>
-  <script src="../scripts/smooth-ui.js"></script>
-
 
 </body>
 </html>
