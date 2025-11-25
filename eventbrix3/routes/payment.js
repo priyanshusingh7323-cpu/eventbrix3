@@ -2,16 +2,17 @@ const express = require("express");
 const router = express.Router();
 const razorpay = require("../config/razorpay");
 const crypto = require("crypto");
+const admin = require("../config/firebaseAdmin");
 
 // CREATE ORDER
-router.post("/payment/create-order", async (req, res) => {
+router.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
 
     const order = await razorpay.orders.create({
-      amount: amount * 100, // paise me convert
+      amount: amount * 100,
       currency: "INR",
-      receipt: "receipt_" + Date.now()
+      receipt: "EBX_" + Date.now(),
     });
 
     res.json({ success: true, order });
@@ -21,20 +22,37 @@ router.post("/payment/create-order", async (req, res) => {
 });
 
 // VERIFY PAYMENT
-router.post("/payment/verify", async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+router.post("/verify", async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      bookingId
+    } = req.body;
 
-  const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
 
-  const expected = crypto
-    .createHmac("sha256", razorpay.key_secret)
-    .update(sign)
-    .digest("hex");
+    const expected = crypto
+      .createHmac("sha256", process.env.RZP_KEY_SECRET)
+      .update(sign)
+      .digest("hex");
 
-  if (expected === razorpay_signature) {
+    if (expected !== razorpay_signature) {
+      return res.json({ success: false, message: "Signature mismatch" });
+    }
+
+    // SAVE PAYMENT STATUS IN FIRESTORE
+    const db = admin.firestore();
+    await db.collection("bookings").doc(bookingId).update({
+      paymentStatus: "paid",
+      paymentInfo: req.body,
+      paymentTimestamp: Date.now(),
+    });
+
     res.json({ success: true, message: "Payment Verified" });
-  } else {
-    res.json({ success: false, message: "Verification Failed" });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
   }
 });
 

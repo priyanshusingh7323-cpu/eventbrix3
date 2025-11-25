@@ -1,5 +1,5 @@
 /* ======================================
-   ORIGINAL IMPORTS
+   IMPORTS
 ====================================== */
 import { db, auth } from "/scripts/firebase.js";
 import {
@@ -13,9 +13,10 @@ import {
   where,
   updateDoc,
   onSnapshot,
-  orderBy,
-  Timestamp
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const BASE_URL = "https://eventbrix3.onrender.com";
 
 /* ======================================
    GET VENDOR ID
@@ -24,7 +25,7 @@ const params = new URLSearchParams(window.location.search);
 const vendorId = params.get("id");
 
 /* ======================================
-   LOAD PROFILE
+   LOAD VENDOR PROFILE
 ====================================== */
 async function loadVendorProfile() {
   const vendorDoc = await getDoc(doc(db, "vendors", vendorId));
@@ -108,7 +109,7 @@ async function loadSuggested(mainCategory) {
 }
 
 /* ======================================
-   SAVE VENDOR (WISHLIST)
+   SAVE VENDOR
 ====================================== */
 document.getElementById("saveVendorBtn").onclick = async () => {
   const user = auth.currentUser;
@@ -140,58 +141,53 @@ document.getElementById("closePopupBtn").onclick = () => {
 };
 
 /* ======================================
-   FIXED BOOKING SUBMIT
+   BACKEND BOOKING SUBMIT (FINAL)
 ====================================== */
 document.getElementById("submitBookingBtn").onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Please login first!");
 
-  // Fetch vendor name directly from page
   const vendorName = document.getElementById("vendorName").innerText;
+  const amount = parseInt(document.getElementById("vendorPrice").innerText.replace("₹", ""));
 
-  // Get form values
   const data = {
     vendorId,
     vendorName,
     customerId: user.uid,
-
     customerName: cName.value,
-    phone: cPhone.value,
+    amount,
     eventDate: cDate.value,
     eventCity: cCity.value,
     venueLocation: cVenue.value,
-    guestCount: cGuests.value,
+    guests: cGuests.value,
     message: cMsg.value,
-
-    amount: 0,             // you can upgrade later
-
-    status: "pending",     // admin approval needed
-    paymentStatus: "not_paid",
-    visitStatus: "not_visited",
-    payoutStage: 0,
-
-    createdAt: Date.now()
+    eventType: document.getElementById("vendorCategory").innerText,
   };
 
-  // Required field validation
-  if (!data.customerName || !data.phone || !data.eventDate) {
-    return alert("Please fill required fields");
+  if (!data.customerName || !data.eventDate || !data.amount) {
+    return alert("Fill required fields");
   }
 
-  // SAVE TO BOOKINGS (CORRECT)
-  await addDoc(collection(db, "bookings"), data);
+  // SEND TO BACKEND
+  const res = await fetch(`${BASE_URL}/api/booking/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 
+  const result = await res.json();
+  if (!result.success) return alert("Booking failed");
+
+  // UI
   popup.style.display = "none";
   overlay.style.display = "none";
-
   thankBox.style.display = "block";
   setTimeout(() => thankBox.style.display = "none", 2000);
 };
 
-/* ======================================================
-   CHAT DRAWER (unchanged)
-====================================================== */
-
+/* ======================================
+   CHAT SYSTEM (UNCHANGED)
+====================================== */
 const drawer = document.getElementById("chatDrawer");
 const chatBtn = document.getElementById("chatBtn");
 const drawerClose = document.getElementById("chatCloseBtn");
@@ -203,18 +199,15 @@ const typingStatus = document.getElementById("typingStatus");
 let drawerChatId = null;
 let typingTimeout = null;
 
-/* OPEN */
 chatBtn.onclick = () => {
   drawer.style.right = "0";
   startDrawerChat();
 };
 
-/* CLOSE */
 drawerClose.onclick = () => {
   drawer.style.right = "-360px";
 };
 
-/* CHAT LOGIC — NO CHANGE */
 async function startDrawerChat() {
   auth.onAuthStateChanged(async (user) => {
     if (!user) return alert("Login required!");
@@ -269,13 +262,11 @@ function listenMessages() {
           ${m.text}
           <div class="time">
             ${time}
-            ${
-              m.sender === "customer"
-                ? `<span class="tick ${m.seenByVendor ? "seen" : ""}">
+            ${m.sender === "customer"
+              ? `<span class="tick ${m.seenByVendor ? "seen" : ""}">
                     ${m.seenByVendor ? "✓✓" : "✓"}
-                   </span>`
-                : ""
-            }
+                 </span>`
+              : ""}
           </div>
         </div>
       `;
@@ -326,8 +317,6 @@ drawerInput.addEventListener("input", async () => {
 function listenTyping() {
   onSnapshot(doc(db, "chats", drawerChatId), (d) => {
     const data = d.data();
-    if (!data) return;
-
     typingStatus.style.display = data.vendorTyping ? "inline" : "none";
   });
 }
@@ -340,8 +329,7 @@ function listenSeen() {
     ),
     async (snap) => {
       snap.forEach(async (m) => {
-        const msg = m.data();
-        if (msg.sender === "vendor" && !msg.seenByCustomer) {
+        if (m.data().sender === "vendor" && !m.data().seenByCustomer) {
           await updateDoc(
             doc(db, "chats", drawerChatId, "messages", m.id),
             { seenByCustomer: true }
