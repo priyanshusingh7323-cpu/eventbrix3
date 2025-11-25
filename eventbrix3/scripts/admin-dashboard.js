@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { processRefund } from "./refund.js";
-import { releasePayout } from "./payout.js";
+import { processPayout } from "./payout.js";   // ✅ FIXED: correct import name
 
 // AUTH GUARD
 auth.onAuthStateChanged((user) => {
@@ -146,7 +146,7 @@ export async function loadRefundPanel() {
 }
 
 window.refundBooking = async (id) => {
-  await processRefund(id);
+  await processRefund(id);     // (✔ uses correct function)
   loadDashboard();
 };
 
@@ -179,7 +179,7 @@ export async function loadPayoutPanel() {
 }
 
 window.payout = async (id, stage) => {
-  await releasePayout(id, stage);
+  await processPayout(id, stage);   // ✅ FIXED: correct function call
   loadDashboard();
 };
 
