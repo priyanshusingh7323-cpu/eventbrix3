@@ -12,18 +12,23 @@ const BASE_URL = "https://eventbrix3.onrender.com";
 ================================ */
 export async function processRefund(bookingId) {
   try {
-    const res = await fetch(`${BASE_URL}/api/refund`, {
+    const res = await fetch(`${BASE_URL}/api/refund/process`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ bookingId }),
     });
 
     const data = await res.json();
-    if (!data.success) return alert("Refund Failed: " + data.message);
 
-    alert("Refund Processed: ₹" + data.refundAmount);
+    if (!data.success) {
+      return alert("Refund Failed: " + (data.error || "Unknown Error"));
+    }
+
+    alert("Refund Processed Successfully: ₹" + data.refundAmount);
     location.reload();
+
   } catch (err) {
-    alert("Refund Failed");
+    console.error(err);
+    alert("Refund Failed: Server Error");
   }
 }

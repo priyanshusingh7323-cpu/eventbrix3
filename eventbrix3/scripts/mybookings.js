@@ -8,6 +8,11 @@ import {
 
 import { openCheckout, payAfterVisit } from "./payment.js";
 
+/* =====================================
+   BACKEND BASE URL (REQUIRED)
+===================================== */
+const BASE_URL = "https://eventbrix3.onrender.com";
+
 /* ============================
    LOAD USER BOOKINGS
 ============================ */
@@ -48,14 +53,17 @@ function cardUI(id, d) {
    BUTTON LOGIC
 ============================ */
 function buttons(id, d) {
+  // Already paid
   if (d.paymentStatus === "paid") {
     return `<p style="color:green;"><b>Payment Completed</b></p>`;
   }
 
+  // Not approved yet
   if (d.status !== "approved") {
     return `<p style="color:gray;">Waiting for approval...</p>`;
   }
 
+  // Approved → show payment options
   return `
     <button onclick="payNow('${id}', ${d.amount})" class="pay-btn">Pay Now</button>
     <button onclick="payLater('${id}')" class="secondary-btn">Pay After Visit</button>

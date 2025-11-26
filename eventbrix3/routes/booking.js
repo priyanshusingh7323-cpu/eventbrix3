@@ -16,8 +16,9 @@ router.post("/create", async (req, res) => {
       eventCity,
       eventType,
       message,
-      venueLocation,   // NEW
-      guests           // NEW
+      venueLocation,
+      guests,
+      phone        // NEW
     } = req.body;
 
     // Basic validation
@@ -25,12 +26,13 @@ router.post("/create", async (req, res) => {
       return res.json({ success: false, error: "Missing required fields" });
     }
 
-    // Save booking
+    // Save booking in Firestore
     const ref = await db.collection("bookings").add({
       vendorId,
       vendorName,
       customerId,
       customerName,
+      phone: phone || "",       // NEW
       amount,
       eventDate,
       eventCity,
@@ -40,7 +42,7 @@ router.post("/create", async (req, res) => {
       guests: guests || "",
       status: "pending",
       paymentStatus: "unpaid",
-      createdAt: Date.now()
+      createdAt: admin.firestore.FieldValue.serverTimestamp() // BETTER
     });
 
     res.json({

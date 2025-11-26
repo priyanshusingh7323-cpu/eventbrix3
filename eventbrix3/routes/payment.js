@@ -4,10 +4,16 @@ const razorpay = require("../config/razorpay");
 const crypto = require("crypto");
 const admin = require("../config/firebaseAdmin");
 
-// CREATE ORDER
+// ============================
+//   CREATE ORDER
+// ============================
 router.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
+
+    if (!amount) {
+      return res.json({ success: false, error: "Amount missing" });
+    }
 
     const order = await razorpay.orders.create({
       amount: amount * 100,
@@ -16,42 +22,55 @@ router.post("/create-order", async (req, res) => {
     });
 
     res.json({ success: true, order });
+
   } catch (err) {
+    console.error("ORDER ERROR:", err);
     res.json({ success: false, error: err.message });
   }
 });
 
-// VERIFY PAYMENT
+// ============================
+//   VERIFY PAYMENT
+// ============================
 router.post("/verify", async (req, res) => {
   try {
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      bookingId
+      bookingId,
     } = req.body;
 
-    const sign = razorpay_order_id + "|" + razorpay_payment_id;
-
-    const expected = crypto
-      .createHmac("sha256", process.env.RZP_KEY_SECRET)
-      .update(sign)
-      .digest("hex");
-
-    if (expected !== razorpay_signature) {
-      return res.json({ success: false, message: "Signature mismatch" });
+    if (!bookingId) {
+      return res.json({ success: false, error: "BookingId missing" });
     }
 
-    // SAVE PAYMENT STATUS IN FIRESTORE
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)   // FIXED
+      .update(body)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.json({ success: false, error: "Signature mismatch" });
+    }
+
+    // SAVE PAYMENT STATUS
     const db = admin.firestore();
+
     await db.collection("bookings").doc(bookingId).update({
       paymentStatus: "paid",
-      paymentInfo: req.body,
-      paymentTimestamp: Date.now(),
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+      signature: razorpay_signature,
+      paymentVerifiedAt: admin.firestore.FieldValue.serverTimestamp(), // FIXED
     });
 
     res.json({ success: true, message: "Payment Verified" });
+
   } catch (err) {
+    console.error("VERIFY ERROR:", err);
     res.json({ success: false, error: err.message });
   }
 });
