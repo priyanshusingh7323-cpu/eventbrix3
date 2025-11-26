@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const admin = require("../config/firebaseAdmin");
 
+// ================================
+// CREATE BOOKING (POST)
+// ================================
 router.post("/create", async (req, res) => {
   try {
     const db = admin.firestore();
@@ -11,48 +14,63 @@ router.post("/create", async (req, res) => {
       vendorName,
       customerId,
       customerName,
+      phone,
       amount,
       eventDate,
       eventCity,
       eventType,
       message,
       venueLocation,
-      guests,
-      phone        // NEW
+      guests
     } = req.body;
 
-    // Basic validation
+    // ----------------------------
+    // VALIDATION (basic)
+    // ----------------------------
     if (!vendorId || !customerId || !amount || !eventDate) {
-      return res.json({ success: false, error: "Missing required fields" });
+      return res.json({
+        success: false,
+        error: "Missing required fields"
+      });
     }
 
-    // Save booking in Firestore
+    // ----------------------------
+    // SAVE BOOKING IN FIRESTORE
+    // ----------------------------
     const ref = await db.collection("bookings").add({
       vendorId,
       vendorName,
       customerId,
       customerName,
-      phone: phone || "",       // NEW
+      phone: phone || "",
       amount,
       eventDate,
       eventCity,
       eventType,
-      message,
+      message: message || "",
       venueLocation: venueLocation || "",
       guests: guests || "",
+      
       status: "pending",
       paymentStatus: "unpaid",
-      createdAt: admin.firestore.FieldValue.serverTimestamp() // BETTER
+
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
-    res.json({
+    // ----------------------------
+    // RESPONSE
+    // ----------------------------
+    return res.json({
       success: true,
       bookingId: ref.id
     });
 
   } catch (err) {
     console.error("BOOKING ERROR:", err);
-    res.json({ success: false, error: err.message });
+    return res.json({
+      success: false,
+      error: err.message
+    });
   }
 });
 

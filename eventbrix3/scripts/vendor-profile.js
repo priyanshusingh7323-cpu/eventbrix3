@@ -186,7 +186,7 @@ document.getElementById("submitBookingBtn").onclick = async () => {
     return alert("Fill required fields");
   }
 
-  const res = await fetch(`${BASE_URL}/api/bookings/create`, {
+  const res = await fetch(`${BASE_URL}/api/booking/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
