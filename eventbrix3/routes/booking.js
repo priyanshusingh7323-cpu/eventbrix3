@@ -14,10 +14,18 @@ router.post("/create", async (req, res) => {
       amount,
       eventDate,
       eventCity,
+      eventType,
       message,
-      eventType
+      venueLocation,   // NEW
+      guests           // NEW
     } = req.body;
 
+    // Basic validation
+    if (!vendorId || !customerId || !amount || !eventDate) {
+      return res.json({ success: false, error: "Missing required fields" });
+    }
+
+    // Save booking
     const ref = await db.collection("bookings").add({
       vendorId,
       vendorName,
@@ -28,13 +36,20 @@ router.post("/create", async (req, res) => {
       eventCity,
       eventType,
       message,
+      venueLocation: venueLocation || "",
+      guests: guests || "",
       status: "pending",
       paymentStatus: "unpaid",
       createdAt: Date.now()
     });
 
-    res.json({ success: true, bookingId: ref.id });
+    res.json({
+      success: true,
+      bookingId: ref.id
+    });
+
   } catch (err) {
+    console.error("BOOKING ERROR:", err);
     res.json({ success: false, error: err.message });
   }
 });
