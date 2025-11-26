@@ -17,7 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ======================================
-   BACKEND BASE URL (FIXED)
+   BACKEND BASE URL
 ====================================== */
 const BASE_URL = "https://eventbrix3.onrender.com";
 
@@ -144,7 +144,7 @@ document.getElementById("closePopupBtn").onclick = () => {
 };
 
 /* ======================================
-   BACKEND BOOKING SUBMIT (FINAL FIXED)
+   BACKEND BOOKING SUBMIT (FINAL)
 ====================================== */
 document.getElementById("submitBookingBtn").onclick = async () => {
   const user = auth.currentUser;
@@ -152,8 +152,7 @@ document.getElementById("submitBookingBtn").onclick = async () => {
 
   const vendorName = document.getElementById("vendorName").innerText;
   const amount = parseInt(
-    document.getElementById("vendorPrice")
-      .innerText.replace("₹", "")
+    document.getElementById("vendorPrice").innerText.replace("₹", "")
   );
 
   const data = {
@@ -167,7 +166,12 @@ document.getElementById("submitBookingBtn").onclick = async () => {
     venueLocation: cVenue.value,
     guests: cGuests.value,
     message: cMsg.value,
-    eventType: document.getElementById("vendorCategory").innerText
+
+    // 🔥 FIXED: eventType now correct
+    eventType: document
+      .getElementById("vendorCategory")
+      .innerText.split("→")[1]
+      ?.trim()
   };
 
   if (!data.customerName || !data.eventDate || !data.amount) {
@@ -193,6 +197,6 @@ document.getElementById("submitBookingBtn").onclick = async () => {
 };
 
 /* ======================================
-   CHAT SYSTEM
+   CHAT SYSTEM (UNCHANGED)
 ====================================== */
-/* (UNCHANGED CODE — SAME AS YOUR VERSION) */
+// (Your original chat drawer code continues...)
