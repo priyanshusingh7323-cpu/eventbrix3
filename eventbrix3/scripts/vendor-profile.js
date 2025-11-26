@@ -36,6 +36,9 @@ async function loadVendorProfile() {
 
   const vendorData = vendorDoc.data();
   const listings = await getDocs(collection(db, "vendors", vendorId, "listings"));
+
+  if (listings.empty) return;
+
   const L = listings.docs[0].data();
 
   loadSlider(L.photos || []);
@@ -58,6 +61,7 @@ loadVendorProfile();
    SLIDER
 ====================================== */
 let slideIndex = 0;
+
 function loadSlider(images) {
   const box = document.getElementById("sliderImages");
   box.innerHTML = "";
@@ -68,15 +72,17 @@ function loadSlider(images) {
   document.getElementById("nextSlide").onclick = () => nextSlide(images.length);
   document.getElementById("prevSlide").onclick = () => prevSlide(images.length);
 }
-function nextSlide(t){ slideIndex=(slideIndex+1)%t; updateSlider(); }
-function prevSlide(t){ slideIndex=(slideIndex-1+t)%t; updateSlider(); }
-function updateSlider(){
+
+function nextSlide(t) { slideIndex = (slideIndex + 1) % t; updateSlider(); }
+function prevSlide(t) { slideIndex = (slideIndex - 1 + t) % t; updateSlider(); }
+
+function updateSlider() {
   document.getElementById("sliderImages").style.transform =
     `translateX(-${slideIndex * 100}%)`;
 }
 
 /* ======================================
-   SUGGESTED VENDORS
+   LOAD SUGGESTED VENDORS
 ====================================== */
 async function loadSuggested(mainCategory) {
   if (!mainCategory) return;
@@ -96,8 +102,10 @@ async function loadSuggested(mainCategory) {
 
     const vendorData = docx.data();
     const listSnap = await getDocs(collection(db, "vendors", docx.id, "listings"));
-    const L = listSnap.docs[0].data();
 
+    if (listSnap.empty) continue;
+
+    const L = listSnap.docs[0].data();
     const img = L.photos?.[0] || "/images/default.jpg";
 
     box.innerHTML += `
@@ -144,7 +152,7 @@ document.getElementById("closePopupBtn").onclick = () => {
 };
 
 /* ======================================
-   BACKEND BOOKING SUBMIT (FINAL)
+   FINAL BOOKING SUBMIT (FULLY FIXED)
 ====================================== */
 document.getElementById("submitBookingBtn").onclick = async () => {
   const user = auth.currentUser;
@@ -159,26 +167,26 @@ document.getElementById("submitBookingBtn").onclick = async () => {
     vendorId,
     vendorName,
     customerId: user.uid,
-    customerName: cName.value,
+    customerName: cName.value.trim(),
     amount,
     eventDate: cDate.value,
-    eventCity: cCity.value,
-    venueLocation: cVenue.value,
-    guests: cGuests.value,
-    message: cMsg.value,
+    eventCity: cCity.value.trim(),
+    venueLocation: cVenue.value.trim(),
+    guests: cGuests.value.trim(),
+    message: cMsg.value.trim(),
 
-    // 🔥 FIXED: eventType now correct
+    // Correct event type
     eventType: document
       .getElementById("vendorCategory")
       .innerText.split("→")[1]
-      ?.trim()
+      ?.trim(),
   };
 
   if (!data.customerName || !data.eventDate || !data.amount) {
     return alert("Fill required fields");
   }
 
-  const res = await fetch(`${BASE_URL}/api/booking/create`, {
+  const res = await fetch(`${BASE_URL}/api/bookings/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -193,10 +201,11 @@ document.getElementById("submitBookingBtn").onclick = async () => {
   popup.style.display = "none";
   overlay.style.display = "none";
   thankBox.style.display = "block";
-  setTimeout(() => thankBox.style.display = "none", 2000);
+
+  setTimeout(() => (thankBox.style.display = "none"), 2000);
 };
 
 /* ======================================
    CHAT SYSTEM (UNCHANGED)
 ====================================== */
-// (Your original chat drawer code continues...)
+// keep your existing chat code unchanged here…
