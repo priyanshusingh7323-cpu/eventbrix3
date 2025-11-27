@@ -1,55 +1,25 @@
 import { auth, db } from "/scripts/firebase.js";
 import {
-  collection,
-  getDocs,
-  getDoc,
   doc,
+  getDoc,
+  getDocs,
+  collection,
   query,
-  where,
+  where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ======================================
-   IMPORT BOOKING SYSTEM
-====================================== */
-import { loadBookingsUI } from "../scripts/mybookings.js";
-
-/* ======================================
-   CHECK LOGIN STATE
-====================================== */
+/* LOAD ON LOGIN */
 auth.onAuthStateChanged(async (user) => {
-  if (!user) {
-    location.href = "/customer/customer-login.html";
-    return;
-  }
+  if (!user) return location.href = "/customer/customer-login.html";
 
   loadProfile(user.uid);
-  loadWishlist(user.uid);
-  loadRecent(user.uid);
-  loadChats(user.uid);
-  loadReviews(user.uid);
-
-  // ⭐ NEW BOOKING UI (correct)
-  loadBookingsUI(user.uid);
+  loadSummary(user.uid);
+  loadCompactUpcoming(user.uid);
 });
 
-/* ======================================
-   TAB SWITCHER
-====================================== */
-document.querySelectorAll(".tabBtn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".section")
-      .forEach((sec) => (sec.style.display = "none"));
-
-    document.getElementById(btn.dataset.tab).style.display = "block";
-  });
-});
-
-/* ======================================
-   LOAD PROFILE
-====================================== */
+/* LOAD PROFILE */
 async function loadProfile(uid) {
   const snap = await getDoc(doc(db, "customers", uid));
   if (!snap.exists()) return;
@@ -58,112 +28,130 @@ async function loadProfile(uid) {
 
   document.getElementById("pName").innerText = d.name;
   document.getElementById("pEmail").innerText = d.email;
-  document.getElementById("pPhone").innerText = d.phone || "-";
-  document.getElementById("pCity").innerText = d.city || "-";
-  document.getElementById("pJoined").innerText = new Date(
-    d.createdAt
-  ).toDateString();
+  document.getElementById("pPhone").innerText = d.phone;
+  document.getElementById("pCity").innerText = d.city;
+  document.getElementById("pJoined").innerText =
+    "Joined " + new Date(d.createdAt).toDateString();
+
+  document.getElementById("greeting").innerText =
+    "Hi " + d.name.split(" ")[0] + " 👋";
 }
 
-/* ======================================
-   LOAD WISHLIST
-====================================== */
-async function loadWishlist(uid) {
-  const box = document.getElementById("wishlistBox");
-  box.innerHTML = "";
-
-  const snap = await getDocs(collection(db, "customers", uid, "wishlist"));
-
-  snap.forEach((d) => {
-    const v = d.data();
-
-    box.innerHTML += `
-      <div class="vendor-card">
-        <img src="/images/default.jpg">
-        <h3>${v.businessName || "Vendor"}</h3>
-        <p>${v.city || ""}</p>
-        <a href="/vendor/vendor-profile.html?id=${v.vendorId}" class="view-btn">View</a>
-      </div>
-    `;
-  });
-}
-
-/* ======================================
-   LOAD RECENT
-====================================== */
-async function loadRecent(uid) {
-  const box = document.getElementById("recentBox");
-  box.innerHTML = "";
-
-  const snap = await getDocs(collection(db, "customers", uid, "recent"));
-
-  snap.forEach((d) => {
-    const v = d.data();
-
-    box.innerHTML += `
-      <div class="vendor-card">
-        <img src="/images/default.jpg">
-        <h3>${v.businessName || "Vendor"}</h3>
-        <p>${v.city || ""}</p>
-        <a href="/vendor/vendor-profile.html?id=${v.vendorId}" class="view-btn">View</a>
-      </div>
-    `;
-  });
-}
-
-/* ======================================
-   LOAD CHATS
-====================================== */
-async function loadChats(uid) {
-  const box = document.getElementById("chatBox");
-  box.innerHTML = "";
-
+/* LOAD SUMMARY (stats) */
+async function loadSummary(uid) {
   const qSnap = await getDocs(
-    query(collection(db, "chats"), where("customerId", "==", uid))
+    query(collection(db, "bookings"), where("customerId", "==", uid))
   );
 
-  qSnap.forEach((c) => {
-    const d = c.data();
+  let upcoming = 0;
+  let pending = 0;
+  let spent = 0;
+  const now = Date.now();
 
-    box.innerHTML += `
-      <div class="chat-card">
-        <p><strong>Vendor:</strong> ${d.vendorId}</p>
-        <p>${d.lastMessage || "No messages yet"}</p>
-        <a href="/customer/chat.html?vendor=${d.vendorId}" style="color:#d4a017;">Open Chat</a>
-      </div>
-    `;
+  qSnap.forEach((b) => {
+    const d = b.data();
+    const date = new Date(d.eventDate).getTime();
+
+    if (date >= now) upcoming++;
+    if (d.paymentStatus !== "paid" && d.status === "approved") pending++;
+    if (d.paymentStatus === "paid") spent += Number(d.amount);
   });
+
+  document.getElementById("statUpcoming").innerText = upcoming;
+  document.getElementById("statPending").innerText = pending;
+  document.getElementById("statSpent").innerText =
+    "₹" + spent.toLocaleString();
 }
 
-/* ======================================
-   LOAD REVIEWS
-====================================== */
-async function loadReviews(uid) {
-  const box = document.getElementById("reviewBox");
+/* LOAD COMPACT UPCOMING EVENTS */
+async function loadCompactUpcoming(uid) {
+  const box = document.getElementById("compactUpcoming");
   box.innerHTML = "";
 
-  const qSnap = await getDocs(
-    query(collection(db, "reviews"), where("customerId", "==", uid))
+  const snap = await getDocs(
+    query(collection(db, "bookings"), where("customerId", "==", uid))
   );
 
-  qSnap.forEach((r) => {
-    const d = r.data();
+  let list = [];
+  const now = Date.now();
 
+  snap.forEach((b) => {
+    const d = b.data();
+    const t = new Date(d.eventDate).getTime();
+    if (t > now)
+      list.push({
+        id: b.id,
+        vendorName: d.vendorName,
+        date: d.eventDate,
+        status: d.status,
+        amount: d.amount
+      });
+  });
+
+  // sort by nearest event
+  list.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const show = list.slice(0, 3);
+
+  if (show.length === 0) {
+    box.innerHTML = `<p style="color:gray;margin-left:15px;">No upcoming events</p>`;
+    return;
+  }
+
+  show.forEach((e) => {
     box.innerHTML += `
-      <div class="booking-card">
-        <p><strong>Vendor:</strong> ${d.vendorId}</p>
-        <p>${d.rating} ⭐</p>
-        <p>${d.review}</p>
+      <div>
+        <div>
+          <strong>${e.vendorName}</strong><br>
+          <small>${e.date} • ${e.status}</small>
+        </div>
+        <div>
+          ₹${e.amount}
+        </div>
       </div>
     `;
   });
 }
 
-/* ======================================
-   LOGOUT BUTTON
-====================================== */
-document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-  await signOut(auth);
-  localStorage.clear();
+/* QUICK ACTIONS */
+document.getElementById("openBookings").onclick = () =>
+  location.href = "/customer/bookings.html";
+
+document.getElementById("openPayments").onclick = () =>
+  location.href = "/customer/payments.html";
+
+document.getElementById("openChats").onclick = () =>
+  location.href = "/customer/chat-list.html";
+
+document.getElementById("openWishlist").onclick = () =>
+  location.href = "/customer/wishlist.html";
+
+document.getElementById("openRecent").onclick = () =>
+  location.href = "/customer/recent.html";
+
+document.getElementById("openAccount").onclick = () =>
+  location.href = "/customer/profile.html";
+
+document.getElementById("openHomePage").onclick = () =>
   location.href = "/index.html";
-});
+
+/* HEADER HOME BUTTON */
+document.getElementById("goHomePage").onclick = () =>
+  location.href = "/index.html";
+
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick = async () => {
+  await signOut(auth);
+  location.href = "/index.html";
+};
+
+/* CHAT SLIDER */
+document.getElementById("openChatPanel").onclick = () => {
+  document.getElementById("chatPanel").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
+};
+
+document.getElementById("closeChatPanel").onclick = () => {
+  document.getElementById("chatPanel").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
+};

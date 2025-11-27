@@ -1,70 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Dashboard | EventBrix</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customer Dashboard | EventBrix</title>
 
-<!-- OLD CSS (don’t touch) -->
-<link rel="stylesheet" href="../styles.css">
-
-<!-- NEW PREMIUM DASHBOARD CSS -->
-<link rel="stylesheet" href="../styles-dashboard.css">
+<!-- GLOBAL + DASHBOARD CSS -->
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../styles-dashboard.css" />
 
 </head>
-
 <body>
 
 <!-- HEADER -->
 <div class="dash-header">
-  <h1>My Dashboard</h1>
+  <h1 id="greeting">Dashboard</h1>
+
+  <!-- NEW HOME BUTTON -->
+  <button id="goHomePage" class="home-btn">
+    <img src="/icons/home-gold.png" />
+  </button>
 </div>
 
-<!-- PROFILE CARD -->
+<!-- PROFILE SUMMARY CARD -->
 <div class="profile-card">
-  <div class="profile-info">
-    <h2 id="pName"></h2>
-    <p id="pEmail"></p>
-    <p id="pPhone"></p>
-    <p id="pCity"></p>
-    <p><small id="pJoined"></small></p>
-  </div>
+  <h2 id="pName"></h2>
+  <p id="pEmail"></p>
+  <p id="pPhone"></p>
+  <p id="pCity"></p>
+  <small id="pJoined"></small>
 
   <button id="logoutBtn" class="logout-btn">Logout</button>
 </div>
 
-<!-- SECTIONS -->
-<div class="section" id="profileTab"></div>
+<!-- QUICK STATS -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3 id="statUpcoming">0</h3>
+    <p>Upcoming</p>
+  </div>
 
-<div class="section" id="wishlistTab" style="display:none;">
-  <h2 class="section-title">Saved Vendors</h2>
-  <div id="wishlistBox"></div>
+  <div class="stat-card">
+    <h3 id="statPending">0</h3>
+    <p>Pending Payments</p>
+  </div>
+
+  <div class="stat-card">
+    <h3 id="statSpent">₹0</h3>
+    <p>Total Spent</p>
+  </div>
 </div>
 
-<div class="section" id="recentTab" style="display:none;">
-  <h2 class="section-title">Recently Viewed</h2>
-  <div id="recentBox"></div>
+<!-- QUICK ACTION GRID -->
+<h2 class="section-title">Quick Actions</h2>
+
+<div class="action-grid">
+
+  <div class="action-card" id="openBookings">
+    <img src="/icons/calendar-gold.png" />
+    <p>My Bookings</p>
+  </div>
+
+  <div class="action-card" id="openPayments">
+    <img src="/icons/wallet-gold.png" />
+    <p>Payments & Refunds</p>
+  </div>
+
+  <div class="action-card" id="openChats">
+    <img src="/icons/chat-gold.png" />
+    <p>Chats</p>
+  </div>
+
+  <div class="action-card" id="openWishlist">
+    <img src="/icons/heart-gold.png" />
+    <p>Wishlist</p>
+  </div>
+
+  <div class="action-card" id="openRecent">
+    <img src="/icons/time-gold.png" />
+    <p>Recently Viewed</p>
+  </div>
+
+  <div class="action-card" id="openAccount">
+    <img src="/icons/user-gold.png" />
+    <p>Account</p>
+  </div>
+
+  <!-- NEW: Home Page Button -->
+  <div class="action-card" id="openHomePage">
+    <img src="/icons/home-gold.png" />
+    <p>Home Page</p>
+  </div>
+
 </div>
 
-<div class="section" id="bookingsTab" style="display:none;">
-  <h2 class="section-title">My Bookings</h2>
+<!-- UPCOMING SECTION -->
+<h2 class="section-title">Upcoming Events</h2>
+<div id="compactUpcoming" class="upcoming-list"></div>
 
-  <!-- UPDATED ID HERE -->
-  <div id="myBookings"></div>
-
-</div>
-
-<div class="section" id="chatsTab" style="display:none;">
-  <h2 class="section-title">My Chats</h2>
-  <div id="chatBox"></div>
-</div>
-
-<div class="section" id="reviewsTab" style="display:none;">
-  <h2 class="section-title">My Reviews</h2>
-  <div id="reviewBox"></div>
-</div>
-
-<!-- CHAT SLIDER -->
+<!-- CHAT SLIDER (same) -->
 <div id="chatPanel" class="chat-slider">
   <div class="chat-header">
     <span>Chat Support</span>
@@ -73,52 +107,39 @@
   <iframe src="/customer/chat.html" class="chat-iframe"></iframe>
 </div>
 
-<!-- OVERLAY -->
 <div id="overlay" class="overlay"></div>
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-  <a class="tabBtn active" data-tab="profileTab">
-    <img src="/icons/home-gold.png"><span>Home</span>
+  <a class="navBtn active" data-tab="dashboard">
+    <img src="/icons/home-gold.png" />
+    <span>Dashboard</span>
   </a>
 
-  <a class="tabBtn" data-tab="wishlistTab">
-    <img src="/icons/heart-gold.png"><span>Saved</span>
-  </a>
-
-  <a class="tabBtn" data-tab="recentTab">
-    <img src="/icons/time-gold.png"><span>Recent</span>
-  </a>
-
-  <a class="tabBtn" data-tab="bookingsTab">
-    <img src="/icons/calendar-gold.png"><span>Bookings</span>
+  <a class="navBtn" id="navBookings">
+    <img src="/icons/calendar-gold.png" />
+    <span>Bookings</span>
   </a>
 
   <a id="openChatPanel">
-    <img src="/icons/chat-gold.png"><span>Chat</span>
+    <img src="/icons/chat-gold.png" />
+    <span>Chat</span>
+  </a>
+
+  <a class="navBtn" id="navWishlist">
+    <img src="/icons/heart-gold.png" />
+    <span>Saved</span>
+  </a>
+
+  <a class="navBtn" id="navAccount">
+    <img src="/icons/user-gold.png" />
+    <span>Account</span>
   </a>
 </div>
 
-
-<!-- MAIN DASHBOARD JS -->
+<!-- MAIN JS -->
 <script type="module" src="../scripts/customer-dashboard.js"></script>
-
-<!-- LOAD BOOKING ACCORDION SYSTEM -->
-<script type="module" src="../scripts/mybookings.js"></script>
-
 <script src="../scripts/smooth-ui.js"></script>
-
-<script>
-document.getElementById("openChatPanel").addEventListener("click", () => {
-  document.getElementById("chatPanel").classList.add("open");
-  document.getElementById("overlay").classList.add("show");
-});
-
-document.getElementById("closeChatPanel").addEventListener("click", () => {
-  document.getElementById("chatPanel").classList.remove("open");
-  document.getElementById("overlay").classList.remove("show");
-});
-</script>
 
 </body>
 </html>
