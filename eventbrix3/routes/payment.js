@@ -4,9 +4,9 @@ const razorpay = require("../config/razorpay");
 const crypto = require("crypto");
 const admin = require("../config/firebaseAdmin");
 
-// ============================
+// =====================================
 //   CREATE ORDER
-// ============================
+// =====================================
 router.post("/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
@@ -15,23 +15,35 @@ router.post("/create-order", async (req, res) => {
       return res.json({ success: false, error: "Amount missing" });
     }
 
+    // Fix: remove commas from price like "15,000"
+    const finalAmount = parseInt(amount.toString().replace(/,/g, ""));
+    if (isNaN(finalAmount)) {
+      return res.json({ success: false, error: "Invalid amount" });
+    }
+
+    if (!razorpay) {
+      return res.json({
+        success: false,
+        error: "Razorpay configuration failed",
+      });
+    }
+
     const order = await razorpay.orders.create({
-      amount: amount * 100,
+      amount: finalAmount * 100, // convert to paise
       currency: "INR",
       receipt: "EBX_" + Date.now(),
     });
 
-    res.json({ success: true, order });
-
+    return res.json({ success: true, order });
   } catch (err) {
     console.error("ORDER ERROR:", err);
-    res.json({ success: false, error: err.message });
+    return res.json({ success: false, error: err.message });
   }
 });
 
-// ============================
+// =====================================
 //   VERIFY PAYMENT
-// ============================
+// =====================================
 router.post("/verify", async (req, res) => {
   try {
     const {
@@ -41,22 +53,40 @@ router.post("/verify", async (req, res) => {
       bookingId,
     } = req.body;
 
-    if (!bookingId) {
-      return res.json({ success: false, error: "BookingId missing" });
+    // Safety validation
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.json({
+        success: false,
+        error: "Missing payment fields",
+      });
     }
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    if (!bookingId) {
+      return res.json({
+        success: false,
+        error: "BookingId missing",
+      });
+    }
 
+    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
+
+    // Using your hardcoded secret
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)   // FIXED
+      .createHmac("sha256", "jSMZLXdOax7nxW4r0a6T1Dcl")
       .update(body)
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      return res.json({ success: false, error: "Signature mismatch" });
+      console.log("SIGNATURE EXPECTED:", expectedSignature);
+      console.log("SIGNATURE RECEIVED:", razorpay_signature);
+
+      return res.json({
+        success: false,
+        error: "Signature mismatch",
+      });
     }
 
-    // SAVE PAYMENT STATUS
+    // Update Firestore
     const db = admin.firestore();
 
     await db.collection("bookings").doc(bookingId).update({
@@ -64,14 +94,17 @@ router.post("/verify", async (req, res) => {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       signature: razorpay_signature,
-      paymentVerifiedAt: admin.firestore.FieldValue.serverTimestamp(), // FIXED
+      paymentTimestamp: Date.now(), // important for refund slabs
+      paymentVerifiedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    res.json({ success: true, message: "Payment Verified" });
-
+    return res.json({
+      success: true,
+      message: "Payment Verified Successfully",
+    });
   } catch (err) {
     console.error("VERIFY ERROR:", err);
-    res.json({ success: false, error: err.message });
+    return res.json({ success: false, error: err.message });
   }
 });
 

@@ -3,14 +3,27 @@ const router = express.Router();
 const admin = require("../config/firebaseAdmin");
 
 // ================================
-// PROCESS PAYOUT
+// PROCESS PAYOUT (Admin Controlled)
 // ================================
 router.post("/process", async (req, res) => {
   try {
     const { bookingId, stage } = req.body;
 
-    if (!bookingId || !stage) {
-      return res.json({ success: false, error: "Missing bookingId or stage" });
+    // Safe validation
+    if (!bookingId || stage === undefined || stage === null) {
+      return res.json({
+        success: false,
+        error: "Missing bookingId or stage value",
+      });
+    }
+
+    // Stage must be 50, 80, or 100
+    const allowedStages = [50, 80, 100];
+    if (!allowedStages.includes(Number(stage))) {
+      return res.json({
+        success: false,
+        error: "Invalid payout stage. Allowed: 50, 80, 100",
+      });
     }
 
     const db = admin.firestore();
@@ -18,40 +31,66 @@ router.post("/process", async (req, res) => {
     const snap = await ref.get();
 
     if (!snap.exists) {
-      return res.json({ success: false, error: "Booking not found" });
+      return res.json({
+        success: false,
+        error: "Booking not found",
+      });
     }
 
     const d = snap.data();
 
-    // payment completed or not?
+    // Payment check
     if (d.paymentStatus !== "paid") {
       return res.json({
         success: false,
-        error: "Customer has not completed payment yet"
+        error: "Payment not completed. Cannot payout.",
       });
     }
 
-    const amount = d.amount;
-    let adjustment = d.vendorPayoutAdjustment || 0;
+    // Prevent payout after refund
+    if (d.status === "refunded") {
+      return res.json({
+        success: false,
+        error: "Booking already refunded. Cannot payout.",
+      });
+    }
 
-    // calculate payout
-    const payoutAmount = Math.round(amount * (stage / 100) + adjustment);
+    const amount = Number(d.amount);
 
-    // update booking doc
+    // FIX: vendorPayoutAdjustment safe conversion
+    const adjustment = Number(d.vendorPayoutAdjustment || 0);
+
+    // FIX: safe payout calculation
+    let payoutAmount = Math.round(amount * (stage / 100) + adjustment);
+
+    // No negative payout
+    if (payoutAmount < 0) payoutAmount = 0;
+
+    // Update Firestore
     await ref.update({
-      payoutStage: stage,
+      payoutStage: Number(stage),
       vendorPayoutAmount: payoutAmount,
-      vendorPayoutAt: admin.firestore.FieldValue.serverTimestamp()
+      vendorPayoutAt: admin.firestore.FieldValue.serverTimestamp(),
+
+      payoutLog: {
+        stage: Number(stage),
+        baseAmount: amount,
+        adjustment,
+        finalPayout: payoutAmount,
+        timestamp: Date.now(),
+      },
     });
 
     return res.json({
       success: true,
-      payoutAmount
+      payoutAmount,
     });
-
   } catch (err) {
     console.error("PAYOUT ERROR:", err);
-    return res.json({ success: false, error: err.message });
+    return res.json({
+      success: false,
+      error: err.message,
+    });
   }
 });
 

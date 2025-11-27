@@ -8,12 +8,9 @@ import {
   collection,
   getDocs,
   setDoc,
-  addDoc,
+  updateDoc,
   query,
   where,
-  updateDoc,
-  onSnapshot,
-  orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* ======================================
@@ -35,23 +32,31 @@ async function loadVendorProfile() {
   if (!vendorDoc.exists()) return;
 
   const vendorData = vendorDoc.data();
-  const listings = await getDocs(collection(db, "vendors", vendorId, "listings"));
 
-  if (listings.empty) return;
+  const listings = await getDocs(
+    collection(db, "vendors", vendorId, "listings")
+  );
+
+  if (listings.empty) {
+    document.getElementById("vendorName").innerText = "Vendor Not Found";
+    return;
+  }
 
   const L = listings.docs[0].data();
 
   loadSlider(L.photos || []);
 
-  document.getElementById("vendorName").innerText = L.businessName;
-  document.getElementById("drawerVendorName").innerText = L.businessName;
+  document.getElementById("vendorName").innerText = L.businessName || "Vendor";
+  document.getElementById("drawerVendorName").innerText =
+    L.businessName || "Vendor";
 
-  document.getElementById("vendorCategory").innerText =
-    `${L.category} → ${L.subcategory}`;
+  document.getElementById("vendorCategory").innerText = `${L.category || ""} → ${
+    L.subcategory || ""
+  }`;
 
-  document.getElementById("vendorCity").innerText = L.city;
+  document.getElementById("vendorCity").innerText = L.city || "";
   document.getElementById("vendorPrice").innerText = `₹${L.price}`;
-  document.getElementById("vendorAbout").innerText = L.about;
+  document.getElementById("vendorAbout").innerText = L.about || "";
 
   loadSuggested(vendorData.mainCategory);
 }
@@ -67,18 +72,27 @@ function loadSlider(images) {
   box.innerHTML = "";
   if (!images.length) images = ["/images/default.jpg"];
 
-  images.forEach(img => box.innerHTML += `<img src="${img}">`);
+  images.forEach((img) => (box.innerHTML += `<img src="${img}">`));
 
-  document.getElementById("nextSlide").onclick = () => nextSlide(images.length);
-  document.getElementById("prevSlide").onclick = () => prevSlide(images.length);
+  document.getElementById("nextSlide").onclick = () =>
+    nextSlide(images.length);
+  document.getElementById("prevSlide").onclick = () =>
+    prevSlide(images.length);
 }
 
-function nextSlide(t) { slideIndex = (slideIndex + 1) % t; updateSlider(); }
-function prevSlide(t) { slideIndex = (slideIndex - 1 + t) % t; updateSlider(); }
+function nextSlide(t) {
+  slideIndex = (slideIndex + 1) % t;
+  updateSlider();
+}
+function prevSlide(t) {
+  slideIndex = (slideIndex - 1 + t) % t;
+  updateSlider();
+}
 
 function updateSlider() {
-  document.getElementById("sliderImages").style.transform =
-    `translateX(-${slideIndex * 100}%)`;
+  document.getElementById(
+    "sliderImages"
+  ).style.transform = `translateX(-${slideIndex * 100}%)`;
 }
 
 /* ======================================
@@ -101,7 +115,9 @@ async function loadSuggested(mainCategory) {
     if (docx.id === vendorId) continue;
 
     const vendorData = docx.data();
-    const listSnap = await getDocs(collection(db, "vendors", docx.id, "listings"));
+    const listSnap = await getDocs(
+      collection(db, "vendors", docx.id, "listings")
+    );
 
     if (listSnap.empty) continue;
 
@@ -120,7 +136,7 @@ async function loadSuggested(mainCategory) {
 }
 
 /* ======================================
-   SAVE VENDOR
+   SAVE VENDOR (Wishlist)
 ====================================== */
 document.getElementById("saveVendorBtn").onclick = async () => {
   const user = auth.currentUser;
@@ -128,7 +144,7 @@ document.getElementById("saveVendorBtn").onclick = async () => {
 
   await setDoc(doc(db, "customers", user.uid, "wishlist", vendorId), {
     vendorId,
-    savedAt: Date.now()
+    savedAt: Date.now(),
   });
 
   alert("Saved ❤️");
@@ -152,20 +168,31 @@ document.getElementById("closePopupBtn").onclick = () => {
 };
 
 /* ======================================
-   FINAL BOOKING SUBMIT (FULLY FIXED)
+   FINAL BOOKING SUBMIT (BUG-FREE)
 ====================================== */
 document.getElementById("submitBookingBtn").onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Please login first!");
 
-  const vendorName = document.getElementById("vendorName").innerText;
-  const amount = parseInt(
-    document.getElementById("vendorPrice").innerText.replace("₹", "")
-  );
+  // SAFE amount
+  let amountText = document
+    .getElementById("vendorPrice")
+    .innerText.replace("₹", "")
+    .replace(/,/g, "");
+
+  const amount = Number(amountText);
+
+  // SAFE eventType handling
+  const categoryText = document.getElementById("vendorCategory").innerText;
+  let eventType = "General";
+
+  if (categoryText.includes("→")) {
+    eventType = categoryText.split("→")[1].trim() || "General";
+  }
 
   const data = {
     vendorId,
-    vendorName,
+    vendorName: document.getElementById("vendorName").innerText,
     customerId: user.uid,
     customerName: cName.value.trim(),
     amount,
@@ -174,22 +201,19 @@ document.getElementById("submitBookingBtn").onclick = async () => {
     venueLocation: cVenue.value.trim(),
     guests: cGuests.value.trim(),
     message: cMsg.value.trim(),
-
-    // Correct event type
-    eventType: document
-      .getElementById("vendorCategory")
-      .innerText.split("→")[1]
-      ?.trim(),
+    eventType,
   };
 
-  if (!data.customerName || !data.eventDate || !data.amount) {
-    return alert("Fill required fields");
-  }
+  // REQUIRED FIELD VALIDATION
+  if (!data.customerName) return alert("Enter your name");
+  if (!data.eventDate) return alert("Select event date");
+  if (!data.amount) return alert("Invalid vendor price");
 
+  // SEND TO BACKEND
   const res = await fetch(`${BASE_URL}/api/booking/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 
   const result = await res.json();
@@ -208,4 +232,4 @@ document.getElementById("submitBookingBtn").onclick = async () => {
 /* ======================================
    CHAT SYSTEM (UNCHANGED)
 ====================================== */
-// keep your existing chat code unchanged here…
+// Tumhara chat code same rehne do

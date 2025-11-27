@@ -3,27 +3,34 @@ import {
   collection,
   query,
   where,
-  getDocs
+  getDocs,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { openCheckout, payAfterVisit } from "./payment.js";
 
 /* =====================================
-   BACKEND BASE URL (REQUIRED)
+   BACKEND BASE URL
 ===================================== */
 const BASE_URL = "https://eventbrix3.onrender.com";
 
 /* ============================
-   LOAD USER BOOKINGS
+   LOAD USER BOOKINGS (UI)
 ============================ */
-export async function loadBookings(userId) {
-  const q = query(collection(db, "bookings"), where("customerId", "==", userId));
+export async function loadBookingsUI(userId) {
+  const q = query(
+    collection(db, "bookings"),
+    where("customerId", "==", userId)
+  );
+
   const snap = await getDocs(q);
 
   let html = "";
+
   snap.forEach((b) => {
     const d = b.data();
-    html += cardUI(b.id, d);
+    html += bookingCard(b.id, d);
   });
 
   document.getElementById("myBookings").innerHTML = html;
@@ -32,51 +39,75 @@ export async function loadBookings(userId) {
 /* ============================
    BOOKING CARD UI
 ============================ */
-function cardUI(id, d) {
+function bookingCard(id, d) {
   return `
     <div class="booking-card" onclick="toggleBooking('${id}')">
-      <p><b>${d.vendorName}</b></p>
+      <p><b>${d.vendorName || "Vendor"}</b></p>
       <p>${d.eventDate}</p>
+      <p style="color:#777;">${d.status}</p>
     </div>
 
     <div id="${id}" class="booking-details" style="display:none;">
       <p><b>Event Type:</b> ${d.eventType}</p>
       <p><b>Amount:</b> ₹${d.amount}</p>
       <p><b>Status:</b> ${d.status}</p>
+      <p><b>Payment:</b> ${d.paymentStatus}</p>
 
-      ${buttons(id, d)}
+      ${renderButtons(id, d)}
     </div>
   `;
 }
 
 /* ============================
-   BUTTON LOGIC
+   BUTTON HANDLER
 ============================ */
-function buttons(id, d) {
-  // Already paid
+function renderButtons(id, d) {
+  // ============================
+  // 1) Payment Completed
+  // ============================
   if (d.paymentStatus === "paid") {
-    return `<p style="color:green;"><b>Payment Completed</b></p>`;
+    return `<p style="color:green;"><b>Payment Completed ✔</b></p>`;
   }
 
-  // Not approved yet
+  // ============================
+  // 2) Pay After Visit (already chosen)
+  // ============================
+  if (d.paymentStatus === "after_visit") {
+    return `<p style="color:blue;"><b>Pay After Visit Selected</b></p>`;
+  }
+
+  // ============================
+  // 3) Booking not approved
+  // ============================
   if (d.status !== "approved") {
-    return `<p style="color:gray;">Waiting for approval...</p>`;
+    return `<p style="color:gray;">Waiting for Admin Approval...</p>`;
   }
 
-  // Approved → show payment options
+  // ============================
+  // 4) Show Buttons (Approved)
+  // ============================
   return `
-    <button onclick="payNow('${id}', ${d.amount})" class="pay-btn">Pay Now</button>
-    <button onclick="payLater('${id}')" class="secondary-btn">Pay After Visit</button>
+    <button class="pay-btn" onclick="payNow('${id}', ${d.amount})">Pay Now</button>
+    <button class="secondary-btn" onclick="choosePayLater('${id}')">Pay After Visit</button>
   `;
 }
 
 /* ============================
-   GLOBAL FUNCS
+   GLOBAL FUNCTIONS
 ============================ */
 window.toggleBooking = function (id) {
-  let box = document.getElementById(id);
+  const box = document.getElementById(id);
   box.style.display = box.style.display === "none" ? "block" : "none";
 };
 
-window.payNow = (id, amount) => openCheckout(id, amount);
-window.payLater = (id) => payAfterVisit(id);
+// PAY NOW (Razorpay)
+window.payNow = (id, amt) => {
+  openCheckout(id, amt);
+};
+
+// PAY AFTER VISIT
+window.choosePayLater = async (id) => {
+  await payAfterVisit(id);
+  alert("Pay After Visit selected!");
+  location.reload();
+};

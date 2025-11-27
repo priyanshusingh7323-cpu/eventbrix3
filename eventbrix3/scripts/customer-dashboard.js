@@ -1,20 +1,19 @@
 import { auth, db } from "/scripts/firebase.js";
 import {
-  doc,
-  getDoc,
   collection,
   getDocs,
+  getDoc,
+  doc,
   query,
-  where
+  where,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* ======================================
-   IMPORT NEW BOOKING SYSTEM
+   IMPORT BOOKING SYSTEM
 ====================================== */
-import { loadBookings } from "../scripts/mybookings.js";
-
+import { loadBookingsUI } from "../scripts/mybookings.js";
 
 /* ======================================
    CHECK LOGIN STATE
@@ -28,50 +27,52 @@ auth.onAuthStateChanged(async (user) => {
   loadProfile(user.uid);
   loadWishlist(user.uid);
   loadRecent(user.uid);
-
-  // ⭐ NEW BOOKING LOADER (correct)
-  loadBookings(user.uid);
-
   loadChats(user.uid);
   loadReviews(user.uid);
-});
 
+  // ⭐ NEW BOOKING UI (correct)
+  loadBookingsUI(user.uid);
+});
 
 /* ======================================
    TAB SWITCHER
 ====================================== */
 document.querySelectorAll(".tabBtn").forEach((btn) => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".section").forEach((sec) => (sec.style.display = "none"));
+    document
+      .querySelectorAll(".section")
+      .forEach((sec) => (sec.style.display = "none"));
+
     document.getElementById(btn.dataset.tab).style.display = "block";
   });
 });
-
 
 /* ======================================
    LOAD PROFILE
 ====================================== */
 async function loadProfile(uid) {
   const snap = await getDoc(doc(db, "customers", uid));
+  if (!snap.exists()) return;
+
   const d = snap.data();
-  if (!d) return;
 
   document.getElementById("pName").innerText = d.name;
   document.getElementById("pEmail").innerText = d.email;
-  document.getElementById("pPhone").innerText = d.phone;
-  document.getElementById("pCity").innerText = d.city;
-  document.getElementById("pJoined").innerText = new Date(d.createdAt).toDateString();
+  document.getElementById("pPhone").innerText = d.phone || "-";
+  document.getElementById("pCity").innerText = d.city || "-";
+  document.getElementById("pJoined").innerText = new Date(
+    d.createdAt
+  ).toDateString();
 }
-
 
 /* ======================================
    LOAD WISHLIST
 ====================================== */
 async function loadWishlist(uid) {
   const box = document.getElementById("wishlistBox");
-  const snap = await getDocs(collection(db, "customers", uid, "wishlist"));
-
   box.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "customers", uid, "wishlist"));
 
   snap.forEach((d) => {
     const v = d.data();
@@ -86,16 +87,15 @@ async function loadWishlist(uid) {
     `;
   });
 }
-
 
 /* ======================================
    LOAD RECENT
 ====================================== */
 async function loadRecent(uid) {
   const box = document.getElementById("recentBox");
-  const snap = await getDocs(collection(db, "customers", uid, "recent"));
-
   box.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "customers", uid, "recent"));
 
   snap.forEach((d) => {
     const v = d.data();
@@ -111,24 +111,16 @@ async function loadRecent(uid) {
   });
 }
 
-
-/* ======================================
-   OLD LOAD BOOKINGS – REMOVED
-====================================== */
-// ❌ function loadBookings(uid) { ... }  <-- DELETE
-
-
 /* ======================================
    LOAD CHATS
 ====================================== */
 async function loadChats(uid) {
   const box = document.getElementById("chatBox");
+  box.innerHTML = "";
 
   const qSnap = await getDocs(
     query(collection(db, "chats"), where("customerId", "==", uid))
   );
-
-  box.innerHTML = "";
 
   qSnap.forEach((c) => {
     const d = c.data();
@@ -143,18 +135,16 @@ async function loadChats(uid) {
   });
 }
 
-
 /* ======================================
    LOAD REVIEWS
 ====================================== */
 async function loadReviews(uid) {
   const box = document.getElementById("reviewBox");
+  box.innerHTML = "";
 
   const qSnap = await getDocs(
     query(collection(db, "reviews"), where("customerId", "==", uid))
   );
-
-  box.innerHTML = "";
 
   qSnap.forEach((r) => {
     const d = r.data();
@@ -168,7 +158,6 @@ async function loadReviews(uid) {
     `;
   });
 }
-
 
 /* ======================================
    LOGOUT BUTTON

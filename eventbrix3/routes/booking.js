@@ -25,36 +25,64 @@ router.post("/create", async (req, res) => {
     } = req.body;
 
     // ----------------------------
-    // VALIDATION (basic)
+    // VALIDATION
     // ----------------------------
     if (!vendorId || !customerId || !amount || !eventDate) {
       return res.json({
         success: false,
-        error: "Missing required fields"
+        error: "Missing required fields",
       });
     }
+
+    // customer name must exist
+    if (!customerName || customerName.trim().length < 1) {
+      return res.json({
+        success: false,
+        error: "Customer name is required",
+      });
+    }
+
+    // Fix: amount must be number
+    const finalAmount = Number(String(amount).replace(/,/g, ""));
+    if (isNaN(finalAmount) || finalAmount <= 0) {
+      return res.json({
+        success: false,
+        error: "Invalid amount value",
+      });
+    }
+
+    // Safe event type
+    const safeEventType = eventType || "General";
 
     // ----------------------------
     // SAVE BOOKING IN FIRESTORE
     // ----------------------------
     const ref = await db.collection("bookings").add({
       vendorId,
-      vendorName,
+      vendorName: vendorName || "Unknown Vendor",
+
       customerId,
-      customerName,
+      customerName: customerName.trim(),
+
       phone: phone || "",
-      amount,
+      amount: finalAmount,   // numeric amount FIXED
       eventDate,
-      eventCity,
-      eventType,
+      eventCity: eventCity || "",
+      eventType: safeEventType,
       message: message || "",
       venueLocation: venueLocation || "",
       guests: guests || "",
-      
+
       status: "pending",
       paymentStatus: "unpaid",
 
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+
+      // Debug log
+      systemLog: {
+        createdAt: Date.now(),
+        createdFrom: "Vendor Profile → Booking Popup",
+      },
     });
 
     // ----------------------------
@@ -62,14 +90,14 @@ router.post("/create", async (req, res) => {
     // ----------------------------
     return res.json({
       success: true,
-      bookingId: ref.id
+      bookingId: ref.id,
     });
 
   } catch (err) {
     console.error("BOOKING ERROR:", err);
     return res.json({
       success: false,
-      error: err.message
+      error: err.message,
     });
   }
 });

@@ -6,7 +6,7 @@ import {
   collection,
   getDocs,
   updateDoc,
-  doc
+  doc,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { processRefund } from "./refund.js";
@@ -17,15 +17,15 @@ import { processPayout } from "./payout.js";
 // ===============================
 const BASE_URL = "https://eventbrix3.onrender.com";
 
-
-// AUTH GUARD
+// ===============================
+// ADMIN LOGIN CHECK
+// ===============================
 auth.onAuthStateChanged((user) => {
   if (!user || user.email !== "admin@eventbrix.com") {
     alert("Unauthorized!");
     window.location.href = "/admin/admin-login.html";
   }
 });
-
 
 // ===============================
 // 1) LOAD PENDING VENDORS
@@ -44,6 +44,7 @@ export async function loadPendingVendors() {
         <div class="admin-card">
           <h3>${d.businessName}</h3>
           <p>${d.city}</p>
+
           <button class="green" onclick="approveVendor('${v.id}')">Approve</button>
           <button class="danger" onclick="rejectVendor('${v.id}')">Reject</button>
         </div>
@@ -62,7 +63,6 @@ window.rejectVendor = async (id) => {
   loadDashboard();
 };
 
-
 // ===============================
 // 2) LOAD PENDING BOOKINGS
 // ===============================
@@ -78,9 +78,12 @@ export async function loadPendingBookings() {
     if (d.status === "pending") {
       box.innerHTML += `
         <div class="admin-card">
+
           <h3>${d.vendorName}</h3>
-          <p><strong>Customer:</strong> ${d.customerName}</p>
-          <p><strong>Event:</strong> ${d.eventCity} — ${d.eventDate}</p>
+          <p><strong>${d.customerName}</strong></p>
+
+          <p>City: ${d.eventCity}</p>
+          <p>Date: ${d.eventDate}</p>
 
           <button class="green" onclick="approveBooking('${b.id}')">Approve</button>
           <button class="danger" onclick="rejectBooking('${b.id}')">Reject</button>
@@ -100,7 +103,6 @@ window.rejectBooking = async (id) => {
   loadDashboard();
 };
 
-
 // ===============================
 // 3) APPROVED BOOKINGS
 // ===============================
@@ -118,13 +120,15 @@ export async function loadApprovedBookings() {
         <div class="admin-card">
           <h3>${d.vendorName}</h3>
           <p>${d.customerName}</p>
-          <p><strong>Status:</strong> ${d.status}</p>
+
+          <p><b>Date:</b> ${d.eventDate}</p>
+          <p><b>Payment:</b> ${d.paymentStatus}</p>
+          <p><b>Amount:</b> ₹${d.amount}</p>
         </div>
       `;
     }
   });
 }
-
 
 // ===============================
 // 4) REFUND PANEL
@@ -138,13 +142,17 @@ export async function loadRefundPanel() {
   snap.forEach((b) => {
     const d = b.data();
 
-    if (d.paymentStatus === "paid") {
+    // Refund only for PAID + NOT refunded bookings
+    if (d.paymentStatus === "paid" && d.status !== "refunded") {
       box.innerHTML += `
         <div class="admin-card">
           <h3>${d.vendorName}</h3>
           <p>${d.customerName}</p>
+          <p><b>Amount:</b> ₹${d.amount}</p>
 
-          <button onclick="refundBooking('${b.id}')">Process Refund</button>
+          <button onclick="refundBooking('${b.id}')" class="danger">
+            Process Refund
+          </button>
         </div>
       `;
     }
@@ -153,9 +161,9 @@ export async function loadRefundPanel() {
 
 window.refundBooking = async (id) => {
   await processRefund(id);
+  alert("Refund Calculated & Applied!");
   loadDashboard();
 };
-
 
 // ===============================
 // 5) PAYOUT PANEL
@@ -169,9 +177,11 @@ export async function loadPayoutPanel() {
   snap.forEach((b) => {
     const d = b.data();
 
-    if (d.paymentStatus === "paid") {
+    // Payout only if PAID and NOT refunded
+    if (d.paymentStatus === "paid" && d.status !== "refunded") {
       box.innerHTML += `
         <div class="admin-card">
+
           <h3>${d.vendorName}</h3>
           <p>${d.customerName}</p>
 
@@ -186,9 +196,9 @@ export async function loadPayoutPanel() {
 
 window.payout = async (id, stage) => {
   await processPayout(id, stage);
+  alert("Payout Processed!");
   loadDashboard();
 };
-
 
 // ===============================
 // LOAD ALL SECTIONS
