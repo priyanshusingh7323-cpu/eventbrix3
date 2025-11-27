@@ -59,33 +59,44 @@ function bookingCard(id, d) {
 }
 
 /* ============================
-   BUTTON HANDLER
+   BUTTON LOGIC WITH 24-HOUR EXPIRY
 ============================ */
 function renderButtons(id, d) {
-  // ============================
-  // 1) Payment Completed
-  // ============================
+  const now = Date.now();
+
+  // 1) Already Paid
   if (d.paymentStatus === "paid") {
     return `<p style="color:green;"><b>Payment Completed ✔</b></p>`;
   }
 
-  // ============================
-  // 2) Pay After Visit (already chosen)
-  // ============================
+  // 2) Pay After Visit already chosen
   if (d.paymentStatus === "after_visit") {
-    return `<p style="color:blue;"><b>Pay After Visit Selected</b></p>`;
+    const selectedAt = d.afterVisitTimestamp || 0;
+    const hoursPassed = (now - selectedAt) / (1000 * 60 * 60);
+
+    // EXPIRED (after 24 hours)
+    if (hoursPassed > 24) {
+      return `
+        <button class="pay-btn" onclick="payNow('${id}', ${d.amount})">Pay Now</button>
+        <p style="color:red;margin-top:8px;"><b>Pay After Visit Expired</b></p>
+      `;
+    }
+
+    // ACTIVE
+    const left = Math.ceil(24 - hoursPassed);
+
+    return `
+      <button class="pay-btn" onclick="payNow('${id}', ${d.amount})">Pay Now</button>
+      <p style="color:blue;margin-top:8px;"><b>Pay After Visit Active (${left} hours left)</b></p>
+    `;
   }
 
-  // ============================
-  // 3) Booking not approved
-  // ============================
+  // 3) Booking not yet approved
   if (d.status !== "approved") {
     return `<p style="color:gray;">Waiting for Admin Approval...</p>`;
   }
 
-  // ============================
-  // 4) Show Buttons (Approved)
-  // ============================
+  // 4) Approved → both options available
   return `
     <button class="pay-btn" onclick="payNow('${id}', ${d.amount})">Pay Now</button>
     <button class="secondary-btn" onclick="choosePayLater('${id}')">Pay After Visit</button>
@@ -105,9 +116,14 @@ window.payNow = (id, amt) => {
   openCheckout(id, amt);
 };
 
-// PAY AFTER VISIT
+// PAY AFTER VISIT (store timestamp)
 window.choosePayLater = async (id) => {
-  await payAfterVisit(id);
+  await updateDoc(doc(db, "bookings", id), {
+    paymentStatus: "after_visit",
+    afterVisitTimestamp: Date.now(),
+    updatedAt: Date.now()
+  });
+
   alert("Pay After Visit selected!");
   location.reload();
 };
