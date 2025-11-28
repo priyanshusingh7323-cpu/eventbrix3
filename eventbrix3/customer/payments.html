@@ -1,101 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Payments & Refunds | EventBrix</title>
 
-<link rel="stylesheet" href="/styles.css">
-<link rel="stylesheet" href="/styles-dashboard.css">
+<link rel="stylesheet" href="/styles.css" />
+<link rel="stylesheet" href="/styles-dashboard.css" />
 
 <style>
-.page-header {
-  background:#111;
-  padding:15px;
-  color:gold;
-  font-size:22px;
-  font-weight:bold;
-  text-align:center;
-  border-bottom:1px solid rgba(255,200,60,0.2);
-}
+  body { background:#0b0b0b; color:#fff; }
 
-.payment-card {
-  background:#161616;
-  border:1px solid rgba(255,200,60,0.3);
-  padding:15px;
-  margin:12px;
-  border-radius:12px;
-  color:white;
-}
+  .payment-card {
+    background:#111;
+    padding:18px;
+    border:1px solid rgba(255,200,50,0.3);
+    margin:15px;
+    border-radius:12px;
+  }
+  .payment-card h3 { color:gold; }
 
-.status-paid {
-  color:#7dff7d;
-  font-weight:bold;
-}
+  .pay-btn {
+    width:100%;
+    padding:12px;
+    background:gold;
+    color:black;
+    border:none;
+    border-radius:10px;
+    margin-top:12px;
+    font-weight:bold;
+    cursor:pointer;
+  }
 
-.status-refunded {
-  color:#ff7d7d;
-  font-weight:bold;
-}
+  .secondary-btn {
+    width:100%;
+    padding:12px;
+    background:#222;
+    color:gold;
+    border:1px solid gold;
+    border-radius:10px;
+    margin-top:10px;
+    cursor:pointer;
+  }
 
-.status-pending {
-  color:#ffbf5e;
-  font-weight:bold;
-}
+  .expired { color:red; font-weight:bold; }
+  .active { color:#5cb85c; font-weight:bold; }
 </style>
+
 </head>
 
 <body>
 
-<div class="page-header">Payments & Refunds</div>
+<h2 style="text-align:center;color:gold;margin-top:20px;">
+  Payments & Refunds
+</h2>
 
-<div id="paymentHistory"></div>
+<div id="paymentList"></div>
 
-<script type="module">
-import { db, auth } from "/scripts/firebase.js";
-import {
-  collection, query, where, getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-auth.onAuthStateChanged(async (user)=>{
-  if(!user) return (location.href="/customer/customer-login.html");
-  loadPayments(user.uid);
-});
-
-async function loadPayments(uid){
-  const box = document.getElementById("paymentHistory");
-  box.innerHTML = "Loading...";
-
-  const snap = await getDocs(
-    query(collection(db,"bookings"), where("customerId","==",uid))
-  );
-
-  box.innerHTML = "";
-
-  snap.forEach(b=>{
-    const d = b.data();
-
-    if (d.paymentStatus !== "unpaid" && d.paymentStatus !== "pay_later") {
-      box.innerHTML += `
-        <div class="payment-card">
-          <h3>${d.vendorName}</h3>
-          <p>Amount: ₹${d.amount}</p>
-          <p>Date: ${d.eventDate}</p>
-          <p>Status:
-            <span class="${
-              d.paymentStatus === "paid" ? "status-paid" :
-              d.paymentStatus === "refunded" ? "status-refunded" :
-              "status-pending"
-            }">
-              ${d.paymentStatus}
-            </span>
-          </p>
-        </div>
-      `;
-    }
-  });
-}
-</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script type="module" src="/scripts/payment-page.js"></script>
 
 </body>
 </html>
