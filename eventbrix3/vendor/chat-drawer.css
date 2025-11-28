@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Profile | EventBrix</title>
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="vendor-profile.css">
+<link rel="stylesheet" href="chat-drawer.css">
+
+</head>
+<body>
+
+<div class="slider-container">
+  <div id="sliderImages" class="slider-images"></div>
+  <div class="slider-controls">
+    <button id="prevSlide">‹</button>
+    <button id="nextSlide">›</button>
+  </div>
+</div>
+
+<div class="vendor-box">
+  <h2 id="vendorName" class="vendor-title"></h2>
+
+  <div class="vendor-meta">
+    <p><strong>Category:</strong> <span id="vendorCategory"></span></p>
+    <p><strong>City:</strong> <span id="vendorCity"></span></p>
+    <p><strong>Starting Price:</strong> <span id="vendorPrice"></span></p>
+  </div>
+
+  <div class="vendor-actions">
+    <button id="bookNowBtn" class="gold-btn">Book Now</button>
+    <button id="chatBtn" class="dark-btn">Chat</button>
+    <button id="saveVendorBtn" class="dark-btn">Save ❤️</button>
+  </div>
+
+  <h3 class="section-head">About</h3>
+  <p id="vendorAbout" class="about-text"></p>
+</div>
+
+<div class="suggest-box">
+  <h3 class="section-head">Similar Vendors</h3>
+  <div id="suggestedVendors" class="suggest-grid"></div>
+</div>
+
+<div id="popupOverlay" class="overlay"></div>
+
+<div id="bookingPopup" class="popup">
+  <h2>Book Vendor</h2>
+  <input id="cName" placeholder="Your Name" class="inputBox">
+  <input id="cPhone" placeholder="Phone" class="inputBox">
+  <input id="cDate" type="date" class="inputBox">
+  <input id="cCity" placeholder="Event City" class="inputBox">
+  <input id="cVenue" placeholder="Venue Location" class="inputBox">
+  <input id="cGuests" placeholder="Guest Count" class="inputBox">
+  <textarea id="cMsg" placeholder="Message" class="inputBox"></textarea>
+  <button id="submitBookingBtn" class="gold-btn" style="width:100%;margin-top:10px;">Submit</button>
+  <button id="closePopupBtn" class="dark-btn" style="width:100%;margin-top:8px;">Close</button>
+</div>
+
+<div id="thankYouBox" class="thank-box">Booking Sent!</div>
+
+<!-- CHAT DRAWER -->
+<div id="chatDrawer" class="chat-drawer">
+
+  <div class="chat-header">
+    <div>
+      <span id="drawerVendorName">Vendor</span><br>
+      <small id="typingStatus" style="color:#ffd24a; display:none;">typing…</small>
+    </div>
+    <span id="chatCloseBtn" class="chat-close">&times;</span>
+  </div>
+
+  <div id="drawerMessages" class="chat-body"></div>
+
+  <div class="chat-input-area">
+    <input id="drawerMsgInput" class="chat-input" placeholder="Type a message...">
+    <button id="drawerSendBtn" class="chat-send-btn">Send</button>
+  </div>
+</div>
+
+<script type="module" src="../scripts/vendor-profile.js"></script>
+<script src="../scripts/smooth-ui.js"></script>
+
+</body>
+</html>

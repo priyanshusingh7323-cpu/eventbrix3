@@ -21,7 +21,6 @@ let CURRENT_VENDOR_ID = null;
 auth.onAuthStateChanged(async (user) => {
   if (!user) return location.href = "vendor-login.html";
 
-  // Get vendor document via UID
   const q = query(collection(db, "vendors"), where("uid", "==", user.uid));
   const snap = await getDocs(q);
 
@@ -33,21 +32,24 @@ auth.onAuthStateChanged(async (user) => {
 
   const data = vendorDoc.data();
 
-  // Fill Header
   document.getElementById("vendorName").innerText = data.businessName || "Vendor";
   document.getElementById("vendorCity").innerText = data.city || "Not Set";
   document.getElementById("vendorID").innerText = vendorId;
   document.getElementById("vendorStatus").innerText = data.status || "pending";
 
-  // Load dashboard sections
   loadListings(vendorId);
   loadApprovedLeads(vendorId);
   loadAnalytics(vendorId);
+
+  // NEW: Earnings & payouts
+  loadEarnings(vendorId);
+  loadPayoutHistory(vendorId);
+
   liveMessageCounter(vendorId);
 });
 
 /* -----------------------------------------
-   NAVBAR BUTTONS
+   NAVBAR
 ------------------------------------------ */
 document.getElementById("homeBtn").onclick = () => {
   location.href = "/index.html";
@@ -62,11 +64,11 @@ document.getElementById("logoutTopBtn").onclick = async () => {
    QUICK ACTION BUTTONS
 ------------------------------------------ */
 document.getElementById("qaListings").onclick = () => {
-  window.scrollTo({ top: document.querySelector("#vendorListings").offsetTop - 30, behavior: "smooth" });
+  scrollToTarget("#vendorListings");
 };
 
 document.getElementById("qaLeads").onclick = () => {
-  window.scrollTo({ top: document.querySelector("#vendorLeads").offsetTop - 30, behavior: "smooth" });
+  scrollToTarget("#vendorLeads");
 };
 
 document.getElementById("qaMessages").onclick = () => {
@@ -77,8 +79,15 @@ document.getElementById("qaProfile").onclick = () => {
   alert("Profile editing coming soon!");
 };
 
+function scrollToTarget(id) {
+  window.scrollTo({
+    top: document.querySelector(id).offsetTop - 30,
+    behavior: "smooth"
+  });
+}
+
 /* -----------------------------------------
-   CREATE NEW LISTING
+   CREATE LISTING
 ------------------------------------------ */
 document.getElementById("newListingBtn").onclick = () => {
   window.location.href = "vendor-register.html?mode=new";
@@ -138,18 +147,15 @@ async function loadApprovedLeads(vendorId) {
 }
 
 /* -----------------------------------------
-   ANALYTICS (PROFILE VIEWS, LEADS, MESSAGES)
+   ANALYTICS
 ------------------------------------------ */
 async function loadAnalytics(vendorId) {
-  // PROFILE VIEWS (static for now)
   document.getElementById("statViews").innerText = 12;
 
-  // TOTAL LEADS
   const leadsRef = collection(db, "leads_approved", vendorId, "items");
   const leadsSnap = await getDocs(leadsRef);
   document.getElementById("statLeads").innerText = leadsSnap.size;
 
-  // MESSAGES COUNT
   const msgRef = collection(db, "chats");
   const q = query(msgRef, where("vendorId", "==", vendorId));
   const msgSnap = await getDocs(q);
@@ -157,17 +163,18 @@ async function loadAnalytics(vendorId) {
 }
 
 /* -----------------------------------------
-   LIVE MESSAGE COUNTER (UNREAD)
+   LIVE CHAT
 ------------------------------------------ */
 function liveMessageCounter(vendorId) {
-  const q = query(collection(db,"chats"), where("vendorId","==",vendorId));
+  const q = query(collection(db, "chats"), where("vendorId","==",vendorId));
 
   onSnapshot(q, (snap) => {
     let unread = 0;
 
     snap.forEach(doc => {
       const c = doc.data();
-      if (c.lastSender === "customer" && c.seenByVendor === false) unread++;
+      if (c.lastSender === "customer" && c.seenByVendor === false)
+        unread++;
     });
 
     document.getElementById("messagesBtn").innerText =
@@ -176,7 +183,7 @@ function liveMessageCounter(vendorId) {
 }
 
 /* -----------------------------------------
-   CHAT DRAWER OPEN/CLOSE
+   CHAT DRAWER
 ------------------------------------------ */
 function openChatDrawer() {
   loadChatList();
@@ -187,9 +194,6 @@ document.getElementById("vdChatClose").onclick = () => {
   document.getElementById("vdChatDrawer").style.right = "-360px";
 };
 
-/* -----------------------------------------
-   LOAD CHAT LIST IN DRAWER
------------------------------------------- */
 async function loadChatList() {
   const box = document.getElementById("vdChatList");
   box.innerHTML = "Loading...";
@@ -212,4 +216,82 @@ async function loadChatList() {
       </div>
     `;
   });
+}
+
+/* -----------------------------------------
+   LOAD EARNINGS SUMMARY
+------------------------------------------ */
+async function loadEarnings(vendorId) {
+  const qSnap = await getDocs(
+    query(collection(db, "bookings"), where("vendorId", "==", vendorId))
+  );
+
+  let total = 0;
+  let pending = 0;
+  let paid = 0;
+  let adjust = 0;
+  let lastPayout = "--";
+
+  qSnap.forEach((b) => {
+    const d = b.data();
+    const amt = Number(d.amount);
+
+    if (d.paymentStatus === "paid") total += amt;
+
+    if (d.vendorPayoutAdjustment) adjust += Number(d.vendorPayoutAdjustment);
+
+    if (d.payoutStage && d.vendorPayoutAmount) {
+      paid += Number(d.vendorPayoutAmount);
+      lastPayout = new Date(d.vendorPayoutAt?.seconds * 1000).toDateString();
+    } else {
+      if (d.paymentStatus === "paid") pending += amt;
+    }
+  });
+
+  document.getElementById("earnTotal").innerText = "₹" + total.toLocaleString();
+  document.getElementById("earnPending").innerText = "₹" + pending.toLocaleString();
+  document.getElementById("earnPaid").innerText = "₹" + paid.toLocaleString();
+  document.getElementById("earnAdjust").innerText = adjust.toLocaleString();
+  document.getElementById("lastPayout").innerText = lastPayout;
+}
+
+/* -----------------------------------------
+   LOAD PAYOUT HISTORY
+------------------------------------------ */
+async function loadPayoutHistory(vendorId) {
+  const snap = await getDocs(
+    query(collection(db,"bookings"), where("vendorId","==",vendorId))
+  );
+
+  const box = document.getElementById("vdPayoutHistory");
+  box.innerHTML = "";
+
+  snap.forEach((b) => {
+    const d = b.data();
+
+    if (!d.payoutStage) return; // skip bookings with no payout
+
+    box.innerHTML += `
+      <div style="
+        padding:12px;
+        margin-bottom:10px;
+        border-bottom:1px solid rgba(255,210,74,0.2);
+      ">
+        <p><strong>Booking:</strong> ${b.id}</p>
+        <p><strong>Payout Stage:</strong> ${d.payoutStage}%</p>
+        <p><strong>Base Amount:</strong> ₹${d.amount}</p>
+        <p><strong>Payout Released:</strong> ₹${d.vendorPayoutAmount}</p>
+        <p><strong>Adjustment:</strong> ${d.vendorPayoutAdjustment || 0}</p>
+        <p><strong>Date:</strong> ${
+          d.vendorPayoutAt
+            ? new Date(d.vendorPayoutAt.seconds * 1000).toLocaleString()
+            : "--"
+        }</p>
+      </div>
+    `;
+  });
+
+  if (box.innerHTML.trim() === "") {
+    box.innerHTML = "<p style='color:gray;'>No payouts released yet.</p>";
+  }
 }
