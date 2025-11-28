@@ -73,6 +73,56 @@
 </div>
 
 <!-- ============================
+   EARNINGS & PAYOUT SUMMARY  (NEW)
+============================ -->
+<h2 class="vd-section-title">Earnings & Payouts</h2>
+
+<div id="vdEarningsSummary" style="padding:20px;">
+  
+  <div class="vd-stats">
+    <div class="vd-stat-card">
+      <h3 id="earnTotal">₹0</h3>
+      <p>Total Earnings</p>
+    </div>
+
+    <div class="vd-stat-card">
+      <h3 id="earnPending">₹0</h3>
+      <p>Pending Payout</p>
+    </div>
+
+    <div class="vd-stat-card">
+      <h3 id="earnPaid">₹0</h3>
+      <p>Payout Released</p>
+    </div>
+
+    <div class="vd-stat-card">
+      <h3 id="earnAdjust">₹0</h3>
+      <p>Refund Deductions</p>
+    </div>
+  </div>
+
+  <p style="color:gray;margin-left:10px;margin-top:8px;">
+    Last Payout: <span id="lastPayout">--</span>
+  </p>
+</div>
+
+<!-- ============================
+   PAYOUT HISTORY TABLE  (NEW)
+============================ -->
+<h2 class="vd-section-title">Payout History</h2>
+
+<div style="padding:20px;">
+  <div id="vdPayoutHistory" style="
+    background:#111;
+    border:1px solid rgba(255,210,74,0.3);
+    border-radius:14px;
+    padding:15px;
+  ">
+    Loading payout data...
+  </div>
+</div>
+
+<!-- ============================
    LISTINGS SECTION
 ============================ -->
 <h2 class="vd-section-title">Your Listings</h2>
@@ -85,7 +135,7 @@
 <div id="vendorLeads" class="vd-leads"></div>
 
 <!-- ============================
-   CHAT DRAWER (vendor side)
+   CHAT DRAWER
 ============================ -->
 <div id="vdChatDrawer" class="vd-chat-drawer">
 
