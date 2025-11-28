@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customer Dashboard | EventBrix</title>
+
+<!-- GLOBAL + DASHBOARD CSS -->
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../styles-dashboard.css" />
+
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="dash-header">
+  <h1 id="greeting">Dashboard</h1>
+
+  <!-- NEW HOME BUTTON -->
+  <button id="goHomePage" class="home-btn">
+    <img src="/icons/home-gold.png" />
+  </button>
+</div>
+
+<!-- PROFILE SUMMARY CARD -->
+<div class="profile-card">
+  <h2 id="pName"></h2>
+  <p id="pEmail"></p>
+  <p id="pPhone"></p>
+  <p id="pCity"></p>
+  <small id="pJoined"></small>
+
+  <button id="logoutBtn" class="logout-btn">Logout</button>
+</div>
+
+<!-- QUICK STATS -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <h3 id="statUpcoming">0</h3>
+    <p>Upcoming</p>
+  </div>
+
+  <div class="stat-card">
+    <h3 id="statPending">0</h3>
+    <p>Pending Payments</p>
+  </div>
+
+  <div class="stat-card">
+    <h3 id="statSpent">₹0</h3>
+    <p>Total Spent</p>
+  </div>
+</div>
+
+<!-- QUICK ACTION GRID -->
+<h2 class="section-title">Quick Actions</h2>
+
+<div class="action-grid">
+
+  <div class="action-card" id="openBookings">
+    <img src="/icons/calendar-gold.png" />
+    <p>My Bookings</p>
+  </div>
+
+  <div class="action-card" id="openPayments">
+    <img src="/icons/wallet-gold.png" />
+    <p>Payments & Refunds</p>
+  </div>
+
+  <div class="action-card" id="openChats">
+    <img src="/icons/chat-gold.png" />
+    <p>Chats</p>
+  </div>
+
+  <div class="action-card" id="openWishlist">
+    <img src="/icons/heart-gold.png" />
+    <p>Wishlist</p>
+  </div>
+
+  <div class="action-card" id="openRecent">
+    <img src="/icons/time-gold.png" />
+    <p>Recently Viewed</p>
+  </div>
+
+  <div class="action-card" id="openAccount">
+    <img src="/icons/user-gold.png" />
+    <p>Account</p>
+  </div>
+
+  <!-- NEW: Home Page Button -->
+  <div class="action-card" id="openHomePage">
+    <img src="/icons/home-gold.png" />
+    <p>Home Page</p>
+  </div>
+
+</div>
+
+<!-- UPCOMING SECTION -->
+<h2 class="section-title">Upcoming Events</h2>
+<div id="compactUpcoming" class="upcoming-list"></div>
+
+<!-- CHAT SLIDER (same) -->
+<div id="chatPanel" class="chat-slider">
+  <div class="chat-header">
+    <span>Chat Support</span>
+    <button id="closeChatPanel">✕</button>
+  </div>
+  <iframe src="/customer/chat.html" class="chat-iframe"></iframe>
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <a class="navBtn active" data-tab="dashboard">
+    <img src="/icons/home-gold.png" />
+    <span>Dashboard</span>
+  </a>
+
+  <a class="navBtn" id="navBookings">
+    <img src="/icons/calendar-gold.png" />
+    <span>Bookings</span>
+  </a>
+
+  <a id="openChatPanel">
+    <img src="/icons/chat-gold.png" />
+    <span>Chat</span>
+  </a>
+
+  <a class="navBtn" id="navWishlist">
+    <img src="/icons/heart-gold.png" />
+    <span>Saved</span>
+  </a>
+
+  <a class="navBtn" id="navAccount">
+    <img src="/icons/user-gold.png" />
+    <span>Account</span>
+  </a>
+</div>
+
+<!-- MAIN JS -->
+<script type="module" src="../scripts/customer-dashboard.js"></script>
+<script src="../scripts/smooth-ui.js"></script>
+
+</body>
+</html>
