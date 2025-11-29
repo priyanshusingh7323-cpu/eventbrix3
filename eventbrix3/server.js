@@ -29,6 +29,8 @@ try {
   app.use("/api/payment", require("./routes/payment"));
   app.use("/api/refund", require("./routes/refund"));
   app.use("/api/payout", require("./routes/payout"));
+  app.use("/api/receipt", require("./routes/receipt"));
+
 } catch (err) {
   console.error("❌ Route Loading Error:", err.message);
 }
