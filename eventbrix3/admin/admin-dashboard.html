@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="../styles.css" />
 
   <style>
-    body { padding: 20px; color: white; background: #111; }
+    body { padding: 20px; color: white; background: #111; font-family: Poppins, sans-serif; }
 
     .section {
       background: #1a1a1a;
@@ -50,14 +50,27 @@
       margin-top: 8px;
     }
 
-    .danger {
-      background: red;
-      color: white;
+    .danger { background: red; }
+    .green { background: #4caf50; }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
     }
 
-    .green {
-      background: #4caf50;
-      color: white;
+    .analytics-card {
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+
+    .analytics-card h3 {
+      color: #ffd24a;
+      font-size: 22px;
     }
   </style>
 </head>
@@ -66,47 +79,86 @@
 
   <h1 style="color:#ffd24a; margin-bottom:20px;">Admin Dashboard</h1>
 
-  <!-- SECTION 1 – PENDING VENDORS -->
+  <!-- SECTION 1 -->
   <div class="section">
     <h2 class="section-title" data-target="vendorsBox">Pending Vendors</h2>
     <div id="vendorsBox" class="section-content"></div>
   </div>
 
-  <!-- SECTION 2 – PENDING BOOKINGS -->
+  <!-- SECTION 2 -->
   <div class="section">
     <h2 class="section-title" data-target="pendingBookingsBox">Pending Bookings</h2>
     <div id="pendingBookingsBox" class="section-content"></div>
   </div>
 
-  <!-- SECTION 3 – APPROVED BOOKINGS -->
+  <!-- SECTION 3 -->
   <div class="section">
     <h2 class="section-title" data-target="approvedBookingsBox">Approved Bookings</h2>
     <div id="approvedBookingsBox" class="section-content"></div>
   </div>
 
-  <!-- SECTION 4 – REFUND ACTIONS -->
+  <!-- SECTION 4 -->
   <div class="section">
     <h2 class="section-title" data-target="refundBox">Refund Actions</h2>
     <div id="refundBox" class="section-content"></div>
   </div>
 
-  <!-- SECTION 5 – PAYOUT ACTIONS -->
+  <!-- SECTION 5 -->
   <div class="section">
     <h2 class="section-title" data-target="payoutBox">Payout Controls</h2>
     <div id="payoutBox" class="section-content"></div>
   </div>
 
-  <!-- FIREBASE -->
-  <script type="module" src="../scripts/firebase.js"></script>
+  <!-- SECTION 6 → ANALYTICS PANEL -->
+  <div class="section">
+    <h2 class="section-title" data-target="analyticsBox">EventBrix Analytics</h2>
 
-  <!-- MAIN ADMIN JS -->
+    <div id="analyticsBox" class="section-content">
+
+      <div class="analytics-grid">
+        <div class="analytics-card"><h3 id="anlPayments">₹0</h3><p>Total Payments</p></div>
+        <div class="analytics-card"><h3 id="anlRefunds">₹0</h3><p>Total Refunds</p></div>
+        <div class="analytics-card"><h3 id="anlPayouts">₹0</h3><p>Total Payouts</p></div>
+        <div class="analytics-card"><h3 id="anlEarnings">₹0</h3><p>Platform Earnings</p></div>
+        <div class="analytics-card"><h3 id="anlProfit">₹0</h3><p>Net Profit</p></div>
+        <div class="analytics-card"><h3 id="anlVendors">0</h3><p>Total Vendors</p></div>
+        <div class="analytics-card"><h3 id="anlCustomers">0</h3><p>Total Customers</p></div>
+        <div class="analytics-card"><h3 id="anlActive">0</h3><p>Active Bookings</p></div>
+      </div>
+
+      <br>
+
+      <div style="background:#1b1b1b; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <h3 style="color:#ffd24a;">Monthly Payments</h3>
+        <canvas id="chartPayments" height="120"></canvas>
+      </div>
+
+      <div style="background:#1b1b1b; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <h3 style="color:#ffd24a;">Refund Breakdown</h3>
+        <canvas id="chartRefunds" height="120"></canvas>
+      </div>
+
+      <div style="background:#1b1b1b; padding:15px; border-radius:10px; margin-bottom:20px;">
+        <h3 style="color:#ffd24a;">Payout Stages</h3>
+        <canvas id="chartPayouts" height="120"></canvas>
+      </div>
+
+      <div style="background:#1b1b1b; padding:15px; border-radius:10px;">
+        <h3 style="color:#ffd24a;">Booking Flow</h3>
+        <canvas id="chartBookings" height="120"></canvas>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="../scripts/firebase.js"></script>
   <script type="module" src="../scripts/admin-dashboard.js"></script>
 
   <script>
-    // Accordion dropdown toggle
-    document.querySelectorAll(".section-title").forEach(title => {
-      title.addEventListener("click", () => {
-        const target = document.getElementById(title.dataset.target);
+    document.querySelectorAll(".section-title").forEach(t => {
+      t.addEventListener("click", () => {
+        const target = document.getElementById(t.dataset.target);
         target.style.display = target.style.display === "block" ? "none" : "block";
       });
     });
