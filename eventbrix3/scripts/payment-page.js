@@ -8,9 +8,12 @@ import {
   updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import { openCheckout } from "./payment.js"; // your original Razorpay core file
+import { openCheckout } from "./payment.js"; // Razorpay core file
 
 const box = document.getElementById("paymentList");
+
+// GLOBAL for refund popup
+let CURRENT_REFUND_BOOKING = null;
 
 /* ================================
    ON USER LOGIN
@@ -50,12 +53,28 @@ function buildPaymentCard(id, d) {
   const now = Date.now();
   let controls = "";
 
-  // ⭐ PAID
-  if (d.paymentStatus === "paid") {
-    controls = `<p style="color:green;font-weight:bold;">Payment Completed ✔</p>`;
+  /* ---------------------------------------
+     1) REFUND REQUEST ALREADY SENT
+  ---------------------------------------- */
+  if (d.refundStatus === "requested") {
+    controls = `<p style="color:orange;"><b>Refund Requested — Pending Review</b></p>`;
   }
 
-  // ⭐ AFTER VISIT SELECTED
+  /* ---------------------------------------
+     2) PAYMENT COMPLETED
+  ---------------------------------------- */
+  else if (d.paymentStatus === "paid") {
+    controls = `
+      <p style="color:green;font-weight:bold;">Payment Completed ✔</p>
+      <button class="secondary-btn" onclick="openRefundPopup('${id}')">
+        Cancel & Refund
+      </button>
+    `;
+  }
+
+  /* ---------------------------------------
+     3) AFTER VISIT FLOW
+  ---------------------------------------- */
   else if (d.paymentStatus === "after_visit") {
     const ts = d.afterVisitTimestamp || 0;
     const hrs = (now - ts) / (1000 * 60 * 60);
@@ -74,15 +93,21 @@ function buildPaymentCard(id, d) {
     }
   }
 
-  // ⭐ APPROVED & UNPAID → Both options
+  /* ---------------------------------------
+     4) APPROVED BUT UNPAID
+  ---------------------------------------- */
   else if (d.status === "approved") {
     controls = `
       <button class="pay-btn" onclick="payNow('${id}', ${d.amount})">Pay Now</button>
-      <button class="secondary-btn" onclick="choosePayLater('${id}')">Pay After Visit</button>
+      <button class="secondary-btn" onclick="choosePayLater('${id}')">
+        Pay After Visit
+      </button>
     `;
   }
 
-  // ⭐ PENDING → No payment allowed
+  /* ---------------------------------------
+     5) WAITING FOR APPROVAL
+  ---------------------------------------- */
   else {
     controls = `<p style="color:gray;">Waiting for admin approval...</p>`;
   }
@@ -102,7 +127,7 @@ function buildPaymentCard(id, d) {
    PAY NOW (RAZORPAY)
 ================================ */
 window.payNow = (id, amt) => {
-  openCheckout(id, amt); // this calls your payment.js (core)
+  openCheckout(id, amt);
 };
 
 /* ================================
@@ -116,5 +141,42 @@ window.choosePayLater = async (id) => {
   });
 
   alert("Pay After Visit Activated");
+  location.reload();
+};
+
+/* ================================
+   OPEN REFUND POPUP
+================================ */
+window.openRefundPopup = function (id) {
+  CURRENT_REFUND_BOOKING = id;
+  document.getElementById("refundPopup").style.display = "flex";
+};
+
+/* ================================
+   CLOSE REFUND POPUP
+================================ */
+document.getElementById("closeRefundPopup").onclick = () => {
+  document.getElementById("refundPopup").style.display = "none";
+};
+
+/* ================================
+   SUBMIT REFUND REQUEST
+================================ */
+document.getElementById("submitRefundBtn").onclick = async () => {
+  const reason = document.getElementById("refundReason").value;
+  const details = document.getElementById("refundDetails").value;
+
+  if (!CURRENT_REFUND_BOOKING) return;
+
+  await updateDoc(doc(db, "bookings", CURRENT_REFUND_BOOKING), {
+    refundRequest: true,
+    refundStatus: "requested",
+    refundReason: reason,
+    refundDetails: details,
+    refundRequestedAt: Date.now()
+  });
+
+  alert("Refund request submitted! The admin will review it.");
+  document.getElementById("refundPopup").style.display = "none";
   location.reload();
 };

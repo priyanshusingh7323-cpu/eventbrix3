@@ -50,8 +50,8 @@
       margin-top: 8px;
     }
 
-    .danger { background: red; }
-    .green { background: #4caf50; }
+    .danger { background: red !important; }
+    .green { background: #4caf50 !important; }
 
     .analytics-grid {
       display: grid;
@@ -97,9 +97,9 @@
     <div id="approvedBookingsBox" class="section-content"></div>
   </div>
 
-  <!-- SECTION 4 -->
+  <!-- SECTION 4 (Updated Refund Requests Section) -->
   <div class="section">
-    <h2 class="section-title" data-target="refundBox">Refund Actions</h2>
+    <h2 class="section-title" data-target="refundBox">Refund Requests</h2>
     <div id="refundBox" class="section-content"></div>
   </div>
 
@@ -151,10 +151,14 @@
     </div>
   </div>
 
+  <!-- CHART JS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FIREBASE + ADMIN JS -->
   <script type="module" src="../scripts/firebase.js"></script>
   <script type="module" src="../scripts/admin-dashboard.js"></script>
 
+  <!-- Accordion -->
   <script>
     document.querySelectorAll(".section-title").forEach(t => {
       t.addEventListener("click", () => {

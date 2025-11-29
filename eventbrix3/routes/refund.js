@@ -1,13 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const admin = require("../config/firebaseAdmin");
+const Razorpay = require("razorpay");
 
-// ================================
-//  PROCESS REFUND (Admin Only)
-// ================================
+// Razorpay instance (same keys as payment.js)
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+/* =====================================================
+      PROCESS REFUND (Triggered by Customer or Admin)
+   ===================================================== */
 router.post("/process", async (req, res) => {
   try {
-    const { bookingId } = req.body;
+    const { bookingId, reason } = req.body;
 
     if (!bookingId) {
       return res.json({ success: false, error: "BookingId missing" });
@@ -25,89 +32,96 @@ router.post("/process", async (req, res) => {
 
     // Already refunded protection
     if (d.status === "refunded") {
-      return res.json({
-        success: false,
-        error: "Booking already refunded",
-      });
+      return res.json({ success: false, error: "Already refunded" });
     }
 
-    // Payment status check
     if (d.paymentStatus !== "paid") {
       return res.json({
         success: false,
-        error: "Payment not completed. Cannot refund.",
+        error: "Payment not completed. Cannot refund."
       });
     }
 
-    // Payment timestamp check
     if (!d.paymentTimestamp) {
       return res.json({
         success: false,
-        error: "Missing payment timestamp",
+        error: "Missing payment timestamp"
       });
     }
 
-    const amount = d.amount;
+    if (!d.paymentId) {
+      return res.json({
+        success: false,
+        error: "Missing paymentId for Razorpay refund"
+      });
+    }
 
-    // Time difference in hours
+    /* ===========================
+        CALCULATE REFUND SLAB
+       =========================== */
+    const now = Date.now();
     const hrs =
-      (Date.now() - Number(d.paymentTimestamp)) / (1000 * 60 * 60);
+      (now - Number(d.paymentTimestamp)) / (1000 * 60 * 60);
 
+    const amount = Number(d.amount);
+    const gatewayFee = amount * 0.02; // 2% Razorpay fee
     let refundAmount = 0;
     let vendorFee = 0;
-    let gatewayFee = amount * 0.02; // 2% gateway fee
 
-    // ===============================
-    // REFUND SLAB LOGIC
-    // ===============================
     if (hrs <= 24) {
-      // Full refund, vendor pays nothing
       refundAmount = amount;
       vendorFee = 0;
     } else if (hrs <= 48) {
-      // 50% refund - gateway fee, vendor pays 2%
       refundAmount = amount * 0.5 - gatewayFee;
       vendorFee = amount * 0.02;
     } else if (hrs <= 168) {
-      // 20% refund - gateway fee, vendor pays 2%
       refundAmount = amount * 0.2 - gatewayFee;
       vendorFee = amount * 0.02;
     } else {
-      // No refund
       refundAmount = 0;
       vendorFee = 0;
     }
 
-    // Refund can't be negative
     if (refundAmount < 0) refundAmount = 0;
 
-    // Vendor payout adjustment must be number
-    const payoutAdjustment = vendorFee > 0 ? -vendorFee : 0;
+    const payoutAdjustment = vendorFee ? -vendorFee : 0;
 
-    // ===============================
-    // UPDATE FIRESTORE
-    // ===============================
+    /* ===========================
+       RAZORPAY REAL REFUND CALL
+       =========================== */
+    let razorRefund = null;
+
+    if (refundAmount > 0) {
+      razorRefund = await razorpay.payments.refund(d.paymentId, {
+        amount: Math.round(refundAmount * 100), // ₹ → paise
+      });
+    }
+
+    /* ===========================
+        FIRESTORE UPDATE
+       =========================== */
     await ref.update({
       status: "refunded",
       refundAmount,
       platformFee: vendorFee,
       vendorPayoutAdjustment: payoutAdjustment,
       refundedAt: admin.firestore.FieldValue.serverTimestamp(),
-
-      // Keep a refund log under same document
+      refundReason: reason || "No reason provided",
       refundLog: {
         hrsPassed: Number(hrs.toFixed(2)),
         refundAmount,
         vendorFee,
         gatewayFee,
+        razorRefundId: razorRefund?.id || null,
       },
     });
 
     return res.json({
       success: true,
       refundAmount,
-      vendorFee,
+      razorRefundId: razorRefund?.id || null,
     });
+
   } catch (err) {
     console.error("REFUND ERROR:", err);
     return res.json({

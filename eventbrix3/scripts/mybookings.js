@@ -6,49 +6,30 @@ import {
   getDocs,
   doc,
   updateDoc,
-  getDoc,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import { openCheckout } from "./payment.js";
 
-const BASE_URL = "https://eventbrix3.onrender.com";
-
-/* ===========================================
-   LOAD BOOKINGS INTO DASHBOARD
-=========================================== */
+/* =========================================================
+   LOAD BOOKINGS INTO CUSTOMER DASHBOARD
+========================================================= */
 export async function loadBookingsUI(userId) {
-  const q = query(collection(db, "bookings"), where("customerId", "==", userId));
-  const snap = await getDocs(q);
+  const snap = await getDocs(
+    query(collection(db, "bookings"), where("customerId", "==", userId))
+  );
 
   let html = "";
   snap.forEach((b) => {
-    const d = b.data();
-    html += bookingCard(b.id, d);
+    html += bookingCard(b.id, b.data());
   });
 
   document.getElementById("myBookings").innerHTML = html;
 }
 
-/* ===========================================
-   BOOKING CARD UI (FINAL PREMIUM VERSION)
-=========================================== */
+/* =========================================================
+   BOOKING CARD UI
+========================================================= */
 function bookingCard(id, d) {
-  const payNowBtn = `
-      <button class="pay-btn" onclick="payNow('${id}')">Pay Now</button>
-  `;
-
-  const payLaterBtn = `
-      <button class="secondary-btn" onclick="choosePayLater('${id}')">
-        Pay After Visit
-      </button>
-  `;
-
-  const receiptBtn = `
-      <button class="gold-btn" onclick="downloadReceipt('${id}')">
-        Download Receipt (PDF)
-      </button>
-  `;
-
   return `
     <div class="booking-card" onclick="toggleBooking('${id}')">
       <p><b>${d.vendorName}</b></p>
@@ -58,42 +39,48 @@ function bookingCard(id, d) {
 
     <div id="${id}" class="booking-details" style="display:none;">
       <p><b>Event Type:</b> ${d.eventType}</p>
-      <p><b>Amount:</b> ₹${d.amount || "-"}</p>
+      <p><b>Amount:</b> ₹${d.amount ?? "-"}</p>
       <p><b>Status:</b> ${d.status}</p>
-      <p><b>Payment Status:</b> ${statusBadge(d)}</p>
+      <p><b>Payment Status:</b> ${paymentStatusBadge(d)}</p>
 
       ${paymentControls(id, d)}
       ${refundSection(id, d)}
-      ${paymentDetails(d)}
-      ${d.paymentStatus === "paid" ? receiptBtn : ""}
     </div>
   `;
 }
 
-/* ===========================================
+/* =========================================================
    PAYMENT STATUS BADGE
-=========================================== */
-function statusBadge(d) {
+========================================================= */
+function paymentStatusBadge(d) {
+  if (d.refundStatus === "requested")
+    return `<span style="color:orange;">Refund Requested</span>`;
+
   if (d.paymentStatus === "paid")
     return `<span style="color:#00ff8c;">Paid ✔</span>`;
 
   if (d.paymentStatus === "after_visit")
-    return `<span style="color:#3aa6ff;">Pay After Visit Active</span>`;
+    return `<span style="color:#3aa6ff;">Pay After Visit</span>`;
 
   return `<span style="color:#ff4444;">Unpaid</span>`;
 }
 
-/* ===========================================
-   PAYMENT CONTROLS (BUTTONS LOGIC)
-=========================================== */
+/* =========================================================
+   PAYMENT CONTROLS
+========================================================= */
 function paymentControls(id, d) {
   const now = Date.now();
 
+  // If refund already requested → no payment allowed
+  if (d.refundStatus === "requested") return "";
+
+  // Already Paid
   if (d.paymentStatus === "paid") return "";
 
+  // Pay After Visit
   if (d.paymentStatus === "after_visit") {
-    const start = d.afterVisitTimestamp || 0;
-    const hrs = (now - start) / (1000 * 60 * 60);
+    const ts = d.afterVisitTimestamp || 0;
+    const hrs = (now - ts) / (1000 * 60 * 60);
 
     if (hrs > 24) {
       return `
@@ -102,82 +89,43 @@ function paymentControls(id, d) {
       `;
     }
 
-    const left = Math.ceil(24 - hrs);
     return `
       <button class="pay-btn" onclick="payNow('${id}')">Pay Now</button>
-      <p style="color:#3aa6ff;"><b>${left} hrs left to pay</b></p>
+      <p style="color:#3aa6ff;"><b>${Math.ceil(24 - hrs)} hrs left</b></p>
     `;
   }
 
+  // Pending Approval → no actions
   if (d.status !== "approved")
     return `<p style="color:gray;">Waiting for approval...</p>`;
 
+  // Approved → both options available
   return `
     <button class="pay-btn" onclick="payNow('${id}')">Pay Now</button>
-    <button class="secondary-btn" onclick="choosePayLater('${id}')">
-      Pay After Visit
+    <button class="secondary-btn" onclick="choosePayLater('${id}')">Pay After Visit</button>
+  `;
+}
+
+/* =========================================================
+   REFUND SECTION (NEW POPUP SYSTEM)
+========================================================= */
+function refundSection(id, d) {
+  if (d.refundStatus === "requested") {
+    return `<p style="color:orange;"><b>Refund Requested — Pending Review</b></p>`;
+  }
+
+  if (d.paymentStatus !== "paid") return "";
+
+  return `
+    <button class="secondary-btn" onclick="openRefundPopup('${id}')">
+      Cancel & Refund
     </button>
   `;
 }
 
-/* ===========================================
-   REFUND SYSTEM (FULL LOGIC)
-=========================================== */
-function refundSection(id, d) {
-  if (d.paymentStatus !== "paid") return "";
-  if (!d.paymentTimestamp) return "";
-
-  const now = Date.now();
-  const hrs = (now - d.paymentTimestamp) / (1000 * 60 * 60);
-
-  let msg = "";
-  let allowed = true;
-
-  if (hrs <= 24) {
-    msg = `Full Refund Eligible (${Math.ceil(24 - hrs)} hrs left)`;
-  } else if (hrs <= 48) {
-    msg = `50% Refund Eligible (${Math.ceil(48 - hrs)} hrs left)`;
-  } else if (hrs <= 168) {
-    msg = `20% Refund Eligible (${Math.ceil(168 - hrs)} hrs left)`;
-  } else {
-    msg = "Not Eligible for Refund";
-    allowed = false;
-  }
-
-  return `
-    <p style="color:gold;"><b>${msg}</b></p>
-    ${
-      allowed
-        ? `<button class="danger-btn" onclick="requestRefund('${id}')">
-             Request Refund
-           </button>`
-        : ""
-    }
-  `;
-}
-
-/* ===========================================
-   PAYMENT DETAILS SECTION
-=========================================== */
-function paymentDetails(d) {
-  if (d.paymentStatus !== "paid") return "";
-
-  return `
-    <p><b>Payment ID:</b> ${d.paymentId}</p>
-    <p><b>Order ID:</b> ${d.orderId}</p>
-    <p><b>Paid At:</b> ${new Date(d.paymentTimestamp).toLocaleString()}</p>
-  `;
-}
-
-/* ===========================================
-   GLOBAL FUNCTIONS
-=========================================== */
-window.toggleBooking = (id) => {
-  const box = document.getElementById(id);
-  box.style.display = box.style.display === "none" ? "block" : "none";
-};
-
-/* PAY NOW → customer enters amount */
+/* =========================================================
+   PAY NOW (Customer Chooses Amount)
+========================================================= */
 window.payNow = async (id) => {
   const amt = prompt("Enter amount to pay (₹):");
 
@@ -191,7 +139,9 @@ window.payNow = async (id) => {
   openCheckout(id, Number(amt));
 };
 
-/* PAY AFTER VISIT */
+/* =========================================================
+   PAY AFTER VISIT
+========================================================= */
 window.choosePayLater = async (id) => {
   await updateDoc(doc(db, "bookings", id), {
     paymentStatus: "after_visit",
@@ -202,24 +152,18 @@ window.choosePayLater = async (id) => {
   location.reload();
 };
 
-/* REFUND REQUEST */
-window.requestRefund = async (id) => {
-  const res = await fetch(`${BASE_URL}/api/refund/process`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ bookingId: id }),
-  });
-
-  const r = await res.json();
-  if (r.success) {
-    alert("Refund processed: ₹" + r.refundAmount);
-    location.reload();
-  } else {
-    alert("Refund failed: " + r.error);
-  }
+/* =========================================================
+   OPEN REFUND POPUP (SHARED POPUP FROM payments.html)
+========================================================= */
+window.openRefundPopup = (id) => {
+  window.CURRENT_REFUND_BOOKING = id; // used by payment-page.js
+  document.getElementById("refundPopup").style.display = "flex";
 };
 
-/* DOWNLOAD RECEIPT */
-window.downloadReceipt = async (id) => {
-  window.open(`${BASE_URL}/api/receipt/download/${id}`, "_blank");
+/* =========================================================
+   TOGGLE BOOKING DETAILS
+========================================================= */
+window.toggleBooking = (id) => {
+  const box = document.getElementById(id);
+  box.style.display = box.style.display === "none" ? "block" : "none";
 };

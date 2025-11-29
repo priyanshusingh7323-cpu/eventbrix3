@@ -1,4 +1,4 @@
- // ===============================
+// ===============================
 // ADMIN AUTH CHECK
 // ===============================
 import { auth, db } from "./firebase.js";
@@ -112,7 +112,7 @@ export async function loadApprovedBookings() {
 }
 
 // ===============================
-// LOAD 4 — Refund Panel
+// LOAD 4 — Refund Requests (NEW)
 // ===============================
 export async function loadRefundPanel() {
   const box = document.getElementById("refundBox");
@@ -123,22 +123,27 @@ export async function loadRefundPanel() {
   snap.forEach((b) => {
     const d = b.data();
 
-    if (d.paymentStatus === "paid" && d.status !== "refunded") {
+    if (d.refundStatus === "requested") {
       box.innerHTML += `
         <div class="admin-card">
           <h3>${d.vendorName}</h3>
           <p>${d.customerName}</p>
-          <p><b>Amount:</b> ₹${d.amount}</p>
-          <button onclick="refundBooking('${b.id}')" class="danger">Process Refund</button>
+          <p><b>Paid Amount:</b> ₹${d.amount}</p>
+          <p><b>Reason:</b> ${d.refundReason || "No reason given"}</p>
+
+          <button onclick="approveRefund('${b.id}')" class="green">
+            Approve Refund
+          </button>
         </div>
       `;
     }
   });
 }
 
-window.refundBooking = async (id) => {
+// 🔥 Admin Approves Refund → Calls processRefund()
+window.approveRefund = async (id) => {
   await processRefund(id);
-  alert("Refund Processed!");
+  alert("Refund Approved & Processed!");
   loadDashboard();
 };
 
@@ -157,6 +162,8 @@ export async function loadPayoutPanel() {
         <div class="admin-card">
           <h3>${d.vendorName}</h3>
           <p>${d.customerName}</p>
+          <p><b>Amount:</b> ₹${d.amount}</p>
+
           <button onclick="payout('${b.id}',50)">Payout 50%</button>
           <button onclick="payout('${b.id}',80)">Payout 80%</button>
           <button onclick="payout('${b.id}',100)">Payout 100%</button>
@@ -168,115 +175,126 @@ export async function loadPayoutPanel() {
 
 window.payout = async (id, stage) => {
   await processPayout(id, stage);
+  alert("Payout Processed!");
   loadDashboard();
 };
 
 // ===============================
-// LOAD 6 — ANALYTICS CARDS
+// LOAD 6 — Analytics Cards
 // ===============================
 async function loadAnalyticsCards() {
   const bSnap = await getDocs(collection(db, "bookings"));
   const vSnap = await getDocs(collection(db, "vendors"));
   const cSnap = await getDocs(collection(db, "customers"));
 
-  let totalPayments = 0, totalRefunds = 0, totalPayouts = 0;
+  let totalPayments = 0,
+    totalRefunds = 0,
+    totalPayouts = 0;
 
   bSnap.forEach((b) => {
     const d = b.data();
-    totalPayments += d.paymentStatus === "paid" ? Number(d.amount) : 0;
-    totalRefunds += d.status === "refunded" ? Number(d.refundAmount || 0) : 0;
+    if (d.paymentStatus === "paid") totalPayments += Number(d.amount);
+    if (d.status === "refunded") totalRefunds += Number(d.refundAmount || 0);
     totalPayouts += Number(d.vendorPayoutAmount || 0);
   });
 
   const earnings = totalPayments - (totalRefunds + totalPayouts);
-  const profit = earnings;
 
   document.getElementById("anlPayments").innerText = "₹" + totalPayments;
   document.getElementById("anlRefunds").innerText = "₹" + totalRefunds;
   document.getElementById("anlPayouts").innerText = "₹" + totalPayouts;
   document.getElementById("anlEarnings").innerText = "₹" + earnings;
-  document.getElementById("anlProfit").innerText = "₹" + profit;
+  document.getElementById("anlProfit").innerText = "₹" + earnings;
   document.getElementById("anlVendors").innerText = vSnap.size;
   document.getElementById("anlCustomers").innerText = cSnap.size;
-
-  const active = bSnap.docs.filter(b => b.data().status === "approved").length;
-  document.getElementById("anlActive").innerText = active;
 }
 
 // ===============================
-// LOAD 7 — ANALYTICS CHARTS
+// LOAD 7 — CHARTS (Chart.js)
 // ===============================
 async function loadCharts() {
   const snap = await getDocs(collection(db, "bookings"));
 
   const payments = {};
-  const refundCount = { refunded: 0, not_refunded: 0 };
-  const payoutStages = { "50%": 0, "80%": 0, "100%": 0 };
-  const bookingFlow = { pending: 0, approved: 0, paid: 0, completed: 0, refunded: 0 };
-
-  const today = new Date();
+  const refundStats = { refunded: 0, not_refunded: 0 };
+  const payoutStats = { "50%": 0, "80%": 0, "100%": 0 };
 
   snap.forEach((b) => {
     const d = b.data();
 
-    // MONTHLY PAYMENTS
-    const month = new Date(d.eventDate).toLocaleString("default", { month: "short" });
-    if (d.paymentStatus === "paid")
+    const month = new Date(d.eventDate).toLocaleString("default", {
+      month: "short",
+    });
+
+    if (d.paymentStatus === "paid") {
       payments[month] = (payments[month] || 0) + Number(d.amount);
+    }
 
-    // REFUNDS
-    if (d.status === "refunded") refundCount.refunded++;
-    else refundCount.not_refunded++;
+    if (d.status === "refunded") refundStats.refunded++;
+    else refundStats.not_refunded++;
 
-    // PAYOUTS
-    if (d.payoutStage === 50) payoutStages["50%"]++;
-    if (d.payoutStage === 80) payoutStages["80%"]++;
-    if (d.payoutStage === 100) payoutStages["100%"]++;
-
-    // BOOKINGS FLOW
-    bookingFlow[d.status] = (bookingFlow[d.status] || 0) + 1;
-    if (d.paymentStatus === "paid") bookingFlow.paid++;
-    if (new Date(d.eventDate) < today && d.status === "approved")
-      bookingFlow.completed++;
+    if (d.payoutStage === 50) payoutStats["50%"]++;
+    if (d.payoutStage === 80) payoutStats["80%"]++;
+    if (d.payoutStage === 100) payoutStats["100%"]++;
   });
 
+  // CHART 1 — Payments Trend
   new Chart(document.getElementById("chartPayments"), {
     type: "line",
     data: {
       labels: Object.keys(payments),
-      datasets: [{ label: "Payments (₹)", data: Object.values(payments), borderColor: "#ffd24a", backgroundColor: "rgba(255,210,74,0.3)" }]
-    }
+      datasets: [
+        {
+          label: "Monthly Payments",
+          data: Object.values(payments),
+          borderColor: "gold",
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: { responsive: true },
   });
 
+  // CHART 2 — Refunds
   new Chart(document.getElementById("chartRefunds"), {
     type: "pie",
     data: {
-      labels: ["Refunded", "Active"],
-      datasets: [{ data: Object.values(refundCount), backgroundColor: ["#ff4d4d", "#4caf50"] }]
-    }
+      labels: ["Refunded", "Not Refunded"],
+      datasets: [
+        {
+          data: [refundStats.refunded, refundStats.not_refunded],
+          backgroundColor: ["red", "green"],
+        },
+      ],
+    },
+    options: { responsive: true },
   });
 
+  // CHART 3 — Payout Stages
   new Chart(document.getElementById("chartPayouts"), {
-    type: "doughnut",
-    data: {
-      labels: ["50%", "80%", "100%"],
-      datasets: [{ data: Object.values(payoutStages), backgroundColor: ["#ffd24a", "#ff9f1a", "#ffc34d"] }]
-    }
-  });
-
-  new Chart(document.getElementById("chartBookings"), {
     type: "bar",
     data: {
-      labels: Object.keys(bookingFlow),
-      datasets: [{ label: "Bookings", data: Object.values(bookingFlow), backgroundColor: "#ffd24a" }]
-    }
+      labels: ["50%", "80%", "100%"],
+      datasets: [
+        {
+          label: "Payout Count",
+          data: [
+            payoutStats["50%"],
+            payoutStats["80%"],
+            payoutStats["100%"],
+          ],
+          backgroundColor: ["#ffcc00", "#ffaa00", "#dd8800"],
+        },
+      ],
+    },
+    options: { responsive: true },
   });
 }
 
 // ===============================
-// MASTER LOADER
+// MAIN LOAD FUNCTION
 // ===============================
-export function loadDashboard() {
+export async function loadDashboard() {
   loadPendingVendors();
   loadPendingBookings();
   loadApprovedBookings();

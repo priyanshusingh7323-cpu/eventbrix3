@@ -45,6 +45,69 @@
 
   .expired { color:red; font-weight:bold; }
   .active { color:#5cb85c; font-weight:bold; }
+
+  /* ================================
+     REFUND POPUP
+  =================================*/
+  .popup {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.7);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+  }
+  .popup-content {
+    width:90%;
+    max-width:400px;
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:12px;
+    border:1px solid rgba(255,210,74,0.4);
+  }
+  .popup-content h3 {
+    color:gold;
+    margin-bottom:10px;
+  }
+  .popup-content label {
+    font-size:14px;
+    margin-top:10px;
+    display:block;
+    color:#ccc;
+  }
+  .popup-content select,
+  .popup-content textarea {
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    background:#111;
+    border:1px solid #444;
+    color:white;
+    border-radius:8px;
+  }
+  .submit-btn {
+    width:100%;
+    padding:12px;
+    background:gold;
+    color:black;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+  }
+  .close-btn {
+    width:100%;
+    padding:10px;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:8px;
+    margin-top:10px;
+    cursor:pointer;
+  }
 </style>
 
 </head>
@@ -56,6 +119,30 @@
 </h2>
 
 <div id="paymentList"></div>
+
+<!-- ======================================
+     REFUND POPUP (ADDED)
+======================================= -->
+<div id="refundPopup" class="popup">
+  <div class="popup-content">
+    <h3>Cancel & Refund</h3>
+
+    <label>Reason for Cancellation</label>
+    <select id="refundReason">
+      <option value="Changed my plans">Changed my plans</option>
+      <option value="Found better vendor">Found better vendor</option>
+      <option value="Budget issue">Budget issue</option>
+      <option value="Vendor unresponsive">Vendor unresponsive</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label>Additional Details (optional)</label>
+    <textarea id="refundDetails" placeholder="Write something..."></textarea>
+
+    <button id="submitRefundBtn" class="submit-btn">Submit Refund Request</button>
+    <button id="closeRefundPopup" class="close-btn">Close</button>
+  </div>
+</div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script type="module" src="/scripts/payment-page.js"></script>
