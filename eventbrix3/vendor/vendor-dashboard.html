@@ -8,17 +8,35 @@
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="vendor-dashboard.css">
 
+<style>
+  /* EXTRA STYLING FOR KYC BOX */
+  #kycBox{
+    border:1px dashed gold;
+    background:#191919;
+    padding:18px;
+    margin:20px 0;
+    border-radius:12px;
+    display:none;
+  }
+  #kycBox h3 { color:gold; margin-bottom:6px; }
+  .kyc-btn{
+    background:gold;
+    padding:10px 14px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+  }
+</style>
+
 </head>
 <body>
 
-<!-- ============================
-   TOP NAVBAR
-============================ -->
+<!-- TOP NAV -->
 <div class="vd-nav">
   <div class="vd-nav-left">
     <h2 class="vd-logo">EventBrix Vendor</h2>
   </div>
-
   <div class="vd-nav-right">
     <button id="homeBtn" class="vd-nav-btn">Home</button>
     <button id="messagesBtn" class="vd-nav-btn">Messages</button>
@@ -26,9 +44,7 @@
   </div>
 </div>
 
-<!-- ============================
-   VENDOR HEADER CARD
-============================ -->
+<!-- HEADER -->
 <div class="vd-header">
   <div>
     <h1 id="vendorName" class="vd-title"></h1>
@@ -42,9 +58,17 @@
   </div>
 </div>
 
-<!-- ============================
-   QUICK ACTIONS
-============================ -->
+<!-- ⭐ KYC SECTION -->
+<div id="kycBox">
+  <h3>KYC Verification Required</h3>
+  <p style="color:gray;margin-bottom:10px;">Submit your documents to become verified vendor.</p>
+  
+  <button class="kyc-btn" onclick="window.location.href='vendor-kyc.html'">
+    Start Verification
+  </button>
+</div>
+
+<!-- QUICK ACTIONS -->
 <div class="vd-quick-actions">
   <button class="vd-action-btn" id="qaListings">Listings</button>
   <button class="vd-action-btn" id="qaLeads">Approved Leads</button>
@@ -52,9 +76,7 @@
   <button class="vd-action-btn" id="qaProfile">Edit Profile</button>
 </div>
 
-<!-- ============================
-   ANALYTICS CARDS
-============================ -->
+<!-- ANALYTICS -->
 <div class="vd-stats">
   <div class="vd-stat-card">
     <h3 id="statViews">0</h3>
@@ -72,45 +94,23 @@
   </div>
 </div>
 
-<!-- ============================
-   EARNINGS & PAYOUT SUMMARY  (NEW)
-============================ -->
+<!-- EARNINGS -->
 <h2 class="vd-section-title">Earnings & Payouts</h2>
 
 <div id="vdEarningsSummary" style="padding:20px;">
-  
   <div class="vd-stats">
-    <div class="vd-stat-card">
-      <h3 id="earnTotal">₹0</h3>
-      <p>Total Earnings</p>
-    </div>
-
-    <div class="vd-stat-card">
-      <h3 id="earnPending">₹0</h3>
-      <p>Pending Payout</p>
-    </div>
-
-    <div class="vd-stat-card">
-      <h3 id="earnPaid">₹0</h3>
-      <p>Payout Released</p>
-    </div>
-
-    <div class="vd-stat-card">
-      <h3 id="earnAdjust">₹0</h3>
-      <p>Refund Deductions</p>
-    </div>
+    <div class="vd-stat-card"><h3 id="earnTotal">₹0</h3><p>Total Earnings</p></div>
+    <div class="vd-stat-card"><h3 id="earnPending">₹0</h3><p>Pending Payout</p></div>
+    <div class="vd-stat-card"><h3 id="earnPaid">₹0</h3><p>Payout Released</p></div>
+    <div class="vd-stat-card"><h3 id="earnAdjust">₹0</h3><p>Refund Deductions</p></div>
   </div>
-
   <p style="color:gray;margin-left:10px;margin-top:8px;">
     Last Payout: <span id="lastPayout">--</span>
   </p>
 </div>
 
-<!-- ============================
-   PAYOUT HISTORY TABLE  (NEW)
-============================ -->
+<!-- PAYOUT HISTORY -->
 <h2 class="vd-section-title">Payout History</h2>
-
 <div style="padding:20px;">
   <div id="vdPayoutHistory" style="
     background:#111;
@@ -122,34 +122,23 @@
   </div>
 </div>
 
-<!-- ============================
-   LISTINGS SECTION
-============================ -->
+<!-- LISTINGS -->
 <h2 class="vd-section-title">Your Listings</h2>
 <div id="vendorListings" class="vd-listings"></div>
 
-<!-- ============================
-   APPROVED LEADS
-============================ -->
+<!-- LEADS -->
 <h2 class="vd-section-title">Approved Leads</h2>
 <div id="vendorLeads" class="vd-leads"></div>
 
-<!-- ============================
-   CHAT DRAWER
-============================ -->
+<!-- CHAT DRAWER -->
 <div id="vdChatDrawer" class="vd-chat-drawer">
-
   <div class="vd-chat-header">
     <span class="vd-chat-title">Messages</span>
     <span id="vdChatClose" class="vd-chat-close">&times;</span>
   </div>
-
   <div id="vdChatList" class="vd-chat-body"></div>
 </div>
 
-<!-- ============================
-   SCRIPT
-============================ -->
 <script type="module" src="../scripts/vendor-dashboard.js"></script>
 
 </body>

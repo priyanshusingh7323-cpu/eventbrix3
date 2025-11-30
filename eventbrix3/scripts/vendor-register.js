@@ -8,19 +8,13 @@ import {
   where
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* ------------------------------------------
-   CLOUDINARY CONFIG
-------------------------------------------- */
 const CLOUD_NAME = "dbxt5tgze";
 const UPLOAD_PRESET = "eventbrix_uploads";
 
-/* GLOBAL */
 let vendorId = null;
 let uploadedImages = [];
 
-/* ------------------------------------------
-   LOGIN CHECK + CREATE VENDOR DOCUMENT
-------------------------------------------- */
+/* LOGIN CHECK */
 auth.onAuthStateChanged(async (user) => {
   if (!user) return (location.href = "vendor-login.html");
 
@@ -36,15 +30,12 @@ auth.onAuthStateChanged(async (user) => {
       createdAt: Date.now(),
       approved: false
     });
-
   } else {
     vendorId = snap.docs[0].id;
   }
 });
 
-/* ------------------------------------------
-   CLOUDINARY IMAGE UPLOAD
-------------------------------------------- */
+/* CLOUDINARY UPLOAD */
 async function uploadToCloudinary(file) {
   const fd = new FormData();
   fd.append("file", file);
@@ -59,7 +50,6 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
-/* MULTI-IMAGE UPLOAD PREVIEW */
 document.getElementById("photoUpload").addEventListener("change", async (e) => {
   uploadedImages = [];
   const files = [...e.target.files];
@@ -78,76 +68,55 @@ document.getElementById("photoUpload").addEventListener("change", async (e) => {
   box.innerHTML = html;
 });
 
-/* ------------------------------------------
-   GOOGLE AUTOCOMPLETE LOCALITY EXTRACTION
-------------------------------------------- */
-let selectedLocality = "";
-
-window.initAutocomplete = function () {
-  const input = document.getElementById("cityInput");
-
-  const autocomplete = new google.maps.places.Autocomplete(input, {
-    types: ["geocode"],
-    componentRestrictions: { country: "in" }
-  });
-
-  autocomplete.addListener("place_changed", () => {
-    const place = autocomplete.getPlace();
-
-    let locality = "";
-
-    place.address_components.forEach((c) => {
-      if (c.types.includes("sublocality") || c.types.includes("sublocality_level_1")) {
-        locality = c.long_name;
-      }
-      if (c.types.includes("locality")) {
-        locality = c.long_name;
-      }
-    });
-
-    selectedLocality = locality || input.value;
-    document.getElementById("vendorLocality").value = selectedLocality;
-  });
+/* PAYMENT METHOD SHOW/HIDE */
+document.getElementById("paymentMethod").onchange = () => {
+  const val = document.getElementById("paymentMethod").value;
+  document.getElementById("advanceBox").classList.toggle("hidden", val !== "advance");
 };
 
-/* ------------------------------------------
-   SUBMIT FORM
-------------------------------------------- */
+/* SUBMIT FORM */
 document.getElementById("vendorRegisterForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!vendorId) return alert("Vendor ID missing!");
 
-  /* READ FORM VALUES */
   const businessName = e.target.businessName.value;
   const ownerName = e.target.ownerName.value;
   const city = e.target.city.value;
   const category = e.target.category.value;
   const subcategory = e.target.subcategory.value;
+
   const price = Number(e.target.price.value);
   const services = e.target.services.value;
   const about = e.target.about.value;
+
   const serviceArea = e.target.serviceArea.value || "";
   const experience = Number(e.target.experience.value || 0);
   const teamSize = Number(e.target.teamSize.value || 0);
 
-  // ⭐ Latitude & longitude
   const latitude = Number(document.getElementById("vendorLat").value || 0);
   const longitude = Number(document.getElementById("vendorLng").value || 0);
 
-  // ⭐ FINAL LOCALITY (GOOGLE EXTRACTED)
-  const locality = document.getElementById("vendorLocality").value || selectedLocality || "";
+  const locality = document.getElementById("vendorLocality").value || "";
 
   const perPlate =
     category === "Banquet / Venue" ? Number(e.target.perPlate.value || 0) : null;
 
-  if (uploadedImages.length === 0) {
-    return alert("Please upload at least 1 image.");
-  }
+  const paymentMethod = document.getElementById("paymentMethod").value;
+  const advancePercent =
+    paymentMethod === "advance"
+      ? Number(document.getElementById("advancePercent").value)
+      : null;
 
-  /* ------------------------------------------
-     DUPLICATE LISTING CHECK
-  ------------------------------------------- */
+  if (!paymentMethod) return alert("Select payment method.");
+
+  if (paymentMethod === "advance" && !advancePercent)
+    return alert("Select advance %.");
+
+  if (uploadedImages.length === 0)
+    return alert("Upload at least 1 image.");
+
+  /* CHECK DUPLICATE LISTING */
   const listRef = collection(db, "vendors", vendorId, "listings");
   const listSnap = await getDocs(listRef);
 
@@ -157,31 +126,35 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
     }
   }
 
-  /* LISTING DATA */
   const listingData = {
     vendorId,
     businessName,
     ownerName,
     city,
-    locality,   // ⭐ SAVE LOCALITY
+    locality,
     latitude,
     longitude,
+
     category,
     subcategory,
     price,
     perPlate,
+
     services,
     about,
     serviceArea,
     experience,
     teamSize,
     photos: uploadedImages,
+
+    paymentMethod,
+    advancePercent,
+
     status: "pending",
     createdAt: Date.now()
   };
 
   try {
-    /* UPDATE MAIN PROFILE */
     await setDoc(
       doc(db, "vendors", vendorId),
       {
@@ -189,7 +162,7 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
         ownerName,
         businessName,
         city,
-        locality,  // ⭐ SAVE LOCALITY
+        locality,
         latitude,
         longitude,
         mainCategory: category,
@@ -202,13 +175,16 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
         experience,
         teamSize,
         photos: uploadedImages,
+
+        paymentMethod,
+        advancePercent,
+
         status: "pending",
         updatedAt: Date.now()
       },
       { merge: true }
     );
 
-    /* CREATE LISTING */
     await setDoc(
       doc(db, "vendors", vendorId, "listings", category),
       listingData
@@ -219,6 +195,6 @@ document.getElementById("vendorRegisterForm").addEventListener("submit", async (
 
   } catch (err) {
     console.error(err);
-    alert("Error: " + err.message);
+    alert(err.message);
   }
 });

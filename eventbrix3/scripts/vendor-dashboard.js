@@ -9,14 +9,12 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-import {
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 let CURRENT_VENDOR_ID = null;
 
 /* -----------------------------------------
-   LOGIN CHECK + LOAD VENDOR PROFILE
+   LOGIN + LOAD VENDOR PROFILE
 ------------------------------------------ */
 auth.onAuthStateChanged(async (user) => {
   if (!user) return location.href = "vendor-login.html";
@@ -37,11 +35,15 @@ auth.onAuthStateChanged(async (user) => {
   document.getElementById("vendorID").innerText = vendorId;
   document.getElementById("vendorStatus").innerText = data.status || "pending";
 
+  // SHOW KYC ONLY IF NOT VERIFIED
+  if (data.status !== "verified") {
+    document.getElementById("kycBox").style.display = "block";
+  }
+
   loadListings(vendorId);
   loadApprovedLeads(vendorId);
   loadAnalytics(vendorId);
 
-  // NEW: Earnings & payouts
   loadEarnings(vendorId);
   loadPayoutHistory(vendorId);
 
@@ -49,7 +51,7 @@ auth.onAuthStateChanged(async (user) => {
 });
 
 /* -----------------------------------------
-   NAVBAR
+   NAVBAR BUTTONS
 ------------------------------------------ */
 document.getElementById("homeBtn").onclick = () => {
   location.href = "/index.html";
@@ -63,21 +65,17 @@ document.getElementById("logoutTopBtn").onclick = async () => {
 /* -----------------------------------------
    QUICK ACTION BUTTONS
 ------------------------------------------ */
-document.getElementById("qaListings").onclick = () => {
+document.getElementById("qaListings").onclick = () =>
   scrollToTarget("#vendorListings");
-};
 
-document.getElementById("qaLeads").onclick = () => {
+document.getElementById("qaLeads").onclick = () =>
   scrollToTarget("#vendorLeads");
-};
 
-document.getElementById("qaMessages").onclick = () => {
+document.getElementById("qaMessages").onclick = () =>
   openChatDrawer();
-};
 
-document.getElementById("qaProfile").onclick = () => {
+document.getElementById("qaProfile").onclick = () =>
   alert("Profile editing coming soon!");
-};
 
 function scrollToTarget(id) {
   window.scrollTo({
@@ -105,7 +103,7 @@ async function loadListings(vendorId) {
 
   snap.forEach((docx) => {
     const L = docx.data();
-    const img = (L.photos && L.photos.length > 0) ? L.photos[0] : "/noimg.png";
+    const img = L.photos?.[0] || "/noimg.png";
 
     box.innerHTML += `
       <div class="listing-card">
@@ -163,7 +161,7 @@ async function loadAnalytics(vendorId) {
 }
 
 /* -----------------------------------------
-   LIVE CHAT
+   LIVE CHAT COUNTER
 ------------------------------------------ */
 function liveMessageCounter(vendorId) {
   const q = query(collection(db, "chats"), where("vendorId","==",vendorId));
@@ -173,7 +171,7 @@ function liveMessageCounter(vendorId) {
 
     snap.forEach(doc => {
       const c = doc.data();
-      if (c.lastSender === "customer" && c.seenByVendor === false)
+      if (c.lastSender === "customer" && !c.seenByVendor)
         unread++;
     });
 
@@ -182,9 +180,6 @@ function liveMessageCounter(vendorId) {
   });
 }
 
-/* -----------------------------------------
-   CHAT DRAWER
------------------------------------------- */
 function openChatDrawer() {
   loadChatList();
   document.getElementById("vdChatDrawer").style.right = "0px";
@@ -207,10 +202,7 @@ async function loadChatList() {
     const C = docx.data();
 
     box.innerHTML += `
-      <div style="
-        padding:12px;
-        border-bottom:1px solid #222;
-        cursor:pointer;">
+      <div style="padding:12px;border-bottom:1px solid #222;cursor:pointer;">
         <p><strong>${C.customerId}</strong></p>
         <p>${C.lastMessage}</p>
       </div>
@@ -219,7 +211,7 @@ async function loadChatList() {
 }
 
 /* -----------------------------------------
-   LOAD EARNINGS SUMMARY
+   EARNINGS SUMMARY
 ------------------------------------------ */
 async function loadEarnings(vendorId) {
   const qSnap = await getDocs(
@@ -243,8 +235,8 @@ async function loadEarnings(vendorId) {
     if (d.payoutStage && d.vendorPayoutAmount) {
       paid += Number(d.vendorPayoutAmount);
       lastPayout = new Date(d.vendorPayoutAt?.seconds * 1000).toDateString();
-    } else {
-      if (d.paymentStatus === "paid") pending += amt;
+    } else if (d.paymentStatus === "paid") {
+      pending += amt;
     }
   });
 
@@ -256,7 +248,7 @@ async function loadEarnings(vendorId) {
 }
 
 /* -----------------------------------------
-   LOAD PAYOUT HISTORY
+   PAYOUT HISTORY
 ------------------------------------------ */
 async function loadPayoutHistory(vendorId) {
   const snap = await getDocs(
@@ -269,14 +261,10 @@ async function loadPayoutHistory(vendorId) {
   snap.forEach((b) => {
     const d = b.data();
 
-    if (!d.payoutStage) return; // skip bookings with no payout
+    if (!d.payoutStage) return;
 
     box.innerHTML += `
-      <div style="
-        padding:12px;
-        margin-bottom:10px;
-        border-bottom:1px solid rgba(255,210,74,0.2);
-      ">
+      <div style="padding:12px;margin-bottom:10px;border-bottom:1px solid rgba(255,210,74,0.2);">
         <p><strong>Booking:</strong> ${b.id}</p>
         <p><strong>Payout Stage:</strong> ${d.payoutStage}%</p>
         <p><strong>Base Amount:</strong> ₹${d.amount}</p>

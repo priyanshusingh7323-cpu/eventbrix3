@@ -20,11 +20,12 @@ auth.onAuthStateChanged((user) => {
 });
 
 // ===============================
-// LOAD 1 — Pending Vendors
+// 1 — Pending Vendors
 // ===============================
 export async function loadPendingVendors() {
   const box = document.getElementById("vendorsBox");
   box.innerHTML = "";
+
   const snap = await getDocs(collection(db, "vendors"));
 
   snap.forEach((v) => {
@@ -34,6 +35,10 @@ export async function loadPendingVendors() {
         <div class="admin-card">
           <h3>${d.businessName}</h3>
           <p>${d.city}</p>
+
+          <textarea id="remark-${v.id}" placeholder="Add remark (optional)" 
+            style="width:100%;padding:6px;border-radius:8px;margin-top:6px;background:#333;color:white;"></textarea>
+
           <button class="green" onclick="approveVendor('${v.id}')">Approve</button>
           <button class="danger" onclick="rejectVendor('${v.id}')">Reject</button>
         </div>
@@ -43,21 +48,30 @@ export async function loadPendingVendors() {
 }
 
 window.approveVendor = async (id) => {
-  await updateDoc(doc(db, "vendors", id), { status: "approved" });
+  const remark = document.getElementById(`remark-${id}`).value || "";
+  await updateDoc(doc(db, "vendors", id), {
+    status: "approved",
+    adminRemark: remark,
+  });
   loadDashboard();
 };
 
 window.rejectVendor = async (id) => {
-  await updateDoc(doc(db, "vendors", id), { status: "rejected" });
+  const remark = document.getElementById(`remark-${id}`).value || "";
+  await updateDoc(doc(db, "vendors", id), {
+    status: "rejected",
+    adminRemark: remark,
+  });
   loadDashboard();
 };
 
 // ===============================
-// LOAD 2 — Pending Bookings
+// 2 — Pending Bookings
 // ===============================
 export async function loadPendingBookings() {
   const box = document.getElementById("pendingBookingsBox");
   box.innerHTML = "";
+
   const snap = await getDocs(collection(db, "bookings"));
 
   snap.forEach((b) => {
@@ -69,6 +83,7 @@ export async function loadPendingBookings() {
           <p>${d.customerName}</p>
           <p>City: ${d.eventCity}</p>
           <p>Date: ${d.eventDate}</p>
+
           <button class="green" onclick="approveBooking('${b.id}')">Approve</button>
           <button class="danger" onclick="rejectBooking('${b.id}')">Reject</button>
         </div>
@@ -88,11 +103,12 @@ window.rejectBooking = async (id) => {
 };
 
 // ===============================
-// LOAD 3 — Approved Bookings
+// 3 — Approved Bookings
 // ===============================
 export async function loadApprovedBookings() {
   const box = document.getElementById("approvedBookingsBox");
   box.innerHTML = "";
+
   const snap = await getDocs(collection(db, "bookings"));
 
   snap.forEach((b) => {
@@ -109,10 +125,10 @@ export async function loadApprovedBookings() {
       `;
     }
   });
-}
+};
 
 // ===============================
-// LOAD 4 — Refund Requests (NEW)
+// 4 — Refund Requests
 // ===============================
 export async function loadRefundPanel() {
   const box = document.getElementById("refundBox");
@@ -140,7 +156,6 @@ export async function loadRefundPanel() {
   });
 }
 
-// 🔥 Admin Approves Refund → Calls processRefund()
 window.approveRefund = async (id) => {
   await processRefund(id);
   alert("Refund Approved & Processed!");
@@ -148,11 +163,12 @@ window.approveRefund = async (id) => {
 };
 
 // ===============================
-// LOAD 5 — Payout Panel
+// 5 — Payout Panel
 // ===============================
 export async function loadPayoutPanel() {
   const box = document.getElementById("payoutBox");
   box.innerHTML = "";
+
   const snap = await getDocs(collection(db, "bookings"));
 
   snap.forEach((b) => {
@@ -180,7 +196,61 @@ window.payout = async (id, stage) => {
 };
 
 // ===============================
-// LOAD 6 — Analytics Cards
+// 6 — KYC PANEL (NEW)
+// ===============================
+export async function loadKYCPending() {
+  const box = document.getElementById("kycBox");
+  box.innerHTML = "";
+
+  const snap = await getDocs(collection(db, "vendors"));
+
+  snap.forEach((v) => {
+    const d = v.data();
+
+    if (d.kycStatus === "submitted") {
+      box.innerHTML += `
+        <div class="admin-card">
+          <h3>${d.businessName}</h3>
+          <p>${d.city}</p>
+
+          <p><b>Aadhaar:</b> ${d.aadhaar}</p>
+          <p><b>PAN:</b> ${d.pan}</p>
+
+          <img src="${d.aadhaarImg}" style="width:120px;border-radius:10px;">
+          <img src="${d.panImg}" style="width:120px;border-radius:10px;">
+
+          <textarea id="kyc-remark-${v.id}" placeholder="Remark (optional)"
+            style="width:100%;padding:6px;border-radius:8px;margin-top:6px;background:#333;color:white;"></textarea>
+
+          <button class="green" onclick="approveKYC('${v.id}')">Approve KYC</button>
+          <button class="danger" onclick="rejectKYC('${v.id}')">Reject KYC</button>
+        </div>
+      `;
+    }
+  });
+}
+
+window.approveKYC = async (id) => {
+  const remark = document.getElementById(`kyc-remark-${id}`).value || "";
+  await updateDoc(doc(db, "vendors", id), {
+    kycStatus: "verified",
+    status: "verified",
+    kycRemark: remark,
+  });
+  loadDashboard();
+};
+
+window.rejectKYC = async (id) => {
+  const remark = document.getElementById(`kyc-remark-${id}`).value || "";
+  await updateDoc(doc(db, "vendors", id), {
+    kycStatus: "rejected",
+    kycRemark: remark,
+  });
+  loadDashboard();
+};
+
+// ===============================
+// 7 — Analytics & Charts
 // ===============================
 async function loadAnalyticsCards() {
   const bSnap = await getDocs(collection(db, "bookings"));
@@ -210,88 +280,6 @@ async function loadAnalyticsCards() {
 }
 
 // ===============================
-// LOAD 7 — CHARTS (Chart.js)
-// ===============================
-async function loadCharts() {
-  const snap = await getDocs(collection(db, "bookings"));
-
-  const payments = {};
-  const refundStats = { refunded: 0, not_refunded: 0 };
-  const payoutStats = { "50%": 0, "80%": 0, "100%": 0 };
-
-  snap.forEach((b) => {
-    const d = b.data();
-
-    const month = new Date(d.eventDate).toLocaleString("default", {
-      month: "short",
-    });
-
-    if (d.paymentStatus === "paid") {
-      payments[month] = (payments[month] || 0) + Number(d.amount);
-    }
-
-    if (d.status === "refunded") refundStats.refunded++;
-    else refundStats.not_refunded++;
-
-    if (d.payoutStage === 50) payoutStats["50%"]++;
-    if (d.payoutStage === 80) payoutStats["80%"]++;
-    if (d.payoutStage === 100) payoutStats["100%"]++;
-  });
-
-  // CHART 1 — Payments Trend
-  new Chart(document.getElementById("chartPayments"), {
-    type: "line",
-    data: {
-      labels: Object.keys(payments),
-      datasets: [
-        {
-          label: "Monthly Payments",
-          data: Object.values(payments),
-          borderColor: "gold",
-          borderWidth: 2,
-        },
-      ],
-    },
-    options: { responsive: true },
-  });
-
-  // CHART 2 — Refunds
-  new Chart(document.getElementById("chartRefunds"), {
-    type: "pie",
-    data: {
-      labels: ["Refunded", "Not Refunded"],
-      datasets: [
-        {
-          data: [refundStats.refunded, refundStats.not_refunded],
-          backgroundColor: ["red", "green"],
-        },
-      ],
-    },
-    options: { responsive: true },
-  });
-
-  // CHART 3 — Payout Stages
-  new Chart(document.getElementById("chartPayouts"), {
-    type: "bar",
-    data: {
-      labels: ["50%", "80%", "100%"],
-      datasets: [
-        {
-          label: "Payout Count",
-          data: [
-            payoutStats["50%"],
-            payoutStats["80%"],
-            payoutStats["100%"],
-          ],
-          backgroundColor: ["#ffcc00", "#ffaa00", "#dd8800"],
-        },
-      ],
-    },
-    options: { responsive: true },
-  });
-}
-
-// ===============================
 // MAIN LOAD FUNCTION
 // ===============================
 export async function loadDashboard() {
@@ -300,8 +288,8 @@ export async function loadDashboard() {
   loadApprovedBookings();
   loadRefundPanel();
   loadPayoutPanel();
+  loadKYCPending();
   loadAnalyticsCards();
-  loadCharts();
 }
 
 loadDashboard();

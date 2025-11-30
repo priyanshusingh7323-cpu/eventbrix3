@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor KYC | EventBrix</title>
+
+<link rel="stylesheet" href="../styles.css">
+
+<style>
+  body {
+    background:#111;
+    color:white;
+    padding:20px;
+    font-family:poppins,sans-serif;
+  }
+  .kyc-box {
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:14px;
+    border:1px solid #333;
+  }
+  .kyc-box input, .kyc-box select {
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:8px;
+    border:1px solid #444;
+    background:#222;
+    color:white;
+  }
+  label { font-weight:600; margin-top:10px; display:block; }
+  button {
+    width:100%;
+    padding:12px;
+    background:gold;
+    border:none;
+    margin-top:15px;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Vendor KYC Verification</h1>
+<p style="color:gray;">Provide correct details to get verified.</p>
+
+<div class="kyc-box">
+
+  <form id="kycForm">
+
+    <label>Aadhaar Number *</label>
+    <input type="text" name="aadhaar" required maxlength="12" placeholder="Enter 12 digit Aadhaar">
+
+    <label>PAN Number *</label>
+    <input type="text" name="pan" required placeholder="ABCDE1234F">
+
+    <label>GST Number (Optional)</label>
+    <input type="text" name="gst" placeholder="GSTIN (optional)">
+
+    <label>Business Registration Certificate *</label>
+    <input type="file" id="regDoc" accept="image/*,application/pdf" required>
+
+    <label>Address Proof *</label>
+    <input type="file" id="addressDoc" accept="image/*,application/pdf" required>
+
+    <label>Owner Selfie *</label>
+    <input type="file" id="selfieDoc" accept="image/*" required>
+
+    <hr style="border:0;border-top:1px solid #444;margin:20px 0;">
+
+    <label>Bank Account Number *</label>
+    <input type="text" name="bankAccount" required>
+
+    <label>IFSC Code *</label>
+    <input type="text" name="ifsc" required>
+
+    <label>Bank Name *</label>
+    <input type="text" name="bankName" required>
+
+    <button type="submit">Submit KYC</button>
+
+  </form>
+
+</div>
+
+<script type="module" src="../scripts/vendor-kyc.js"></script>
+
+</body>
+</html>
